@@ -1,0 +1,562 @@
+{
+  "countries": {
+    "schema": {
+      "id": "uuid",
+      "created_at": "timestamp with time zone",
+      "code": "character varying",
+      "default_currency_code": "character varying",
+      "default_language": "text"
+    }
+  },
+  "creditors": {
+    "schema": {
+      "type": "character varying",
+      "primary_payment_account_id": "uuid",
+      "currency_code": "character varying",
+      "country_code": "character varying",
+      "id": "uuid",
+      "created_at": "timestamp with time zone",
+      "updated_at": "timestamp with time zone",
+      "name": "character varying",
+      "terms_url": "text",
+      "bgc_account": "character varying",
+      "display_name": "text",
+      "organisation_number": "text",
+      "sign_autogiro": "boolean"
+    }
+  },
+  "currencies": {
+    "schema": {
+      "created_at": "timestamp with time zone",
+      "code": "character varying",
+      "id": "uuid"
+    }
+  },
+  "payment_accounts": {
+    "schema": {
+      "id": "uuid",
+      "created_at": "timestamp with time zone",
+      "updated_at": "timestamp with time zone",
+      "account_number": "text",
+      "type": "text",
+      "currency": "text",
+      "company": "text",
+      "description": "text",
+      "underlying_account_id": "uuid",
+      "creditor_id": "uuid",
+      "bic": "character varying"
+    }
+  },
+  "assessments": {
+    "schema": {
+      "id": "text",
+      "created_at": "timestamp with time zone",
+      "status": "text",
+      "application_id": "uuid",
+      "main_policy": "jsonb",
+      "interest_rate": "numeric",
+      "monthly_fee": "numeric",
+      "reviewed_at": "timestamp with time zone",
+      "reviewed_by": "text",
+      "reviewed_comment": "text",
+      "final_policy": "jsonb",
+      "customer_id": "integer",
+      "amortization_rate": "numeric",
+      "external_score": "numeric",
+      "score": "numeric",
+      "external_lookup_id": "integer",
+      "external_lookup_provider": "text",
+      "updated_at": "timestamp with time zone"
+    },
+    "ts_column" : "updated_at",
+    "bq_partition_column": "created_at",
+    "backfill_method": "export"
+  },
+  "applications": {
+    "schema": {
+      "metadata": "jsonb",
+      "reject_reason": "text",
+      "step": "text",
+      "status": "text",
+      "id": "uuid",
+      "reject_tags": "ARRAY",
+      "source": "text",
+      "currency_code": "character varying",
+      "old_id": "text",
+      "country_code": "character varying",
+      "completion_sendout": "text",
+      "image_url": "text",
+      "promo_code": "character varying",
+      "assigned_to": "character varying",
+      "offer_id": "text",
+      "assessment_id": "text",
+      "external_statement_id": "text",
+      "updated_at": "timestamp with time zone",
+      "has_confidential_data": "boolean",
+      "customer_kalp_input_id": "uuid",
+      "is_demo": "boolean",
+      "transfer_id": "uuid",
+      "ddi_session_id": "uuid",
+      "affiliate": "jsonb",
+      "referrer_id": "integer",
+      "channel_id": "uuid",
+      "assigned_at": "timestamp with time zone",
+      "submission_id": "uuid",
+      "loan_id": "integer",
+      "customer_id": "integer",
+      "message_id": "integer",
+      "created_at": "timestamp with time zone",
+      "customer_provided": "text"
+    },
+    "ts_column": "updated_at",
+    "bq_partition_column": "created_at",
+    "backfill_method": "beam_backfill"
+  },
+  "loans": {
+    "schema": {
+      "original_months": "integer",
+      "monthly_fee": "numeric",
+      "cycle_end_day": "integer",
+      "start_date": "date",
+      "id": "integer",
+      "status": "character varying",
+      "lender_id": "integer",
+      "source_loan_id": "integer",
+      "currency_code": "character varying",
+      "country_code": "character varying",
+      "balance": "numeric",
+      "signature_id": "uuid",
+      "interest_rate": "numeric",
+      "acquisition_details": "jsonb",
+      "end_date": "date",
+      "creditor_id": "uuid",
+      "type": "character varying",
+      "months": "integer",
+      "created_at": "timestamp with time zone",
+      "updated_at": "timestamp with time zone",
+      "customer_id": "integer",
+      "application_id": "uuid",
+      "original_amount": "numeric",
+      "amortization_rate": "numeric",
+      "contract_id": "uuid",
+      "dpd": "integer",
+      "last_processed": "date"
+    },
+    "ts_column": "updated_at",
+    "bq_partition_column": "created_at",
+    "backfill_method": "beam_backfill"
+  },
+  "customers": {
+    "schema": {
+      "termination_date": "date",
+      "created_at": "timestamp with time zone",
+      "updated_at": "timestamp with time zone",
+      "id": "integer",
+      "primary_channel_id": "uuid",
+      "referrer_id": "integer",
+      "reminded_at": "timestamp with time zone",
+      "trustpilot_invitation_sent_at": "timestamp with time zone",
+      "termination_report_date": "date",
+      "autogiro_authorization_id": "uuid",
+      "creditor_id": "uuid",
+      "birthdate": "date",
+      "candidate_for_creditor_id": "uuid",
+      "originated_at": "date",
+      "ocr": "bigint",
+      "autogiro_payment_plan_id": "uuid",
+      "full_name": "character varying",
+      "smooch_id": "character varying",
+      "address_street": "character varying",
+      "address_postcode": "character varying",
+      "address_city": "character varying",
+      "first_name": "character varying",
+      "last_name": "character varying",
+      "offers_token": "character varying",
+      "referral_code": "character varying",
+      "status": "text",
+      "country_code": "character varying",
+      "gender": "text",
+      "currency_code": "character varying",
+      "language_preference": "text",
+      "intercom_user_id": "character varying"
+    },
+    "ts_column" : "updated_at",
+    "bq_partition_column": "created_at",
+    "backfill_method": "beam_backfill"
+  },
+  "cycles": {
+    "schema": {
+      "customer_id": "integer",
+      "due_date": "date",
+      "updated_at": "timestamp with time zone",
+      "loan_id": "integer",
+      "status": "character varying",
+      "id": "uuid",
+      "used_payment_vacation_at": "date",
+      "dpd": "integer",
+      "balance": "numeric",
+      "start_date": "date",
+      "old_id": "integer",
+      "created_at": "timestamp with time zone",
+      "end_date": "date"
+    },
+    "ts_column": "updated_at",
+    "bq_partition_column": "created_at",
+    "backfill_method": "beam_backfill"
+  },
+  "offers": {
+    "schema": {
+      "monthly_fee": "numeric",
+      "interest_rate": "numeric",
+      "updated_at": "timestamp with time zone",
+      "signature_id": "uuid",
+      "lender_id": "integer",
+      "amortization_rate": "numeric",
+      "old_financing_cost": "numeric",
+      "old_monthly_fee": "numeric",
+      "old_interest_rate": "numeric",
+      "effective_apr": "numeric",
+      "monthly_payment": "numeric",
+      "saved_amount": "numeric",
+      "id": "text",
+      "financing_cost": "numeric",
+      "short_id": "text",
+      "pricing_months": "integer",
+      "months": "integer",
+      "status": "text",
+      "amount": "numeric",
+      "customer_id": "integer",
+      "application_id": "uuid",
+      "signed_at": "timestamp with time zone",
+      "sign_result": "jsonb",
+      "created_at": "timestamp with time zone",
+      "assessment_id": "text"
+    },
+    "ts_column" : "updated_at",
+    "bq_partition_column": "created_at",
+    "backfill_method": "export"
+  },
+  "external_statements": {
+    "schema": {
+      "ddi_result": "jsonb",
+      "loan_balance": "numeric",
+      "loan_interest": "numeric",
+      "loan_fee": "numeric",
+      "payment_due_date": "date",
+      "id": "text",
+      "payment_amount": "numeric",
+      "status": "text",
+      "image_url": "text",
+      "personal_identifier": "text",
+      "customer_name": "text",
+      "customer_street": "text",
+      "customer_postal": "text",
+      "loan_type": "text",
+      "payment_reference": "text",
+      "payment_account": "text",
+      "has_reminder_fees": "boolean",
+      "updated_at": "timestamp with time zone",
+      "loan_months": "integer",
+      "lender_id": "integer",
+      "engine_result": "jsonb",
+      "application_id": "uuid",
+      "created_at": "timestamp with time zone",
+      "is_personal_payment_account":"boolean",
+      "customer_birthdate": "date",
+      "customer_gender": "text"
+    },
+    "ts_column" : "updated_at",
+    "bq_partition_column": "created_at",
+    "backfill_method": "beam_backfill"
+  },
+  "transactions": {
+    "schema": {
+      "source": "character varying",
+      "comment": "character varying",
+      "created_by": "character varying",
+      "type": "character varying",
+      "id": "integer",
+      "created_at": "timestamp with time zone",
+      "customer_id": "integer",
+      "loan_id": "integer",
+      "accrual_date": "date",
+      "amount": "numeric",
+      "old_cycle_id": "integer",
+      "statement_id": "uuid",
+      "metadata": "jsonb",
+      "cycle_id": "uuid",
+      "creditor_id": "uuid"
+    },
+    "ts_column" : "created_at",
+    "bq_partition_column": "created_at"
+  },
+  "payments": {
+    "schema": {
+      "id": "uuid",
+      "created_at": "timestamp with time zone",
+      "customer_id": "integer",
+      "source": "character varying",
+      "amount": "numeric",
+      "deposit_date": "date",
+      "reference": "character varying",
+      "name": "character varying",
+      "address": "character varying",
+      "postal": "character varying",
+      "city": "character varying",
+      "country": "character varying",
+      "deposit_account": "character varying",
+      "type": "text",
+      "updated_at": "timestamp with time zone",
+      "updated_by": "text",
+      "status": "text",
+      "source_data": "text",
+      "currency_code": "character varying",
+      "payer_identifier": "text",
+      "product": "character varying"
+    },
+    "ts_column" : "COALESCE(updated_at, created_at)",
+    "bq_partition_column": "created_at",
+    "backfill_method": "beam_backfill"
+  },
+  "lenders": {
+    "schema": {
+      "id": "integer",
+      "created_at": "timestamp with time zone",
+      "updated_at": "timestamp with time zone",
+      "name": "character varying",
+      "default_payment_account": "text",
+      "country_code": "character varying",
+      "description": "text",
+      "display_name": "text"
+    }
+  },
+  "customer_kalp_input": {
+    "schema": {
+      "id": "uuid",
+      "customer_id": "integer",
+      "submission_id": "uuid",
+      "number_of_kids": "integer",
+      "income_gross": "integer",
+      "has_spouse": "boolean",
+      "accommodation_arrangement": "text",
+      "created_at": "timestamp with time zone",
+      "rent": "integer",
+      "debt": "text",
+      "version": "text"
+    },
+    "ts_column" : "created_at",
+    "bq_partition_column": "created_at"
+  },
+  "customer_identities": {
+    "schema": {
+      "id": "uuid", 
+      "customer_id": "integer", 
+      "type": "text", 
+      "value": "character varying", 
+      "verified": "boolean", 
+      "country_code": "character varying", 
+      "created_at": "timestamp with time zone", 
+      "updated_at": "timestamp with time zone"
+    },
+    "ts_column" : "COALESCE(updated_at, created_at)",
+    "bq_partition_column": "created_at",
+    "backfill_method": "beam_backfill"
+  },
+  "channels": {
+    "schema": {
+      "id": "uuid", 
+      "created_at": "timestamp with time zone", 
+      "is_active":  "boolean", 
+      "type": "character varying", 
+      "value":  "character varying", 
+      "smooch_id":  "character varying", 
+      "metadata": "jsonb", 
+      "primary_customer_id":  "integer", 
+      "slack_channel_id": "character varying", 
+      "updated_at": "timestamp with time zone"
+    },
+    "ts_column": "COALESCE(updated_at, created_at)",
+    "bq_partition_column": "created_at",
+    "backfill_method": "beam_backfill"
+  },
+  "credit_block_applications": {
+    "schema": {
+      "id": "uuid",
+      "created_at": "timestamp with time zone",
+      "updated_at": "timestamp with time zone",
+      "status": "text",
+      "reject_reason": "text",
+      "customer_id": "integer",
+      "lender_id": "integer",
+      "signature_id": "uuid",
+      "poa_file": "text"
+    },
+    "bq_partition_column": "created_at"
+  },
+  "signatures": {
+    "schema": {
+      "id": "uuid",
+      "created_at": "timestamp with time zone", 
+      "customer_id": "integer", 
+      "content": "jsonb", 
+      "platform": "text", 
+      "user_ip": "text", 
+      "user_agent": "text", 
+      "type": "text", 
+      "intent": "text"
+    },
+    "ts_column": "created_at",
+    "bq_partition_column": "created_at",
+    "backfill_method": "export"
+  },
+  "messages": {
+    "schema": {
+      "id": "integer", 
+      "created_at": "timestamp with time zone", 
+      "direction": "character varying", 
+      "smooch_id": "character varying", 
+      "type": "character varying", 
+      "\"from\"": "character varying", 
+      "text": "text", 
+      "file_urls": "ARRAY", 
+      "customer_id": "integer", 
+      "metadata": "jsonb", 
+      "channel_id": "uuid", 
+      "payload": "jsonb"
+    },
+    "ts_column": "created_at",
+    "bq_partition_column": "created_at",
+    "backfill_method": "export"
+  },
+  "customer_attributes": {
+    "schema": {
+      "id": "integer", 
+      "created_at": "timestamp with time zone", 
+      "start_date": "date", 
+      "customer_id": "integer", 
+      "key": "character varying", 
+      "value": "text", 
+      "source": "character varying", 
+      "admin_id": "uuid"
+    },
+    "ts_column": "created_at",
+    "bq_partition_column": "created_at",
+    "backfill_method": "beam_backfill"
+  },
+  "statements": {
+    "schema": {
+      "id": "uuid", 
+      "created_at": "timestamp with time zone",
+      "customer_id": "integer", 
+      "prev_balance": "numeric", 
+      "sum_payments": "numeric", 
+      "added_principal": "numeric", 
+      "sum_interest": "numeric", 
+      "sum_fees": "numeric", 
+      "sum_penalties": "numeric", 
+      "next_balance": "numeric", 
+      "min_payment": "numeric", 
+      "min_amortization": "numeric", 
+      "ocr_number": "character varying", 
+      "due_date": "date", 
+      "sum_discounts": "numeric", 
+      "public_url": "text", 
+      "s3_key": "text", 
+      "sent_at": "timestamp with time zone", 
+      "dpd": "integer", 
+      "payment_vacation_month": "date", 
+      "payment_method": "text", 
+      "payment_plan_pull_amount": "numeric", 
+      "currency_code": "character varying", 
+      "creditor_migration": "boolean", 
+      "country_code": "character varying", 
+      "updated_at": "timestamp with time zone"
+    },
+    "ts_column": "COALESCE(updated_at, created_at)",
+    "bq_partition_column": "created_at",
+    "backfill_method": "beam_backfill"
+  },
+  "custom_terms": {
+    "schema": {
+      "id": "uuid",
+      "created_at": "timestamp with time zone",
+      "updated_at": "timestamp with time zone",
+      "customer_id": "integer",
+      "type": "text",
+      "created_by": "text",
+      "start_date": "date",
+      "end_date": "date",
+      "terminated_at": "date",
+      "comment": "text",
+      "attributes": "jsonb",
+      "admin_id": "uuid"
+    }
+  },
+  "customer_discounts": {
+    "schema": {
+      "id": "uuid",
+      "created_at": "timestamp with time zone",
+      "customer_id": "integer",
+      "type": "text",
+      "code": "character varying",
+      "amount": "numeric",
+      "currency_code": "character varying"
+    }
+  },
+  "demo_accounts": {
+    "schema": {
+      "id": "uuid", 
+      "created_at": "timestamp with time zone", 
+      "updated_at": "timestamp with time zone", 
+      "description": "text", 
+      "customer_id": "integer", 
+      "settings": "jsonb"
+    }
+  },
+  "promo_codes": {
+    "schema": {
+      "id": "uuid",
+      "created_at": "timestamp with time zone",
+      "code": "character varying",
+      "amount": "numeric",
+      "currency_code": "character varying",
+      "country_code": "character varying",
+      "start_date": "date",
+      "end_date": "date",
+      "description": "text",
+      "type": "text",
+      "channel": "text"
+    }
+  },
+  "autogiro_payment_plans": {
+    "schema": {
+      "id": "uuid",
+      "created_at": "timestamp with time zone",
+      "updated_at": "timestamp with time zone",
+      "type": "text",
+      "pull_day_of_month": "integer",
+      "status": "text",
+      "customer_id": "integer",
+      "starting_at": "date",
+      "amount": "numeric"
+    },
+    "ts_column" : "updated_at",
+    "bq_partition_column": "created_at",
+    "backfill_method": "beam_backfill"
+  },
+  "ddi_sessions": {
+    "schema": {
+      "id": "uuid",
+      "created_at": "timestamp with time zone",
+      "updated_at": "timestamp with time zone",
+      "provider": "text",
+      "status": "text",
+      "details": "text",
+      "items": "jsonb",
+      "metadata": "jsonb"
+    },
+    "ts_column" : "updated_at",
+    "bq_partition_column": "created_at",
+    "backfill_method": "beam_backfill"
+  }
+}

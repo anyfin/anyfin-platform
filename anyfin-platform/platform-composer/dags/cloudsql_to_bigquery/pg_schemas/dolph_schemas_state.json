@@ -1,0 +1,154 @@
+{
+    "users": {
+        "schema": {
+          "id": "integer",
+          "created_at": "timestamp with time zone",
+          "updated_at": "timestamp with time zone",
+          "manual_income": "real",
+          "settings": "jsonb",
+          "primary_account": "integer"
+        },
+        "bq_partition_column": "created_at"
+    },
+    "tink_integrations": {
+        "schema": {
+          "id": "uuid",
+          "tink_user_id": "character varying",
+          "user_id": "integer",
+          "created_at": "timestamp with time zone",
+          "updated_at": "timestamp with time zone"
+        },
+        "bq_partition_column": "created_at"
+    },
+    "providers": {
+        "schema": {
+            "id": "integer",
+            "name": "character varying", 
+            "display_name": "character varying",
+            "type": "character varying", 
+            "last_sync_at": "timestamp with time zone",
+            "credential": "jsonb",
+            "metadata": "jsonb", 
+            "user_id": "integer", 
+            "created_at": "timestamp with time zone", 
+            "updated_at": "timestamp with time zone"
+        },
+        "bq_partition_column": "created_at"
+    },
+    "accounts": {
+        "schema": {
+            "id": "integer", 
+            "user_id": "integer", 
+            "account_number": "character varying", 
+            "available_credit": "real", 
+            "balance": "real", 
+            "name": "character varying", 
+            "type": "character varying", 
+            "currency_code": "character varying", 
+            "metadata": "jsonb", 
+            "created_at": "timestamp with time zone", 
+            "updated_at": "timestamp with time zone", 
+            "provider_id": "integer"
+        },
+        "bq_partition_column": "created_at"
+    },
+    "transactions": {
+        "schema": {
+            "id": "bigint", 
+            "account_id": "integer", 
+            "user_id": "integer", 
+            "date": "timestamp with time zone", 
+            "description": "character varying", 
+            "amount": "real", 
+            "currency_code": "character varying", 
+            "type": "character varying", 
+            "category": "character varying", 
+            "category_metadata": "jsonb", 
+            "metadata": "jsonb", 
+            "created_at": "timestamp with time zone", 
+            "updated_at": "timestamp with time zone", 
+            "selected": "boolean", 
+            "recurring_id": "integer", 
+            "tags": "jsonb", 
+            "reference_id": "character varying"
+        },
+        "ts_column": "updated_at",
+        "bq_partition_column": "created_at"
+    },
+    "recurrings": {
+        "schema": {
+            "id": "integer", 
+            "user_id": "integer", 
+            "metadata": "jsonb", 
+            "recurring_key": "character varying", 
+            "description": "character varying", 
+            "display_name": "character varying", 
+            "score": "real", 
+            "category": "character varying", 
+            "subcategory": "character varying", 
+            "amount": "real", 
+            "currency": "character varying", 
+            "selected": "boolean", 
+            "type": "character varying", 
+            "created_at": "timestamp with time zone", 
+            "updated_at": "timestamp with time zone", 
+            "active": "boolean"
+        },
+        "ts_column": "updated_at",
+        "bq_partition_column": "created_at"
+    },
+    "cash_advance_applications": {
+        "schema": {
+            "id": "integer", 
+            "user_id": "integer", 
+            "amount": "real", 
+            "currency": "character varying", 
+            "stage": "character varying", 
+            "underwriting": "jsonb", 
+            "payout_id": "integer", 
+            "created_at": "timestamp with time zone", 
+            "updated_at": "timestamp with time zone", 
+            "reject_reason": "jsonb", 
+            "error": "jsonb", 
+            "loan_id": "character varying", 
+            "scheduled_payment_ref": "character varying", 
+            "purpose": "character varying", 
+            "contract_file": "character varying",
+            "pull_date": "date"
+        },
+        "ts_column": "updated_at",
+        "bq_partition_column": "created_at"
+    },
+    "payouts": {
+        "schema": {
+            "id": "integer", 
+            "type": "character varying", 
+            "amount": "real", 
+            "currency": "character varying", 
+            "status": "character varying", 
+            "user_id": "integer", 
+            "created_at": "timestamp with time zone", 
+            "updated_at": "timestamp with time zone", 
+            "error": "jsonb", 
+            "ref_id": "character varying", 
+            "account_number": "character varying"
+        },
+        "bq_partition_column": "created_at"
+    },
+    "payins": {
+        "schema": {
+            "id": "integer", 
+            "type": "character varying", 
+            "ref_id": "character varying", 
+            "amount": "real", 
+            "currency": "character varying", 
+            "status": "character varying", 
+            "user_id": "integer",
+            "error": "jsonb",
+            "created_at": "timestamp with time zone", 
+            "updated_at": "timestamp with time zone", 
+            "cash_advance_id": "integer"
+        },
+        "bq_partition_column": "created_at"
+    }
+}
