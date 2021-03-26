@@ -111,7 +111,6 @@
             "reject_reason": "jsonb", 
             "error": "jsonb", 
             "loan_id": "character varying", 
-            "scheduled_payment_ref": "character varying", 
             "purpose": "character varying", 
             "contract_file": "character varying",
             "pull_date": "date"
