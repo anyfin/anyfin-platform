@@ -70,7 +70,8 @@
     },
     "ts_column" : "updated_at",
     "bq_partition_column": "created_at",
-    "backfill_method": "export"
+    "backfill_method": "export",
+    "chunksize": "5000"
   },
   "applications": {
     "schema": {
@@ -234,7 +235,8 @@
     },
     "ts_column" : "updated_at",
     "bq_partition_column": "created_at",
-    "backfill_method": "export"
+    "backfill_method": "export",
+    "chunksize": "30000"
   },
   "external_statements": {
     "schema": {
@@ -407,7 +409,8 @@
     },
     "ts_column": "created_at",
     "bq_partition_column": "created_at",
-    "backfill_method": "export"
+    "backfill_method": "export",
+    "chunksize": "30000"
   },
   "messages": {
     "schema": {
@@ -426,7 +429,8 @@
     },
     "ts_column": "created_at",
     "bq_partition_column": "created_at",
-    "backfill_method": "export"
+    "backfill_method": "export",
+    "chunksize": "50000"
   },
   "customer_attributes": {
     "schema": {
