@@ -1,15 +1,18 @@
 import os
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import tempfile
-from airflow import DAG
+import logging
+from google.cloud import bigquery
+from airflow import DAG, AirflowException
 from airflow.models import Variable
 from airflow.contrib.operators.bigquery_check_operator import BigQueryCheckOperator
-from airflow.operators.python_operator import PythonOperator
+from airflow.operators.python_operator import PythonOperator, BranchPythonOperator
 from airflow.utils.trigger_rule import TriggerRule
 from airflow.contrib.operators.bigquery_operator import BigQueryOperator
 from airflow.contrib.hooks.gcs_hook import GoogleCloudStorageHook
 from airflow.hooks.postgres_hook import PostgresHook
+from airflow.operators.dummy_operator import DummyOperator
 from DataFlowPython3Operator import DataFlowPython3Operator
 
 PROJECT_NAME = 'anyfin'
@@ -184,99 +187,93 @@ extract_from_cloudsql = DataFlowPython3Operator(
     dag=dag
 )
 
+def check_if_first_daily_run(ds, **kwargs):
+    today = date.today()
+    today = today.strftime("%Y-%m-%d")
+    if today != ds:
+        return 'postgres_status'
+    else:
+        return 'no_check'
 
-new_customers = BigQueryOperator(
-    task_id='new_customers',
-    sql=f"""
-      select * except(rn)
-      from
-      (
-        select *, ROW_NUMBER() over (partition by customer_id order by created_at) rn
-        from `anyfin.main.applications`
-        where step in ('loan', 'transfer') and status in ('open', 'closed')
-      ) t
-      where rn = 1 and customer_id is not null and not coalesce(is_demo, false)
-    """,
-    destination_dataset_table=f"anyfin.precomputed.new_customers",
-    time_partitioning={'field': 'created_at'},
-    use_legacy_sql=False,
-    write_disposition='WRITE_TRUNCATE',
-    bigquery_conn_id='bigquery_default',
-    create_disposition='CREATE_IF_NEEDED',
+
+first_daily_run = BranchPythonOperator(
+    task_id='first_daily_run',
+    provide_context=True,
+    python_callable=check_if_first_daily_run,
     dag=dag
 )
 
-new_customer_channels = BigQueryOperator(
-    task_id='new_customer_channels',
-    sql=f"""
-         select * EXCEPT(rn)
-         from
-         (
-            select *, ROW_NUMBER() over (partition by channel_id order by created_at) rn
-            from `anyfin.main.applications`
-            where step in ('loan', 'transfer') and status in ('open', 'closed') 
-         )
-         where rn = 1 and channel_id is not null""",
-    destination_dataset_table=f"anyfin.precomputed.new_customer_channels",
-    time_partitioning={'field': 'created_at'},
-    use_legacy_sql=False,
-    write_disposition='WRITE_TRUNCATE',
-    bigquery_conn_id='bigquery_default',
-    create_disposition='CREATE_IF_NEEDED',
+def fetch_postgres_rowcount(tables, ds, **kwargs):
+    db = PostgresHook('main_replica')
+    query = []
+    for table_name in tables:
+        query.append(f"SELECT '{table_name}', COUNT(id) FROM {table_name} where created_at::date = '{ds}'")
+    query = ' UNION ALL '.join(query)
+    
+    rowcounts = db.get_records(query)
+    counts = {}
+    for row in rowcounts:
+        counts[row[0]] = row[1]
+    return counts
+
+postgres_status = PythonOperator(
+    task_id='postgres_status',
+    provide_context=True,
+    op_kwargs={'tables': TABLES},
+    python_callable=fetch_postgres_rowcount,
     dag=dag
 )
 
-new_applicants = BigQueryOperator(
-    task_id='new_applicants',
-    sql=f"""
-        select 
-        a.*
-        from  `anyfin.main.applications` a
-        left join `anyfin.precomputed.new_customer_channels` ncc on a.channel_id = ncc.channel_id
-        where not coalesce(a.is_demo, false)
-        and (a.reject_reason is null or a.reject_reason not in ('duplicate', 'invalid - not a statement', 'invalid - unsupported type'))
-        and a.country_code is not null
-        and (ncc.created_at >= a.created_at or ncc.id is null)""",
-    destination_dataset_table=f"anyfin.precomputed.new_applicants",
-    time_partitioning={'field': 'created_at'},
-    use_legacy_sql=False,
-    write_disposition='WRITE_TRUNCATE',
-    bigquery_conn_id='bigquery_default',
-    create_disposition='CREATE_IF_NEEDED',
+def fetch_bigquery_rowcount(tables, ds, **kwargs):
+    query = []
+    for table_name in tables:
+        query.append(f"SELECT '{table_name}' table_name, COUNT(DISTINCT id) num_of_unique_rows FROM `anyfin.main_staging.{table_name}_raw` where DATE(created_at) = '{ds}'")
+    query = ' UNION ALL '.join(query)
+    client = bigquery.Client()
+    query_job = client.query(query)
+    results = query_job.result()
+    counts = {}
+    for row in results:
+        counts[row.table_name] = row.num_of_unique_rows
+    return counts
+
+bq_status = PythonOperator(
+    task_id='bq_status',
+    provide_context=True,
+    op_kwargs={'tables': TABLES},
+    python_callable=fetch_bigquery_rowcount,
     dag=dag
 )
 
+def bq_pg_comparison(tables, **kwargs):
+    postgres_results = kwargs['ti'].xcom_pull(task_ids='postgres_status')
+    bq_results = kwargs['ti'].xcom_pull(task_ids='bq_status')
 
-new_offerees = BigQueryOperator(
-    task_id='new_offerees',
-    sql=f"""
-        with new_customers_temp as(
-          select *
-          from
-          (
-            select *, ROW_NUMBER() over (partition by customer_id order by created_at) rn
-            from `anyfin.main.applications`
-            where step in ('loan', 'transfer') and status in ('open', 'closed')
-          ) t
-          where rn = 1 and customer_id is not null  
-        )
-        select 
-        a.*
-        from  `anyfin.main.applications` a
-        left join new_customers_temp nc on a.customer_id = nc.customer_id
-        where not coalesce(a.is_demo, false)
-        and a.offer_id is not null
-        and a.country_code is not null
-        and (nc.created_at >= a.created_at or nc.id is null)""",
-    destination_dataset_table=f"anyfin.precomputed.new_offerees",
-    time_partitioning={'field': 'created_at'},
-    use_legacy_sql=False,
-    write_disposition='WRITE_TRUNCATE',
-    bigquery_conn_id='bigquery_default',
-    create_disposition='CREATE_IF_NEEDED',
+    discrepancies = {}
+
+    for table_name in tables:
+        logging.info(f"Table: {table_name}: Postgres - {postgres_results[table_name]} || BQ - {bq_results[table_name]}")
+        if postgres_results[table_name] != bq_results[table_name]:
+            discrepancies[table_name] = {'postgres': postgres_results[table_name], 'bq': bq_results[table_name]}
+    
+    if not discrepancies:
+        return True
+    else:
+        raise AirflowException(f"Discrepancies found in tables: {' ,'.join(discrepancies.keys())}")
+
+check_postgres_against_bq = PythonOperator(
+    task_id='check_postgres_against_bq',
+    provide_context=True,
+    op_kwargs={'tables': TABLES},
+    python_callable=bq_pg_comparison,
+    email_on_failure=True,
     dag=dag
 )
 
+no_check = DummyOperator(
+    task_id='no_check',
+    dag=dag
+)
 
 dedup_tasks = []
 for table in TABLES:
@@ -364,13 +361,6 @@ for table in TABLES:
 
 
 
-
-    if table == 'applications':
-        dedup >> new_customers
-        dedup >> new_customer_channels >> new_applicants
-        dedup >> new_offerees
-
-
 deduplication_success_confirmation = PythonOperator(
     task_id='deduplication_success_confirmation',
     python_callable=deduplication_success,
@@ -380,25 +370,16 @@ deduplication_success_confirmation = PythonOperator(
     dag=dag
 )
 
-all_tables_updated = BigQueryCheckOperator(
-    task_id='all_tables_updated',
-    sql='''
-    SELECT COUNTIF(is_up_to_date)/COUNT(table_id) = 1 all_up_to_date FROM (
-        SELECT
-          table_id,
-          '{{tomorrow_ds}}' <= DATE(TIMESTAMP_MILLIS(last_modified_time)) is_up_to_date
-        FROM
-        `anyfin.main_staging.__TABLES__`)
-    ''',
-    bigquery_conn_id='bigquery_default',
-    use_legacy_sql=False,
-    dag=dag
-)
 
 task_extract_tables >> task_no_missing_columns
 
 task_extract_tables >> task_upload_result_to_gcs
 
+extract_from_cloudsql >> first_daily_run
+
+first_daily_run >> postgres_status >> bq_status >> check_postgres_against_bq
+first_daily_run >> no_check
+
 task_upload_result_to_gcs >> extract_from_cloudsql >> dedup_tasks
 
-dedup_tasks >> deduplication_success_confirmation >> all_tables_updated
+dedup_tasks >> deduplication_success_confirmation
