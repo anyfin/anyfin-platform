@@ -30,7 +30,7 @@ with open('main_schemas_state.json') as f:
   schemas = json.load(f)
 
 
-with open('main.tf', 'w') as output_f:
+with open('../bq_schemas/main/main.tf', 'w') as output_f:
 	for table in schemas:
 		output_f.write('resource "google_bigquery_table" "{table_name}_raw" {{\n'.format(table_name=table))
 		output_f.write('	dataset_id = "main_staging"\n')

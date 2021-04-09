@@ -432,6 +432,22 @@
     "backfill_method": "export",
     "chunksize": "50000"
   },
+  "customer_alarms": {
+    "schema": {
+      "created_at": "timestamp with time zone",
+      "customer_id": "integer", 
+      "status": "text", 
+      "type": "character varying", 
+      "description": "text",
+      "data": "jsonb", 
+      "id": "integer", 
+      "country_code": "character varying", 
+      "assigned_to_id": "uuid", 
+      "assigned_at": "timestamp with time zone", 
+      "updated_at": "timestamp with time zone"
+    },
+    "bq_partition_column": "created_at"
+  },
   "customer_attributes": {
     "schema": {
       "id": "integer", 

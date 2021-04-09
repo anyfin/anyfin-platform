@@ -2033,6 +2033,87 @@ EOF
 }
 
 
+resource "google_bigquery_table" "customer_alarms_raw" {
+	dataset_id = "main_staging"
+	table_id   = "customer_alarms_raw"
+	project    = "anyfin"
+
+	labels = {
+		env = "default"
+	}
+
+	time_partitioning { 
+    	type = "DAY" 
+		field = "created_at" 
+	}
+
+	schema = <<EOF
+[
+	{
+		"mode": "NULLABLE",
+		"name": "created_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "customer_id",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "status",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "type",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "description",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "data",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "id",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "country_code",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "assigned_to_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "assigned_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "updated_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "_ingested_ts",
+		"type": "TIMESTAMP"
+	}
+]
+EOF
+}
+
+
 resource "google_bigquery_table" "customer_attributes_raw" {
 	dataset_id = "main_staging"
 	table_id   = "customer_attributes_raw"
