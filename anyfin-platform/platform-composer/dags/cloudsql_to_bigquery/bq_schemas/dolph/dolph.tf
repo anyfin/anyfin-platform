@@ -452,7 +452,7 @@ resource "google_bigquery_table" "recurrings_raw" {
   },
   {
     "mode": "NULLABLE",
-    "name": "selected",
+    "name": "selected_by_user",
     "type": "BOOLEAN"
   },
   {
