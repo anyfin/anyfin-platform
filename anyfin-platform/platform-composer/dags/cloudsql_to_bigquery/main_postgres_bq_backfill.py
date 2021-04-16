@@ -230,6 +230,14 @@ for table_name, content in tables_to_backfill:
 		dag=dag
 	)
 
+	task_delete_old_json_extract = GoogleCloudStorageDeleteOperator(
+		task_id=f'delete_old_json_{table_name}_extract',
+		bucket_name=BUCKET_NAME,
+		prefix=f'json_extracts/{table_name}/export-',
+		google_cloud_storage_conn_id='postgres-bq-etl-con',
+		dag=dag
+	)
+
 	# Export table
 	columns = ", ".join(content['schema'].keys())
 	task_export_table = BashOperator(
@@ -329,7 +337,7 @@ for table_name, content in tables_to_backfill:
 	)
 	# Create dependencies
 
-	task_delete_old_export >> task_export_table >> task_wait_operation >> submit_python_split_task >> task_generate_schema_object >> bq_load_backup >> sanity_check_bq >> bq_load_final
+	task_delete_old_export >> task_delete_old_json_extract >> task_export_table >> task_wait_operation >> submit_python_split_task >> task_generate_schema_object >> bq_load_backup >> sanity_check_bq >> bq_load_final
 	prev_wait_task >> task_export_table
 	prev_wait_task = task_wait_operation
 
