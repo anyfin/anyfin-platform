@@ -1,0 +1,91 @@
+# To deploy
+# kubectl apply -f platform_cloudsql_proxy.yaml
+
+# Prerequisite: Composer-cluster must contain a secret called cloudsql-credentials, which contains a base64 encoded service account key.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudsql-proxy
+  labels:
+    app: cloudsql-proxy
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cloudsql-proxy
+  template:
+    metadata:
+      labels:
+        app: cloudsql-proxy
+    spec:
+      containers:
+        - name: cloudsql-proxy
+          ports:
+            - containerPort: 5430
+            - containerPort: 5431
+            - containerPort: 5432
+            - containerPort: 5434
+            - containerPort: 5435
+            - containerPort: 5436
+          image: gcr.io/cloudsql-docker/gce-proxy:latest
+          command:
+            [
+              "/cloud_sql_proxy",
+              "-instances=anyfin:europe-west1:anyfin-assess-replica=tcp:0.0.0.0:5430,anyfin:europe-west1:anyfin-ddi-service=tcp:0.0.0.0:5431,anyfin:europe-west1:anyfin-main-replica=tcp:0.0.0.0:5432,anyfin-platform:europe-north1:risk-data-modelling=tcp:0.0.0.0:5434,anyfin-staging:europe-west1:main-staging-replica=tcp:0.0.0.0:5435,anyfin:europe-west1:anyfin-dolph-read-replica=tcp:0.0.0.0:5436",
+              "-credential_file=/secrets/cloudsql/credentials.json",
+            ]
+            # Developer: Update the Cloud sql instances you want to connect to as comma separated values (also update containerPort and service ports to reflect the instance list). 
+            # Note that different instances can't share the same port
+            # The service account in credentials.json should have Cloud SQL Client role in all projects in the instance list 
+          volumeMounts:
+            - name: cloudsql-credentials
+              mountPath: /secrets/cloudsql
+              readOnly: true
+          resources:
+            requests:
+              cpu: 5m
+              memory: 16M
+            limits:
+              cpu: 500m
+              memory: 64M
+      volumes:
+        - name: cloudsql-credentials
+          secret:
+            secretName: cloudsql-credentials
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cloudsql-proxy
+  labels:
+    app: cloudsql-proxy-service
+spec:
+  type: ClusterIP
+  selector:
+    app: cloudsql-proxy
+  ports:
+    - name: anyfin-assess-replica
+      protocol: TCP
+      port: 5430
+      targetPort: 5430
+    - name: ddi-service
+      protocol: TCP
+      port: 5431
+      targetPort: 5431
+    - name: anyfin-main-replica
+      protocol: TCP
+      port: 5432
+      targetPort: 5432
+    - name: risk-data-modelling
+      protocol: TCP
+      port: 5434
+      targetPort: 5434
+    - name: main-staging-replica
+      protocol: TCP
+      port: 5435
+      targetPort: 5435
+    - name: anyfin-dolph-read-replica
+      protocol: TCP
+      port: 5436
+      targetPort: 5436
