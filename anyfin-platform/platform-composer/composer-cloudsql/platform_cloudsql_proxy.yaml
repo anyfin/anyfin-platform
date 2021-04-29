@@ -24,6 +24,7 @@ spec:
             - containerPort: 5430
             - containerPort: 5431
             - containerPort: 5432
+            - containerPort: 5433
             - containerPort: 5434
             - containerPort: 5435
             - containerPort: 5436
@@ -31,7 +32,7 @@ spec:
           command:
             [
               "/cloud_sql_proxy",
-              "-instances=anyfin:europe-west1:anyfin-assess-replica=tcp:0.0.0.0:5430,anyfin:europe-west1:anyfin-ddi-service=tcp:0.0.0.0:5431,anyfin:europe-west1:anyfin-main-replica=tcp:0.0.0.0:5432,anyfin-platform:europe-north1:risk-data-modelling=tcp:0.0.0.0:5434,anyfin-staging:europe-west1:main-staging-replica=tcp:0.0.0.0:5435,anyfin:europe-west1:anyfin-dolph-read-replica=tcp:0.0.0.0:5436",
+              "-instances=anyfin:europe-west1:anyfin-assess-replica=tcp:0.0.0.0:5430,anyfin:europe-west1:anyfin-ddi-service=tcp:0.0.0.0:5431,anyfin:europe-west1:anyfin-main-replica=tcp:0.0.0.0:5432,anyfin:europe-west1:pfm=tcp:0.0.0.0:5433,anyfin-platform:europe-north1:risk-data-modelling=tcp:0.0.0.0:5434,anyfin-staging:europe-west1:main-staging-replica=tcp:0.0.0.0:5435,anyfin:europe-west1:anyfin-dolph-read-replica=tcp:0.0.0.0:5436",
               "-credential_file=/secrets/cloudsql/credentials.json",
             ]
             # Developer: Update the Cloud sql instances you want to connect to as comma separated values (also update containerPort and service ports to reflect the instance list). 
@@ -77,6 +78,10 @@ spec:
       protocol: TCP
       port: 5432
       targetPort: 5432
+    - name: pfm
+      protocol: TCP
+      port: 5433
+      targetPort: 5433
     - name: risk-data-modelling
       protocol: TCP
       port: 5434
