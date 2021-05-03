@@ -1,10 +1,12 @@
 import json
 import re
 from string import Template
+import sys
 
 
-### REPLACE double quote "" with empty string
-## @malcolmtivelius 17/12-20
+### 
+
+DATABASE_NAME = sys.argv[1]
 
 def convert_type_to_bq(t):
 	if t == 'timestamp with time zone':
@@ -26,14 +28,14 @@ def convert_type_to_bq(t):
 		return 'STRING'
 
 
-with open('main_schemas_state.json') as f:
+with open(f'{DATABASE_NAME}_schemas_state.json') as f:
   schemas = json.load(f)
 
 
-with open('../bq_schemas/main/main.tf', 'w') as output_f:
+with open(f'../bq_schemas/{DATABASE_NAME}/{DATABASE_NAME}.tf', 'w') as output_f:
 	for table in schemas:
 		output_f.write('resource "google_bigquery_table" "{table_name}_raw" {{\n'.format(table_name=table))
-		output_f.write('	dataset_id = "main_staging"\n')
+		output_f.write(f'	dataset_id = "{DATABASE_NAME}_staging"\n')
 		output_f.write('	table_id   = "{table_name}_raw"\n'.format(table_name=table))
 		output_f.write('	project    = "anyfin"\n')
 		output_f.write('\n')
