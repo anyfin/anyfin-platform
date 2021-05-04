@@ -6,7 +6,7 @@ from airflow.models import Variable
 from airflow.contrib.operators.bigquery_check_operator import BigQueryCheckOperator
 from airflow.operators.python_operator import PythonOperator, BranchPythonOperator
 from airflow.utils.trigger_rule import TriggerRule
-from airflow.contrib.operators.bigquery_operator import BigQueryCheckOperator
+from airflow.contrib.operators.bigquery_operator import BigQueryOperator
 
 from airflow.operators.dummy_operator import DummyOperator
 from DataFlowPython3Operator import DataFlowPython3Operator
