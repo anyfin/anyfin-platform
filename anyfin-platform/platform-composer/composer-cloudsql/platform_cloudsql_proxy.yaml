@@ -28,11 +28,12 @@ spec:
             - containerPort: 5434
             - containerPort: 5435
             - containerPort: 5436
+            - containerPort: 5437
           image: gcr.io/cloudsql-docker/gce-proxy:latest
           command:
             [
               "/cloud_sql_proxy",
-              "-instances=anyfin:europe-west1:anyfin-assess-replica=tcp:0.0.0.0:5430,anyfin:europe-west1:anyfin-ddi-service=tcp:0.0.0.0:5431,anyfin:europe-west1:anyfin-main-replica=tcp:0.0.0.0:5432,anyfin:europe-west1:pfm-replica=tcp:0.0.0.0:5433,anyfin-platform:europe-north1:risk-data-modelling=tcp:0.0.0.0:5434,anyfin-staging:europe-west1:main-staging-replica=tcp:0.0.0.0:5435,anyfin:europe-west1:anyfin-dolph-read-replica=tcp:0.0.0.0:5436",
+              "-instances=anyfin:europe-west1:anyfin-assess-replica=tcp:0.0.0.0:5430,anyfin:europe-west1:anyfin-ddi-service=tcp:0.0.0.0:5431,anyfin:europe-west1:anyfin-main-replica=tcp:0.0.0.0:5432,anyfin:europe-west1:pfm-replica=tcp:0.0.0.0:5433,anyfin-platform:europe-north1:risk-data-modelling=tcp:0.0.0.0:5434,anyfin-staging:europe-west1:main-staging-replica=tcp:0.0.0.0:5435,anyfin:europe-west1:anyfin-dolph-read-replica=tcp:0.0.0.0:5436,anyfin:europe-west1:psd2-replica=tcp:0.0.0.0:5437",
               "-credential_file=/secrets/cloudsql/credentials.json",
             ]
             # Developer: Update the Cloud sql instances you want to connect to as comma separated values (also update containerPort and service ports to reflect the instance list). 
@@ -94,3 +95,7 @@ spec:
       protocol: TCP
       port: 5436
       targetPort: 5436
+    - name: psd2-replica
+      protocol: TCP
+      port: 5437
+      targetPort: 5437

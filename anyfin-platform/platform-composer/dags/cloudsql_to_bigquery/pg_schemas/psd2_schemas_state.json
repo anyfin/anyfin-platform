@@ -1,0 +1,45 @@
+{
+    "accounts": {
+      "schema": {
+        "id": "integer", 
+        "created_at": "timestamp with time zone", 
+        "updated_at": "timestamp with time zone", 
+        "customer_id": "integer", 
+        "connection_id": "integer", 
+        "external_id": "text", 
+        "provider_code": "character varying", 
+        "type": "character varying", 
+        "name": "character varying", 
+        "currency_code": "character varying", 
+        "balance": "numeric", 
+        "last_synced_at": "date", 
+        "backfilled_until": "date", 
+        "raw_data": "jsonb"
+      },
+      "bq_partition_column": "created_at",
+      "backfill_method": "None"
+    },
+    "psd2_connections": {
+      "schema": {
+        "id": "integer", 
+        "created_at": "timestamp with time zone", 
+        "updated_at": "timestamp with time zone", 
+        "customer_id": "integer", 
+        "provider_code": "character varying", 
+        "status": "character varying", 
+        "status_payload": "jsonb", 
+        "provider_data": "jsonb", 
+        "access_token": "text", 
+        "refresh_token": "text", 
+        "refresh_at": "timestamp with time zone", 
+        "expires_at": "timestamp with time zone", 
+        "accounts_synced_at": "timestamp with time zone", 
+        "transactions_synced_at": "timestamp with time zone", 
+        "error": "jsonb"
+      },
+      "bq_partition_column": "created_at",
+      "backfill_method": "None"
+    }
+
+  }
+  
