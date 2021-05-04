@@ -132,7 +132,8 @@ class ETL:
         db = PostgresHook(f'{self.DATABASE_NAME}_replica')
         query = []
         for table_name in self.TABLES:
-            query.append(f"SELECT '{table_name}', COUNT(id) FROM {table_name} where created_at::date = '{ds}'")
+            if not self.TABLES.get(table).get('ignore_daily'):
+                query.append(f"SELECT '{table_name}', COUNT(id) FROM {table_name} where created_at::date = '{ds}'")
         query = ' UNION ALL '.join(query)
         
         rowcounts = db.get_records(query)
@@ -146,10 +147,11 @@ class ETL:
     def fetch_bigquery_rowcount(self, ds, **kwargs):
         query = []
         for table_name in self.TABLES:
-            query.append(f"SELECT '{table_name}' table_name, \
-                           COUNT(DISTINCT id) num_of_unique_rows \
-                           FROM `anyfin.{self.DATABASE_NAME}_staging.{table_name}_raw` \
-                           WHERE DATE(created_at) = '{ds}'")
+            if not self.TABLES.get(table).get('ignore_daily'):
+                query.append(f"SELECT '{table_name}' table_name, \
+                            COUNT(DISTINCT id) num_of_unique_rows \
+                            FROM `anyfin.{self.DATABASE_NAME}_staging.{table_name}_raw` \
+                            WHERE DATE(created_at) = '{ds}'")
         query = ' UNION ALL '.join(query)
         client = bigquery.Client()
         query_job = client.query(query)
