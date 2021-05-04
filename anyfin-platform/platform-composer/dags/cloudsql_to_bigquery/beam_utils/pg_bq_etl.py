@@ -106,7 +106,8 @@ def run(backfill, start_date, pipeline_args=None):
             load_tables = TABLE_NAMES
 
         for table in load_tables:
-            p = update_pipeline(table, pipeline, start_date, backfill)
+            if not TABLES.get(table).get('ignore_daily'):
+                p = update_pipeline(table, pipeline, start_date, backfill)
 
 
 if __name__ == "__main__":

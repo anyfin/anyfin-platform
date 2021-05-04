@@ -73,7 +73,8 @@
             "reference_id": "character varying"
         },
         "ts_column": "updated_at",
-        "bq_partition_column": "created_at"
+        "bq_partition_column": "created_at",
+        "ignore_daily": true
     },
     "recurrings": {
         "schema": {
