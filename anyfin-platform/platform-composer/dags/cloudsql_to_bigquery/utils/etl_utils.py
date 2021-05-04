@@ -170,9 +170,10 @@ class ETL:
         discrepancies = {}
 
         for table_name in self.TABLES:
-            logging.info(f"Table: {table_name}: Postgres - {postgres_results[table_name]} || BQ - {bq_results[table_name]}")
-            if postgres_results[table_name] != bq_results[table_name]:
-                discrepancies[table_name] = {'postgres': postgres_results[table_name], 'bq': bq_results[table_name]}
+            if not self.TABLES.get(table_name).get('ignore_daily'):
+                logging.info(f"Table: {table_name}: Postgres - {postgres_results[table_name]} || BQ - {bq_results[table_name]}")
+                if postgres_results[table_name] != bq_results[table_name]:
+                    discrepancies[table_name] = {'postgres': postgres_results[table_name], 'bq': bq_results[table_name]}
         
         if not discrepancies:
             return True
