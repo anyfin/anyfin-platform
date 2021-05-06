@@ -39,6 +39,22 @@
       },
       "bq_partition_column": "created_at",
       "backfill_method": "None"
+    },
+    "psd2_log": {
+      "schema": {
+        "id": "integer", 
+        "created_at": "timestamp with time zone", 
+        "updated_at": "timestamp with time zone", 
+        "request_id": "uuid", 
+        "connection_id": "integer", 
+        "provider_code": "character varying", 
+        "activity": "text", 
+        "status": "text", 
+        "duration": "integer", 
+        "info": "jsonb"
+      },
+      "bq_partition_column": "created_at",
+      "backfill_method": "None"
     }
 
   }

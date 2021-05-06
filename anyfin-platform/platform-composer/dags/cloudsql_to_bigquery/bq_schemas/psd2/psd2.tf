@@ -195,3 +195,79 @@ EOF
 }
 
 
+resource "google_bigquery_table" "psd2_log_raw" {
+	dataset_id = "psd2_staging"
+	table_id   = "psd2_log_raw"
+	project    = "anyfin"
+
+	labels = {
+		env = "default"
+	}
+
+	time_partitioning { 
+    	type = "DAY" 
+		field = "created_at" 
+	}
+
+	schema = <<EOF
+[
+	{
+		"mode": "NULLABLE",
+		"name": "id",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "created_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "updated_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "request_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "connection_id",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "provider_code",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "activity",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "status",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "duration",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "info",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "_ingested_ts",
+		"type": "TIMESTAMP"
+	}
+]
+EOF
+}
+
+
