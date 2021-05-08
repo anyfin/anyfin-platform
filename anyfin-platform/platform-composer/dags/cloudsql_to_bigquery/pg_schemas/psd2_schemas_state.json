@@ -27,7 +27,6 @@
         "customer_id": "integer", 
         "provider_code": "character varying", 
         "status": "character varying", 
-        "status_payload": "jsonb", 
         "provider_data": "jsonb", 
         "access_token": "text", 
         "refresh_token": "text", 
@@ -35,7 +34,8 @@
         "expires_at": "timestamp with time zone", 
         "accounts_synced_at": "timestamp with time zone", 
         "transactions_synced_at": "timestamp with time zone", 
-        "error": "jsonb"
+        "error": "jsonb",
+        "action": "jsonb"
       },
       "bq_partition_column": "created_at",
       "backfill_method": "None"
