@@ -142,11 +142,6 @@ resource "google_bigquery_table" "psd2_connections_raw" {
 	},
 	{
 		"mode": "NULLABLE",
-		"name": "status_payload",
-		"type": "STRING"
-	},
-	{
-		"mode": "NULLABLE",
 		"name": "provider_data",
 		"type": "STRING"
 	},
@@ -183,6 +178,11 @@ resource "google_bigquery_table" "psd2_connections_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "error",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "action",
 		"type": "STRING"
 	},
 	{
