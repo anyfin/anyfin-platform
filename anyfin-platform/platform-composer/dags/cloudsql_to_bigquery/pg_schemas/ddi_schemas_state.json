@@ -1,0 +1,22 @@
+{
+    "ddi_sessions": {
+      "schema": {
+        "id":"uuid",
+        "created_at":"timestamp with time zone",
+        "updated_at":"timestamp with time zone",
+        "provider":"text",
+        "status":"text",
+        "details":"text",
+        "items":"jsonb",
+        "metadata":"jsonb",
+        "platform":"text",
+        "user_ip":"text",
+        "user_agent":"text",
+        "user_identifier":"text",
+        "metrics":"jsonb",
+        "decision_tree":"ARRAY"
+      },
+      "bq_partition_column": "created_at",
+      "ts_column" : "updated_at"
+    }
+}

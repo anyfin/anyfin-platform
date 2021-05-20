@@ -28,11 +28,14 @@
     - To fetch the Postgres schema for a table use: 
         ```SQL 
         SELECT
-   		    table_name,
-   		    json_agg(concat(column_name::text, ':', data_type::text)) as columns
-	    FROM  information_schema.columns
-	    WHERE table_name = [Insert Table name here as String]
-	    GROUP BY table_name ```
+            table_name,
+            string_agg(
+                '"' || column_name::text ||  '":"' || data_type::text || '"', ', '
+                ) as columns
+        FROM  information_schema.columns
+        WHERE table_name = [table name string]
+        GROUP BY table_name;
+        ```
     - Using the format in step one, create a json object for each table and save the file as [database_name]_schemas_state.json under pg_schemas folder
     - Deploy in the Platform Composer dags/cloudsql_to_bigquery/pg_schemas in GCP
 

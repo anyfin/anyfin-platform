@@ -28,11 +28,11 @@ def convert_type_to_bq(t):
 		return 'STRING'
 
 
-with open(f'{DATABASE_NAME}_schemas_state.json') as f:
+with open(f'./pg_schemas/{DATABASE_NAME}_schemas_state.json') as f:
   schemas = json.load(f)
 
 
-with open(f'../bq_schemas/{DATABASE_NAME}/{DATABASE_NAME}.tf', 'w') as output_f:
+with open(f'./bq_schemas/{DATABASE_NAME}/{DATABASE_NAME}.tf', 'w') as output_f:
 	for table in schemas:
 		output_f.write('resource "google_bigquery_table" "{table_name}_raw" {{\n'.format(table_name=table))
 		output_f.write(f'	dataset_id = "{DATABASE_NAME}_staging"\n')
