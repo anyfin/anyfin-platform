@@ -161,7 +161,7 @@ with DAG('purchase_history',
         sql=EXTRACT_SQL.format('{{ ds }}'),
         bucket=BUCKET,
         google_cloud_storage_conn_id='postgres-bq-etl-con',
-        postgres_conn_id='ddi_db',
+        postgres_conn_id='ddi_replica',
         filename=DAILY_EXTRACTED_FILENAME
     )
 
