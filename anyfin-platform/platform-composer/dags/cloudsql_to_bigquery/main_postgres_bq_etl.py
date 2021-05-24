@@ -17,8 +17,10 @@ PROJECT_NAME = 'anyfin'
 GCS_BUCKET = 'sql-to-bq-etl'
 DATABASE_NAME = 'main'
 
-TEMPLATE_FILE = os.path.dirname(os.path.realpath(__file__)) + '/beam_utils/pg_bq_etl.py'
-SETUP_FILE = os.path.dirname(os.path.realpath(__file__)) + '/beam_utils/setup.py'
+TEMPLATE_FILE = os.path.dirname(os.path.realpath(
+    __file__)) + '/beam_utils/pg_bq_etl.py'
+SETUP_FILE = os.path.dirname(
+    os.path.realpath(__file__)) + '/beam_utils/setup.py'
 
 ETL = ETL(GCS_BUCKET=GCS_BUCKET, DATABASE_NAME=DATABASE_NAME)
 
@@ -172,7 +174,10 @@ for table in ETL.get_tables():
                     json_extract(main_policy,  '$.data.labelling_auto_reject_reasons' )  as `labelling_auto_reject_reasons`,
                     json_extract(main_policy,  '$.data.AsiakastietoLookup' )  as `asiakastieto_lookup`,
                     json_extract(main_policy,  '$.data.AsiakastietoCcisLookup' )  as `asiakastieto_ccis_lookup`,
-                    json_extract(main_policy,  '$.data.KalpNew' )  as `kalp_new`
+                    json_extract(main_policy,  '$.data.KalpNew' )  as `kalp_new`,
+                    json_extract(main_policy,  '$.data.CustomerPolicy' )  as `customer_policy`,
+                    json_extract(main_policy,  '$.data.CustomerMatcherSchufaId' )  as `customer_matcher_schufa_id`,
+                    json_extract(main_policy,  '$.data.SCLookup' )  as `sc_lookup`
                     from temp join 
                     anyfin.{DATABASE_NAME}_staging.{table}_raw t on temp.id= t.id and temp.max_ingested_ts=t._ingested_ts
             """,
@@ -185,10 +190,10 @@ for table in ETL.get_tables():
             create_disposition='CREATE_IF_NEEDED',
             dag=dag
         )
-        dedup_tasks.append(dedup)        
+        dedup_tasks.append(dedup)
 
-    else: 
-        dedup = BigQueryOperator(    
+    else:
+        dedup = BigQueryOperator(
             task_id='deduplicate_' + table,
             sql=f"""
                 with temp as (
