@@ -982,6 +982,97 @@ EOF
 }
 
 
+resource "google_bigquery_table" "ddi_providers_raw" {
+	dataset_id = "main_staging"
+	table_id   = "ddi_providers_raw"
+	project    = "anyfin"
+
+	labels = {
+		env = "default"
+	}
+
+	schema = <<EOF
+[
+	{
+		"mode": "NULLABLE",
+		"name": "id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "order",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "created_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "updated_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "name",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "auth",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "type",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "lender_id",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "country_code",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "min_android_app_version",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "min_ios_app_version",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "active_android",
+		"type": "BOOLEAN"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "active_ios",
+		"type": "BOOLEAN"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "active_web",
+		"type": "BOOLEAN"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "_ingested_ts",
+		"type": "TIMESTAMP"
+	}
+]
+EOF
+}
+
+
 resource "google_bigquery_table" "offers_raw" {
 	dataset_id = "main_staging"
 	table_id   = "offers_raw"

@@ -205,6 +205,24 @@
     "bq_partition_column": "created_at",
     "backfill_method": "beam_backfill"
   },
+  "ddi_providers": {
+    "schema": {
+      "id":"uuid", 
+      "order":"integer", 
+      "created_at":"timestamp with time zone", 
+      "updated_at":"timestamp with time zone", 
+      "name":"character varying", 
+      "auth":"text", 
+      "type":"text", 
+      "lender_id":"integer", 
+      "country_code":"character", 
+      "min_android_app_version":"character varying", 
+      "min_ios_app_version":"character varying", 
+      "active_android":"boolean", 
+      "active_ios":"boolean", 
+      "active_web":"boolean"
+    }
+  },
   "offers": {
     "schema": {
       "monthly_fee": "numeric",
