@@ -242,7 +242,7 @@ for table_name, content in tables_to_backfill:
 	columns = ", ".join(content['schema'].keys())
 	task_export_table = BashOperator(
 		task_id='export_' + table_name,
-		bash_command="gcloud sql export csv anyfin-main-replica --project=anyfin "
+		bash_command="gcloud sql export csv anyfin-main-replica --project=anyfin --billing-project=anyfin " # add --log-http  for debugging
 					f"--offload --async gs://{BUCKET_NAME}/pg_dumps/main_{table_name}.csv "
 					f"--database=main --query='select {columns}, now() as _ingested_ts from {table_name};'",
 		dag=dag
