@@ -52,8 +52,7 @@ class ParseColumnsFn(beam.DoFn):
             if isinstance(x, (date, time)):
                 row[i] = str(x)
 
-        schema = [s.replace('"', '') if s == '"from"' else s for s in self.schema]
-        # schema = [s.replace('"', '') for s in self.schema]  ## More general approach
+        schema = [s.replace('"', '') for s in self.schema]
         row = dict(zip(schema, row))
         row['_ingested_ts'] = str(datetime.now().isoformat())
         yield row

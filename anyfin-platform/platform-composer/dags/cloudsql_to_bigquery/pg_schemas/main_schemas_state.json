@@ -208,7 +208,7 @@
   "ddi_providers": {
     "schema": {
       "id":"uuid", 
-      "order":"integer", 
+      "\"order\"":"integer",
       "created_at":"timestamp with time zone", 
       "updated_at":"timestamp with time zone", 
       "name":"character varying", 
