@@ -1,13 +1,13 @@
 {
     "balance_widgets": {
       "schema": {
-        "id": "integer", 
-        "created_at": "timestamp with time zone", 
-        "updated_at": "timestamp with time zone",
-        "customer_id": "integer", 
-        "title": "text", 
-        "color": "text", 
-        "account_ids": "ARRAY"
+        "id":"uuid", 
+        "created_at":"timestamp with time zone", 
+        "updated_at":"timestamp with time zone", 
+        "customer_id":"integer", 
+        "title":"text", 
+        "color":"text", 
+        "account_ids":"ARRAY"
       },
       "bq_partition_column": "created_at",
       "backfill_method": "None"

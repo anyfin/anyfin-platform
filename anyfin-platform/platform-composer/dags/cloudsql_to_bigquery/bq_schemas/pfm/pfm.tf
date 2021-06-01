@@ -17,7 +17,7 @@ resource "google_bigquery_table" "balance_widgets_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "id",
-		"type": "INTEGER"
+		"type": "STRING"
 	},
 	{
 		"mode": "NULLABLE",
