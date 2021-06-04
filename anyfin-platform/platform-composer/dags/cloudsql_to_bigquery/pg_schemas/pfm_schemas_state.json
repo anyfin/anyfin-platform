@@ -11,6 +11,31 @@
       },
       "bq_partition_column": "created_at",
       "backfill_method": "None"
+    },
+    "customer_widgets": {
+      "schema": {
+        "id":"uuid", 
+        "created_at":"timestamp with time zone", 
+        "updated_at":"timestamp with time zone", 
+        "customer_id":"integer", 
+        "type":"text", 
+        "position":"integer"
+      },
+      "bq_partition_column": "created_at",
+      "backfill_method": "None"
+    },
+    "salary_day_widgets": {
+      "schema": {
+        "id":"uuid", 
+        "created_at":"timestamp with time zone", 
+        "updated_at":"timestamp with time zone", 
+        "customer_id":"integer", 
+        "color":"text", 
+        "salary_day":"integer", 
+        "adjust_weekends":"boolean"
+      },
+      "bq_partition_column": "created_at",
+      "backfill_method": "None"
     }
   }
   
