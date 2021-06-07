@@ -53,7 +53,7 @@ def run(table_name, chunk_size):
         except AttributeError as error:
             return None
 
-    csv_filepath = f'gs://{BUCKET_NAME}/pg_dumps/{DATABASE_NAME}_{table_name}.csv'
+    csv_filepath = f'gs://{BUCKET_NAME}/pg_dumps/{DATABASE_NAME}_{table_name}_export.csv'
     for chunk in pd.read_csv(csv_filepath, chunksize=chunk_size, names=columns, dtype=dtypes):
         for field in array_fields:
             chunk[field] = chunk[field].apply( convert_string_to_array )
