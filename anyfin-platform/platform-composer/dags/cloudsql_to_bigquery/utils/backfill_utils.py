@@ -54,7 +54,7 @@ class BACKFILL:
     def fetch_num_of_rows_postgres(self):
         db = PostgresHook(f'{self.DATABASE_NAME}_replica')
         query = []
-        for table_name, _ in self.EXPORT_TABLES:
+        for table_name, _ in self.get_export_tables():
             query.append(f"SELECT '{table_name}', COUNT(*) FROM {table_name}")
         query = ' UNION ALL '.join(query)
 

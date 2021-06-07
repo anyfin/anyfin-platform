@@ -44,7 +44,7 @@ def run(table_name, chunk_size):
     start = time.time()
 
     client = storage.Client()
-    bucket = client.get_bucket(DATABASE_NAME)
+    bucket = client.get_bucket(BUCKET_NAME)
 
     files_uploaded = 0
     def convert_string_to_array(x):

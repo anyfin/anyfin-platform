@@ -82,21 +82,22 @@ for DB in DATABASES_INFO:
 	INSTANCE_NAME = DB['INSTANCE_NAME']
 	DATABASE = DB['DATABASE']
 	backfill = BACKFILL(GCS_BUCKET=GCS_BUCKET, DATABASE_NAME=DATABASE_NAME)
-
-	# Task to upload schema to compute instance
-	task_upload_schema_to_instance = BashOperator(
-		task_id='upload_convertion_script_to_instance',
-		bash_command=f'gcloud compute scp --zone "europe-west1-b" --project "anyfin-platform" \
-					f"{DAG_PATH}/pg_schemas/{DATABASE_NAME}_schemas_state.json" \
-					postgres-bq-backfill:/home/airflow/ ',
-		dag=dag
-	)
-
-	postgres_check = PythonOperator(
-		task_id=f'{DATABASE_NAME}_sanity_check_postgres',
-		python_callable=backfill.fetch_num_of_rows_postgres,
-		dag=dag
-	)
+	
+	if backfill.get_export_tables():
+		# Task to upload schema to compute instance
+		task_upload_schema_to_instance = BashOperator(
+			task_id='upload_convertion_script_to_instance',
+			bash_command=f'gcloud compute scp --zone "europe-west1-b" --project "anyfin-platform" \
+						f"{DAG_PATH}/pg_schemas/{DATABASE_NAME}_schemas_state.json" \
+						postgres-bq-backfill:/home/airflow/ ',
+			dag=dag
+		)
+		if DATABASE_NAME != 'dolph':
+			postgres_check = PythonOperator(
+				task_id=f'{DATABASE_NAME}_sanity_check_postgres',
+				python_callable=backfill.fetch_num_of_rows_postgres,
+				dag=dag
+			)
 
 	split_tasks = []
 	prev_wait_task = ""
@@ -128,7 +129,7 @@ for DB in DATABASES_INFO:
 		task_export_table = BashOperator(
 			task_id=f'export_{table_name}',
 			bash_command=f"gcloud sql export csv  {INSTANCE_NAME} --project={PROJECT_NAME} --billing-project={PROJECT_NAME} " # add --log-http  for debugging
-						f"--offload --async gs://{GCS_BUCKET}/{DATABASE_NAME}_{table_name}_export "
+						f"--offload --async gs://{GCS_BUCKET}/pg_dumps/{DATABASE_NAME}_{table_name}_export.csv "
 						f"--database={DATABASE} --query='select * from {table_name};'",
 			dag=dag
 		)
@@ -173,7 +174,7 @@ for DB in DATABASES_INFO:
 				dag=dag
 			)
 			split_tasks.append(submit_python_split_task)
-			SOURCE_OBJECT = f'json_extracts/{table_name}/export-*.json' # The JSON extract here should prob be in a folder named {DATABASE_NAME} 3/6
+			SOURCE_OBJECT = f'json_extracts/{DATABASE_NAME}/{table_name}/export-*.json'
 
 			# Load generated JSON files into BQ
 			bq_load_backup = GoogleCloudStorageToBigQueryOperator(
@@ -237,6 +238,8 @@ for DB in DATABASES_INFO:
 
 		# Create dependencies
 		task_delete_old_export >> task_export_table >> task_wait_operation >> task_generate_schema_object >> bq_load_backup >> sanity_check_bq >> bq_load_final
+		if DATABASE_NAME != 'dolph':
+			postgres_check >> sanity_check_bq
 		if nested:
 			task_delete_old_json_extract >> task_export_table
 			task_wait_operation >> submit_python_split_task >> bq_load_backup
