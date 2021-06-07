@@ -35,7 +35,7 @@
         "adjust_weekends":"boolean"
       },
       "bq_partition_column": "created_at",
-      "backfill_method": "None"
+      "backfill_method": null
     }
   }
   
