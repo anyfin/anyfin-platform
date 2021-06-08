@@ -96,7 +96,7 @@ class BACKFILL:
             )
 
     def fetch_bigquery_data(self, table_name, destination_table, **kwargs):
-        postgres_results = kwargs['ti'].xcom_pull(task_ids='sanity_check_postgres')
+        postgres_results = kwargs['ti'].xcom_pull(task_ids=f'{self.DATABASE_NAME}_sanity_check_postgres')
         client = bigquery.Client()
         query_job = client.query(
             f"""

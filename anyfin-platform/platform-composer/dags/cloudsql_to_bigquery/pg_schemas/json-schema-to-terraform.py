@@ -34,9 +34,15 @@ with open(f'./pg_schemas/{DATABASE_NAME}_schemas_state.json') as f:
 
 with open(f'./bq_schemas/{DATABASE_NAME}/{DATABASE_NAME}.tf', 'w') as output_f:
 	for table in schemas:
-		output_f.write('resource "google_bigquery_table" "{table_name}_raw" {{\n'.format(table_name=table))
-		output_f.write(f'	dataset_id = "{DATABASE_NAME}_staging"\n')
-		output_f.write('	table_id   = "{table_name}_raw"\n'.format(table_name=table))
+		table_suffix = '_raw'
+		database_suffix = '_staging'
+		if DATABASE_NAME == 'dolph' and table == 'transactions': 
+			table_suffix = ''
+			database_suffix = ''
+
+		output_f.write(f'resource "google_bigquery_table" "{table}{table_suffix}" {{\n')
+		output_f.write(f'	dataset_id = "{DATABASE_NAME}{database_suffix}"\n')
+		output_f.write(f'	table_id   = "{table}{table_suffix}"\n')
 		output_f.write('	project    = "anyfin"\n')
 		output_f.write('\n')
 		output_f.write('	labels = {\n')

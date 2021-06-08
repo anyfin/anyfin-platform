@@ -110,7 +110,7 @@ for DB in DATABASES_INFO:
 		task_delete_old_export = GoogleCloudStorageDeleteOperator(
 			task_id=f'delete_old_{table_name}_export',
 			bucket_name=GCS_BUCKET,
-			objects=[f'pg_dumps/{DATABASE_NAME}_{table_name}.csv'],
+			objects=[f'pg_dumps/{DATABASE_NAME}_{table_name}_export.csv'],
 			google_cloud_storage_conn_id='postgres-bq-etl-con',
 			dag=dag
 		)
@@ -130,7 +130,7 @@ for DB in DATABASES_INFO:
 			task_id=f'export_{table_name}',
 			bash_command=f"gcloud sql export csv  {INSTANCE_NAME} --project={PROJECT_NAME} --billing-project={PROJECT_NAME} " # add --log-http  for debugging
 						f"--offload --async gs://{GCS_BUCKET}/pg_dumps/{DATABASE_NAME}_{table_name}_export.csv "
-						f"--database={DATABASE} --query='select * from {table_name};'",
+						f"--database={DATABASE} --query='select {columns}, now() as _ingested_ts from {table_name};'",
 			dag=dag
 		)
 
