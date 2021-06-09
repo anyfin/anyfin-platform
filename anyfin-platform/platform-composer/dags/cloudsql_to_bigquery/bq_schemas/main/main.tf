@@ -1742,7 +1742,7 @@ resource "google_bigquery_table" "customer_kalp_input_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "version",
-		"type": "STRING"
+		"type": "INTEGER"
 	},
 	{
 		"mode": "NULLABLE",
