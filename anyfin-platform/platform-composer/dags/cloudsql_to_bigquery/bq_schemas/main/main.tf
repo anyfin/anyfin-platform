@@ -1737,7 +1737,7 @@ resource "google_bigquery_table" "customer_kalp_input_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "debt",
-		"type": "STRING"
+		"type": "INTEGER"
 	},
 	{
 		"mode": "NULLABLE",

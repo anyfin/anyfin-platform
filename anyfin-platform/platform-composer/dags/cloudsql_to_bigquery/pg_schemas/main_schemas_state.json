@@ -361,7 +361,7 @@
       "accommodation_arrangement": "text",
       "created_at": "timestamp with time zone",
       "rent": "integer",
-      "debt": "text",
+      "debt": "integer",
       "version": "text"
     },
     "ts_column" : "created_at",

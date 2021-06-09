@@ -86,6 +86,7 @@ extract_from_cloudsql = DataFlowPython3Operator(
     options={
         "num-workers": '1'
     },
+    email_on_failure=True,
     gcp_conn_id='postgres-bq-etl-con',
     poll_sleep=30,
     dag=dag
