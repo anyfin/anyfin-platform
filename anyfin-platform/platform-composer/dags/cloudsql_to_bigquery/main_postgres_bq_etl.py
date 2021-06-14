@@ -178,7 +178,8 @@ for table in ETL.get_tables():
                     json_extract(main_policy,  '$.data.KalpNew' )  as `kalp_new`,
                     json_extract(main_policy,  '$.data.CustomerPolicy' )  as `customer_policy`,
                     json_extract(main_policy,  '$.data.CustomerMatcherSchufaId' )  as `customer_matcher_schufa_id`,
-                    json_extract(main_policy,  '$.data.SCLookup' )  as `sc_lookup`
+                    json_extract(main_policy,  '$.data.SCLookup' )  as `sc_lookup`,
+                    json_extract(main_policy,  '$.data.CRIFBuergelLookup' )  as `crif_buergel_lookup`
                     from temp join 
                     anyfin.{DATABASE_NAME}_staging.{table}_raw t on temp.id= t.id and temp.max_ingested_ts=t._ingested_ts
             """,
