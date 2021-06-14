@@ -92,12 +92,13 @@ for DB in DATABASES_INFO:
 						postgres-bq-backfill:/home/airflow/ ',
 			dag=dag
 		)
-		if DATABASE_NAME != 'dolph':
-			postgres_check = PythonOperator(
-				task_id=f'{DATABASE_NAME}_sanity_check_postgres',
-				python_callable=backfill.fetch_num_of_rows_postgres,
-				dag=dag
-			)
+	sanity_check_tables = [table for table, content in backfill.get_export_tables() if not ('ignore_sanity_check' in content and content['ignore_sanity_check'] == True)]
+	if sanity_check_tables:
+		postgres_check = PythonOperator(
+			task_id=f'{DATABASE_NAME}_sanity_check_postgres',
+			python_callable=backfill.fetch_num_of_rows_postgres,
+			dag=dag
+		)
 
 	split_tasks = []
 	prev_wait_task = ""
@@ -156,9 +157,6 @@ for DB in DATABASES_INFO:
 			dag=dag
 		)
 
-		SCHEMA_OBJECT = f'pg_dumps/{DATABASE_NAME}_{table_name}_schema.json'
-		DESTINATION_TABLE = f'{DATABASE_NAME}_staging.{table_name}_raw_backup'
-
 		if 'bq_partition_column' in content:
 			PARTITION = {'type': 'DAY', 'field': content['bq_partition_column']}
 		else:
@@ -174,72 +172,64 @@ for DB in DATABASES_INFO:
 				dag=dag
 			)
 			split_tasks.append(submit_python_split_task)
+
 			SOURCE_OBJECT = f'json_extracts/{DATABASE_NAME}/{table_name}/export-*.json'
-
-			# Load generated JSON files into BQ
-			bq_load_backup = GoogleCloudStorageToBigQueryOperator(
-				task_id=f'backup_load_{DATABASE_NAME}_{table_name}_into_bq',
-				bucket=GCS_BUCKET,
-				schema_object=SCHEMA_OBJECT,
-				source_objects=[SOURCE_OBJECT, ],
-				time_partitioning=PARTITION,
-				source_format='NEWLINE_DELIMITED_JSON',
-				create_disposition='CREATE_NEVER',
-				write_disposition='WRITE_TRUNCATE',
-				allow_jagged_rows=True,
-				ignore_unknown_values=True,
-				max_bad_records=0,
-				destination_project_dataset_table=DESTINATION_TABLE,
-				bigquery_conn_id='postgres-bq-etl-con',
-				google_cloud_storage_conn_id='postgres-bq-etl-con',
-				dag=dag
-			)
+			SOURCE_FORMAT = 'NEWLINE_DELIMITED_JSON'
 		else:
-			# Load exported CSV into BQ
-			SOURCE_OBJECT = f'{DATABASE_NAME}_{table_name}_export'
+			SOURCE_OBJECT = f'pg_dumps/{DATABASE_NAME}_{table_name}_export.csv'
+			SOURCE_FORMAT = 'CSV'
 
-			bq_load_backup = GoogleCloudStorageToBigQueryOperator(
-				task_id=f'backup_load_{DATABASE_NAME}_{table_name}_into_bq',
-				bucket=GCS_BUCKET,
-				schema_object=SCHEMA_OBJECT,
-				source_objects=[SOURCE_OBJECT, ],
-				time_partitioning=PARTITION,
-				source_format='CSV',
-				create_disposition='CREATE_NEVER',
-				write_disposition='WRITE_TRUNCATE',
-				allow_jagged_rows=True,
-				ignore_unknown_values=True,
-				max_bad_records=0,
-				destination_project_dataset_table=DESTINATION_TABLE,
-				bigquery_conn_id='postgres-bq-etl-con',
-				google_cloud_storage_conn_id='postgres-bq-etl-con',
-				dag=dag
-			)
+		SCHEMA_OBJECT = f'pg_dumps/{DATABASE_NAME}_{table_name}_schema.json'
+		if table_name in sanity_check_tables:
+			DESTINATION_TABLE = f'{DATABASE_NAME}_staging.{table_name}_raw_backup'
+		else:
+			DESTINATION_TABLE = f'{DATABASE_NAME}.{table_name}'
 
-		sanity_check_bq = PythonOperator(
-			task_id=f"check_{DATABASE_NAME}_{table_name}_against_postgres",
-			python_callable=backfill.fetch_bigquery_data,
-			op_kwargs = {'table_name': table_name, 'destination_table': DESTINATION_TABLE},
-			provide_context=True,
-			dag=dag
-		)
-
-		DESTINATION_TABLE = f'{DATABASE_NAME}_staging.{table_name}_raw'
-
-		bq_load_final = BigQueryToBigQueryOperator(
-			task_id=f'final_load_{DATABASE_NAME}_{table_name}_into_bq',
+		# Load export CSV/JSON into BQ
+		bq_load_backup = GoogleCloudStorageToBigQueryOperator(
+			task_id=f'backup_load_{DATABASE_NAME}_{table_name}_into_bq',
+			bucket=GCS_BUCKET,
+			schema_object=SCHEMA_OBJECT,
+			source_objects=[SOURCE_OBJECT, ],
+			time_partitioning=PARTITION,
+			source_format=SOURCE_FORMAT,
 			create_disposition='CREATE_NEVER',
 			write_disposition='WRITE_TRUNCATE',
-			source_project_dataset_tables=f'{DESTINATION_TABLE}_backup',
+			allow_jagged_rows=True,
+			ignore_unknown_values=True,
+			max_bad_records=5,
 			destination_project_dataset_table=DESTINATION_TABLE,
 			bigquery_conn_id='postgres-bq-etl-con',
+			google_cloud_storage_conn_id='postgres-bq-etl-con',
 			dag=dag
 		)
 
+		if table_name in sanity_check_tables:
+			sanity_check_bq = PythonOperator(
+				task_id=f"check_{DATABASE_NAME}_{table_name}_against_postgres",
+				python_callable=backfill.fetch_bigquery_data,
+				op_kwargs = {'table_name': table_name, 'destination_table': DESTINATION_TABLE},
+				provide_context=True,
+				dag=dag
+			)
+
+			DESTINATION_TABLE = f'{DATABASE_NAME}_staging.{table_name}_raw'
+
+			bq_load_final = BigQueryToBigQueryOperator(
+				task_id=f'final_load_{DATABASE_NAME}_{table_name}_into_bq',
+				create_disposition='CREATE_NEVER',
+				write_disposition='WRITE_TRUNCATE',
+				source_project_dataset_tables=f'{DESTINATION_TABLE}_backup',
+				destination_project_dataset_table=DESTINATION_TABLE,
+				bigquery_conn_id='postgres-bq-etl-con',
+				dag=dag
+			)
+
 		# Create dependencies
-		task_delete_old_export >> task_export_table >> task_wait_operation >> task_generate_schema_object >> bq_load_backup >> sanity_check_bq >> bq_load_final
-		if DATABASE_NAME != 'dolph':
+		task_delete_old_export >> task_export_table >> task_wait_operation >> task_generate_schema_object >> bq_load_backup
+		if sanity_check_tables:
 			postgres_check >> sanity_check_bq
+			bq_load_backup >> sanity_check_bq >> bq_load_final
 		if nested:
 			task_delete_old_json_extract >> task_export_table
 			task_wait_operation >> submit_python_split_task >> bq_load_backup

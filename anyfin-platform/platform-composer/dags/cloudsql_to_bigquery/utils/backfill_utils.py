@@ -19,11 +19,14 @@ class BACKFILL:
         with open(os.path.join(os.path.dirname(__file__), f'../pg_schemas/{DATABASE_NAME}_schemas_state.json')) as f:
             self.TABLES = json.loads(f.read())
 
+        self.BEAM_TABLES = [(table_name, content) for table_name, content in self.TABLES.items() if 'backfill_method' in content and content['backfill_method'] == 'beam_backfill']
         self.DIRECT_EXPORT_TABLES = [(table_name, content) for table_name, content in self.TABLES.items() if 'backfill_method' in content and content['backfill_method'] == 'direct_export']
         self.NESTED_EXPORT_TABLES = [(table_name, content) for table_name, content in self.TABLES.items() if 'backfill_method' in content and content['backfill_method'] == 'nested_export']
         
     def get_tables(self):
         return self.TABLES
+    def get_beam_tables(self):
+        return self.BEAM_TABLES
     def get_export_tables(self):
         return self.DIRECT_EXPORT_TABLES + self.NESTED_EXPORT_TABLES
     def get_direct_export_tables(self):

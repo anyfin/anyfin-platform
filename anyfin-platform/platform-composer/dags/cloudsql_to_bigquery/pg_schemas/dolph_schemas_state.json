@@ -75,7 +75,8 @@
         "ts_column": "updated_at",
         "bq_partition_column": "created_at",
         "backfill_method": "direct_export",
-        "ignore_daily": true
+        "ignore_daily": true,
+        "ignore_sanity_check": true
     },
     "recurrings": {
         "schema": {
@@ -97,7 +98,8 @@
             "active": "boolean"
         },
         "ts_column": "updated_at",
-        "bq_partition_column": "created_at"
+        "bq_partition_column": "created_at",
+        "backfill_method": "direct_export"
     },
     "cash_advance_applications": {
         "schema": {
@@ -118,7 +120,8 @@
             "pull_date": "date"
         },
         "ts_column": "updated_at",
-        "bq_partition_column": "created_at"
+        "bq_partition_column": "created_at",
+        "backfill_method": "beam_backfill"
     },
     "payouts": {
         "schema": {

@@ -8,17 +8,21 @@
     - Deploy this file in the Platform Composer dags/cloudsql_to_bigquery folder in GCP
 - Create PG Schema file
     - Follow the format of the other [database_name]_schemas_state.json files
-        ```JSON
+        ```python
         {
             "table_name": {
+                # Required
                 "schema": {
                     "field": "type", 
                     "field": "type",  
                 },
+                # Optional
                 "ts_column": "updated_at",           # Fetch daily data based on the ts_column - Remove row to fetch all data every day
                 "bq_partition_column": "created_at", # The column to partition on in BigQuery
-                "backfill_method": "None",           # Valid options ["None", "Export", "beam_backfill"]
-                "chunk_size": "50000"                # Keep this row if backfill_method = "Export"
+                "backfill_method": "beam_backfill",    # Valid options ["direct_export", "nested_export", "beam_backfill"]
+                "chunk_size": "50000",               # Keep this row if backfill_method = "Export"
+                "ignore_sanity_check": true,         # Add this to remove a table from the sanity check
+                "ignore_daily": true                 # Add this to exclude table from loading daily data
             },
             {
             "table_name": ....
