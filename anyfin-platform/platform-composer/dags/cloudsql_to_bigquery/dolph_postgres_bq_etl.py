@@ -78,6 +78,7 @@ extract_from_cloudsql = DataFlowPython3Operator(
         "runner": "DataFlowRunner",
         "experiment": "use_beam_bq_sink",
         "date": '{{ds}}',
+        "machine_type": "n1-standard-4",
         "setup_file": SETUP_FILE,
         "temp_location": f'gs://{GCS_BUCKET}/Temp/',
         "database_name": f"{DATABASE_NAME}"
