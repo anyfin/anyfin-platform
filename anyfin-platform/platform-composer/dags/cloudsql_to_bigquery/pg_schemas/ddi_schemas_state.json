@@ -17,6 +17,7 @@
         "decision_tree":"ARRAY"
       },
       "bq_partition_column": "created_at",
-      "ts_column" : "updated_at"
+      "ts_column": "updated_at",
+      "backfill_method": "beam_backfill"
     }
 }
