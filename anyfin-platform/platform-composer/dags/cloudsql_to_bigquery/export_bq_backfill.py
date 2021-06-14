@@ -227,7 +227,7 @@ for DB in DATABASES_INFO:
 
 		# Create dependencies
 		task_delete_old_export >> task_export_table >> task_wait_operation >> task_generate_schema_object >> bq_load_backup
-		if sanity_check_tables:
+		if table_name in sanity_check_tables:
 			postgres_check >> sanity_check_bq
 			bq_load_backup >> sanity_check_bq >> bq_load_final
 		if nested:
