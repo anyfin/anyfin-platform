@@ -24,6 +24,9 @@ def convert_type_to_bq(t):
 	elif t == 'boolean':
 		return 'BOOLEAN'
 
+	elif t == 'real':
+		return 'FLOAT'
+	
 	else: 
 		return 'STRING'
 

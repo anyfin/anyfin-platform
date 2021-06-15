@@ -51,6 +51,10 @@ class BACKFILL:
 
         elif t == 'boolean':
             return 'BOOLEAN'
+
+        elif t == 'real':
+            return 'FLOAT'
+            
         else: 
             return 'STRING'
 

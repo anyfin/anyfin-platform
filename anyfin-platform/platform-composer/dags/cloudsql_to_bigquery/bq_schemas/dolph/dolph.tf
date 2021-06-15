@@ -32,7 +32,7 @@ resource "google_bigquery_table" "users_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "manual_income",
-		"type": "STRING"
+		"type": "FLOAT"
 	},
 	{
 		"mode": "NULLABLE",
@@ -215,12 +215,12 @@ resource "google_bigquery_table" "accounts_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "available_credit",
-		"type": "STRING"
+		"type": "FLOAT"
 	},
 	{
 		"mode": "NULLABLE",
 		"name": "balance",
-		"type": "STRING"
+		"type": "FLOAT"
 	},
 	{
 		"mode": "NULLABLE",
@@ -311,7 +311,7 @@ resource "google_bigquery_table" "transactions" {
 	{
 		"mode": "NULLABLE",
 		"name": "amount",
-		"type": "STRING"
+		"type": "FLOAT"
 	},
 	{
 		"mode": "NULLABLE",
@@ -427,7 +427,7 @@ resource "google_bigquery_table" "recurrings_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "score",
-		"type": "STRING"
+		"type": "FLOAT"
 	},
 	{
 		"mode": "NULLABLE",
@@ -442,7 +442,7 @@ resource "google_bigquery_table" "recurrings_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "amount",
-		"type": "STRING"
+		"type": "FLOAT"
 	},
 	{
 		"mode": "NULLABLE",
@@ -513,7 +513,7 @@ resource "google_bigquery_table" "cash_advance_applications_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "amount",
-		"type": "STRING"
+		"type": "FLOAT"
 	},
 	{
 		"mode": "NULLABLE",
@@ -614,7 +614,7 @@ resource "google_bigquery_table" "payouts_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "amount",
-		"type": "STRING"
+		"type": "FLOAT"
 	},
 	{
 		"mode": "NULLABLE",
@@ -700,7 +700,7 @@ resource "google_bigquery_table" "payins_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "amount",
-		"type": "STRING"
+		"type": "FLOAT"
 	},
 	{
 		"mode": "NULLABLE",

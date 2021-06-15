@@ -54,6 +54,7 @@ gce_instance_start_task = GceInstanceStartOperator(
 	zone='europe-west1-b',
 	resource_id='postgres-bq-backfill',
 	task_id='gcp_compute_start',
+	trigger_rule=TriggerRule.ONE_SUCCESS,
 	dag=dag
 )
 
@@ -75,24 +76,25 @@ gce_instance_stop_task = GceInstanceStopOperator(
 )
 
 
-wait_tasks = []
 
 for DB in DATABASES_INFO:
 	DATABASE_NAME = DB['DATABASE_NAME']
 	INSTANCE_NAME = DB['INSTANCE_NAME']
 	DATABASE = DB['DATABASE']
 	backfill = BACKFILL(GCS_BUCKET=GCS_BUCKET, DATABASE_NAME=DATABASE_NAME)
-	
-	if backfill.get_export_tables():
+	sanity_check_tables = [table for table, content in backfill.get_export_tables() if not ('ignore_sanity_check' in content and content['ignore_sanity_check'] == True)]
+	daily_tables = [table for table, content in backfill.get_export_tables() if not ('ignore_daily' in content and content['ignore_daily'] == True)]
+
+	if backfill.get_nested_export_tables():
 		# Task to upload schema to compute instance
 		task_upload_schema_to_instance = BashOperator(
-			task_id='upload_convertion_script_to_instance',
+			task_id=f'upload_{DATABASE_NAME}_schema_to_instance',
 			bash_command=f'gcloud compute scp --zone "europe-west1-b" --project "anyfin-platform" \
 						f"{DAG_PATH}/pg_schemas/{DATABASE_NAME}_schemas_state.json" \
 						postgres-bq-backfill:/home/airflow/ ',
 			dag=dag
 		)
-	sanity_check_tables = [table for table, content in backfill.get_export_tables() if not ('ignore_sanity_check' in content and content['ignore_sanity_check'] == True)]
+	
 	if sanity_check_tables:
 		postgres_check = PythonOperator(
 			task_id=f'{DATABASE_NAME}_sanity_check_postgres',
@@ -101,7 +103,6 @@ for DB in DATABASES_INFO:
 		)
 
 	split_tasks = []
-	prev_wait_task = ""
 
 	# Iterate over all tables to backfill and create tasks
 	for table_name, content in backfill.get_export_tables():
@@ -131,22 +132,19 @@ for DB in DATABASES_INFO:
 			task_id=f'export_{table_name}',
 			bash_command=f"gcloud sql export csv  {INSTANCE_NAME} --project={PROJECT_NAME} --billing-project={PROJECT_NAME} " # add --log-http  for debugging
 						f"--offload --async gs://{GCS_BUCKET}/pg_dumps/{DATABASE_NAME}_{table_name}_export.csv "
-						f"--database={DATABASE} --query='select {columns}, now() as _ingested_ts from {table_name};'",
-			dag=dag
-		)
-
-		# Wait for export to complete
-		task_wait_operation = BashOperator(
-			task_id='wait_operation_' + table_name,
-			bash_command=f"operation_id=$(gcloud beta sql operations --project={PROJECT_NAME} list --instance={INSTANCE_NAME} "
+						f"--database={DATABASE} --query='select {columns}, now() as _ingested_ts from {table_name};'"
+						" && "
+						"sleep 30"
+						" && "
+						f"operation_id=$(gcloud beta sql operations --project={PROJECT_NAME} list --instance={INSTANCE_NAME} "
 						"| grep EXPORT | grep RUNNING | awk '{print $1}'); "
 						"if [ -z '$operation_id' ]; "
 						"then echo ""; "
 						f"else gcloud beta sql operations wait --project {PROJECT_NAME} $operation_id --timeout=3600; "
 						"fi;",
+			pool=f'{DATABASE_NAME}_export_tasks',
 			dag=dag
 		)
-		wait_tasks.append(task_wait_operation)
 
 		# Generate BQ schema used for loading data into BQ
 		task_generate_schema_object = PythonOperator(
@@ -180,10 +178,12 @@ for DB in DATABASES_INFO:
 			SOURCE_FORMAT = 'CSV'
 
 		SCHEMA_OBJECT = f'pg_dumps/{DATABASE_NAME}_{table_name}_schema.json'
-		if table_name in sanity_check_tables:
-			DESTINATION_TABLE = f'{DATABASE_NAME}_staging.{table_name}_raw_backup'
-		else:
-			DESTINATION_TABLE = f'{DATABASE_NAME}.{table_name}'
+
+		staging = '_staging' if table_name in sanity_check_tables or table_name in daily_tables else ''
+		raw = '_raw' if table_name in daily_tables else ''
+		backup = '_backup' if table_name in sanity_check_tables else ''
+
+		DESTINATION_TABLE = f'{DATABASE_NAME}{staging}.{table_name}{raw}{backup}'
 
 		# Load export CSV/JSON into BQ
 		bq_load_backup = GoogleCloudStorageToBigQueryOperator(
@@ -213,7 +213,7 @@ for DB in DATABASES_INFO:
 				dag=dag
 			)
 
-			DESTINATION_TABLE = f'{DATABASE_NAME}_staging.{table_name}_raw'
+			DESTINATION_TABLE = f'{DATABASE_NAME}{staging}.{table_name}{raw}'
 
 			bq_load_final = BigQueryToBigQueryOperator(
 				task_id=f'final_load_{DATABASE_NAME}_{table_name}_into_bq',
@@ -226,18 +226,14 @@ for DB in DATABASES_INFO:
 			)
 
 		# Create dependencies
-		task_delete_old_export >> task_export_table >> task_wait_operation >> task_generate_schema_object >> bq_load_backup
+		task_delete_old_export >> task_export_table >> task_generate_schema_object >> bq_load_backup
 		if table_name in sanity_check_tables:
 			postgres_check >> sanity_check_bq
 			bq_load_backup >> sanity_check_bq >> bq_load_final
 		if nested:
 			task_delete_old_json_extract >> task_export_table
-			task_wait_operation >> submit_python_split_task >> bq_load_backup
+			task_export_table >> gce_instance_start_task >> submit_python_split_task >> bq_load_backup
+			upload_convertion_script_to_instance_task >> task_upload_schema_to_instance >> submit_python_split_task >> gce_instance_stop_task
+			
 
-		prev_wait_task >> task_export_table
-		prev_wait_task = task_wait_operation
-	
-	task_upload_schema_to_instance >> split_tasks >> gce_instance_stop_task
-
-if wait_tasks: # Check if wait_tasks is not empty
-	wait_tasks[0] >> gce_instance_start_task >> upload_convertion_script_to_instance_task
+gce_instance_start_task >> upload_convertion_script_to_instance_task
