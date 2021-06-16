@@ -232,7 +232,7 @@ for DB in DATABASES_INFO:
 			bq_load_backup >> sanity_check_bq >> bq_load_final
 		if nested:
 			task_delete_old_json_extract >> task_export_table
-			task_export_table >> gce_instance_start_task >> submit_python_split_task >> bq_load_backup
+			task_export_table >> submit_python_split_task >> bq_load_backup
 			upload_convertion_script_to_instance_task >> task_upload_schema_to_instance >> submit_python_split_task >> gce_instance_stop_task
 			
 
