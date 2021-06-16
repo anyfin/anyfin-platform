@@ -15,6 +15,7 @@ from cloudsql_to_bigquery.utils.etl_utils import ETL
 
 PROJECT_NAME = 'anyfin'
 GCS_BUCKET = 'sql-to-bq-etl'
+DATAFLOW_BUCKET = 'etl-dataflow-bucket'
 DATABASE_NAME = 'psd2'
 
 TEMPLATE_FILE = os.path.dirname(os.path.realpath(__file__)) + '/beam_utils/pg_bq_etl.py'
@@ -75,13 +76,13 @@ extract_from_cloudsql = DataFlowPython3Operator(
         "project": PROJECT_NAME,
         "worker_zone": 'europe-west1-b',
         "region": "europe-west1",
-        "staging_location": f'gs://{GCS_BUCKET}/Staging/',
+        "staging_location": f'gs://{DATAFLOW_BUCKET}/Staging/',
         "runner": "DataFlowRunner",
         "experiment": "use_beam_bq_sink",
         "date": '{{ds}}',
         "machine_type": "n1-standard-4",
         "setup_file": SETUP_FILE,
-        "temp_location": f'gs://{GCS_BUCKET}/Temp/',
+        "temp_location": f'gs://{DATAFLOW_BUCKET}/Temp/',
         "database_name": f"{DATABASE_NAME}"
     },
     delegate_to="postgres-bq-etl@anyfin.iam.gserviceaccount.com",
