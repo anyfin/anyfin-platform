@@ -36,6 +36,11 @@ resource "google_bigquery_table" "countries_raw" {
 	},
 	{
 		"mode": "NULLABLE",
+		"name": "updated_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
 		"name": "_ingested_ts",
 		"type": "TIMESTAMP"
 	}
@@ -143,6 +148,11 @@ resource "google_bigquery_table" "currencies_raw" {
 [
 	{
 		"mode": "NULLABLE",
+		"name": "id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
 		"name": "created_at",
 		"type": "TIMESTAMP"
 	},
@@ -153,8 +163,8 @@ resource "google_bigquery_table" "currencies_raw" {
 	},
 	{
 		"mode": "NULLABLE",
-		"name": "id",
-		"type": "STRING"
+		"name": "updated_at",
+		"type": "TIMESTAMP"
 	},
 	{
 		"mode": "NULLABLE",
@@ -230,6 +240,11 @@ resource "google_bigquery_table" "payment_accounts_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "bic",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "changelog",
 		"type": "STRING"
 	},
 	{
@@ -350,6 +365,11 @@ resource "google_bigquery_table" "assessments_raw" {
 	},
 	{
 		"mode": "NULLABLE",
+		"name": "creditor_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
 		"name": "_ingested_ts",
 		"type": "TIMESTAMP"
 	}
@@ -376,12 +396,17 @@ resource "google_bigquery_table" "applications_raw" {
 [
 	{
 		"mode": "NULLABLE",
-		"name": "metadata",
+		"name": "id",
 		"type": "STRING"
 	},
 	{
 		"mode": "NULLABLE",
-		"name": "reject_reason",
+		"name": "created_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "status",
 		"type": "STRING"
 	},
 	{
@@ -391,42 +416,7 @@ resource "google_bigquery_table" "applications_raw" {
 	},
 	{
 		"mode": "NULLABLE",
-		"name": "status",
-		"type": "STRING"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "id",
-		"type": "STRING"
-	},
-	{
-		"mode": "REPEATED",
-		"name": "reject_tags",
-		"type": "STRING"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "source",
-		"type": "STRING"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "currency_code",
-		"type": "STRING"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "old_id",
-		"type": "STRING"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "country_code",
-		"type": "STRING"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "completion_sendout",
+		"name": "reject_reason",
 		"type": "STRING"
 	},
 	{
@@ -436,87 +426,7 @@ resource "google_bigquery_table" "applications_raw" {
 	},
 	{
 		"mode": "NULLABLE",
-		"name": "promo_code",
-		"type": "STRING"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "assigned_to",
-		"type": "STRING"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "offer_id",
-		"type": "STRING"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "assessment_id",
-		"type": "STRING"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "external_statement_id",
-		"type": "STRING"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "updated_at",
-		"type": "TIMESTAMP"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "has_confidential_data",
-		"type": "BOOLEAN"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "customer_kalp_input_id",
-		"type": "STRING"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "is_demo",
-		"type": "BOOLEAN"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "transfer_id",
-		"type": "STRING"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "ddi_session_id",
-		"type": "STRING"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "affiliate",
-		"type": "STRING"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "referrer_id",
-		"type": "INTEGER"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "channel_id",
-		"type": "STRING"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "assigned_at",
-		"type": "TIMESTAMP"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "submission_id",
-		"type": "STRING"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "loan_id",
+		"name": "message_id",
 		"type": "INTEGER"
 	},
 	{
@@ -526,17 +436,137 @@ resource "google_bigquery_table" "applications_raw" {
 	},
 	{
 		"mode": "NULLABLE",
-		"name": "message_id",
+		"name": "external_statement_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "assessment_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "offer_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "loan_id",
 		"type": "INTEGER"
 	},
 	{
 		"mode": "NULLABLE",
-		"name": "created_at",
+		"name": "submission_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "assigned_to",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "assigned_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "channel_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "referrer_id",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "affiliate",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "promo_code",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "ddi_session_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "metadata",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "transfer_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "completion_sendout",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "country_code",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "old_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "currency_code",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "is_demo",
+		"type": "BOOLEAN"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "source",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "customer_kalp_input_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "REPEATED",
+		"name": "reject_tags",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "has_confidential_data",
+		"type": "BOOLEAN"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "updated_at",
 		"type": "TIMESTAMP"
 	},
 	{
 		"mode": "NULLABLE",
 		"name": "customer_provided",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "creditor_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "rejected_by",
 		"type": "STRING"
 	},
 	{
@@ -1091,117 +1121,12 @@ resource "google_bigquery_table" "offers_raw" {
 [
 	{
 		"mode": "NULLABLE",
-		"name": "monthly_fee",
-		"type": "FLOAT"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "interest_rate",
-		"type": "FLOAT"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "updated_at",
-		"type": "TIMESTAMP"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "signature_id",
-		"type": "STRING"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "lender_id",
-		"type": "INTEGER"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "amortization_rate",
-		"type": "FLOAT"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "old_financing_cost",
-		"type": "FLOAT"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "old_monthly_fee",
-		"type": "FLOAT"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "old_interest_rate",
-		"type": "FLOAT"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "effective_apr",
-		"type": "FLOAT"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "monthly_payment",
-		"type": "FLOAT"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "saved_amount",
-		"type": "FLOAT"
-	},
-	{
-		"mode": "NULLABLE",
 		"name": "id",
 		"type": "STRING"
 	},
 	{
 		"mode": "NULLABLE",
-		"name": "financing_cost",
-		"type": "FLOAT"
-	},
-	{
-		"mode": "NULLABLE",
 		"name": "short_id",
-		"type": "STRING"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "pricing_months",
-		"type": "INTEGER"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "months",
-		"type": "INTEGER"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "status",
-		"type": "STRING"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "amount",
-		"type": "FLOAT"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "customer_id",
-		"type": "INTEGER"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "application_id",
-		"type": "STRING"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "signed_at",
-		"type": "TIMESTAMP"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "sign_result",
 		"type": "STRING"
 	},
 	{
@@ -1211,8 +1136,133 @@ resource "google_bigquery_table" "offers_raw" {
 	},
 	{
 		"mode": "NULLABLE",
+		"name": "status",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "sign_result",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "signed_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "application_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
 		"name": "assessment_id",
 		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "customer_id",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "amount",
+		"type": "FLOAT"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "interest_rate",
+		"type": "FLOAT"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "monthly_fee",
+		"type": "FLOAT"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "months",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "pricing_months",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "financing_cost",
+		"type": "FLOAT"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "saved_amount",
+		"type": "FLOAT"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "monthly_payment",
+		"type": "FLOAT"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "effective_apr",
+		"type": "FLOAT"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "old_interest_rate",
+		"type": "FLOAT"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "old_monthly_fee",
+		"type": "FLOAT"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "old_financing_cost",
+		"type": "FLOAT"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "amortization_rate",
+		"type": "FLOAT"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "lender_id",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "signature_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "updated_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "old_effective_apr",
+		"type": "FLOAT"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "creditor_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "original_months",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "original_monthly_payment",
+		"type": "FLOAT"
 	},
 	{
 		"mode": "NULLABLE",
@@ -1242,38 +1292,13 @@ resource "google_bigquery_table" "external_statements_raw" {
 [
 	{
 		"mode": "NULLABLE",
-		"name": "ddi_result",
-		"type": "STRING"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "loan_balance",
-		"type": "FLOAT"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "loan_interest",
-		"type": "FLOAT"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "loan_fee",
-		"type": "FLOAT"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "payment_due_date",
-		"type": "DATE"
-	},
-	{
-		"mode": "NULLABLE",
 		"name": "id",
 		"type": "STRING"
 	},
 	{
 		"mode": "NULLABLE",
-		"name": "payment_amount",
-		"type": "FLOAT"
+		"name": "created_at",
+		"type": "TIMESTAMP"
 	},
 	{
 		"mode": "NULLABLE",
@@ -1282,8 +1307,23 @@ resource "google_bigquery_table" "external_statements_raw" {
 	},
 	{
 		"mode": "NULLABLE",
+		"name": "application_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
 		"name": "image_url",
 		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "engine_result",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "lender_id",
+		"type": "INTEGER"
 	},
 	{
 		"mode": "NULLABLE",
@@ -1312,6 +1352,31 @@ resource "google_bigquery_table" "external_statements_raw" {
 	},
 	{
 		"mode": "NULLABLE",
+		"name": "loan_balance",
+		"type": "FLOAT"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "loan_months",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "loan_interest",
+		"type": "FLOAT"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "loan_fee",
+		"type": "FLOAT"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "payment_due_date",
+		"type": "DATE"
+	},
+	{
+		"mode": "NULLABLE",
 		"name": "payment_reference",
 		"type": "STRING"
 	},
@@ -1322,37 +1387,22 @@ resource "google_bigquery_table" "external_statements_raw" {
 	},
 	{
 		"mode": "NULLABLE",
+		"name": "payment_amount",
+		"type": "FLOAT"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "ddi_result",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
 		"name": "has_reminder_fees",
 		"type": "BOOLEAN"
 	},
 	{
 		"mode": "NULLABLE",
 		"name": "updated_at",
-		"type": "TIMESTAMP"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "loan_months",
-		"type": "INTEGER"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "lender_id",
-		"type": "INTEGER"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "engine_result",
-		"type": "STRING"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "application_id",
-		"type": "STRING"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "created_at",
 		"type": "TIMESTAMP"
 	},
 	{
@@ -1369,6 +1419,36 @@ resource "google_bigquery_table" "external_statements_raw" {
 		"mode": "NULLABLE",
 		"name": "customer_gender",
 		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "customer_city",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "assessment_overrides",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "customer_id",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "creditor_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "loan_credit_limit",
+		"type": "FLOAT"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "amortization_rate",
+		"type": "FLOAT"
 	},
 	{
 		"mode": "NULLABLE",
@@ -1604,6 +1684,16 @@ resource "google_bigquery_table" "payments_raw" {
 	},
 	{
 		"mode": "NULLABLE",
+		"name": "category",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "loan_id",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
 		"name": "_ingested_ts",
 		"type": "TIMESTAMP"
 	}
@@ -1662,6 +1752,16 @@ resource "google_bigquery_table" "lenders_raw" {
 		"mode": "NULLABLE",
 		"name": "display_name",
 		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "brand_attributes",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "duplicate",
+		"type": "BOOLEAN"
 	},
 	{
 		"mode": "NULLABLE",
@@ -1743,6 +1843,26 @@ resource "google_bigquery_table" "customer_kalp_input_raw" {
 		"mode": "NULLABLE",
 		"name": "version",
 		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "updated_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "country_code",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "currency_code",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "source_of_income",
+		"type": "STRING"
 	},
 	{
 		"mode": "NULLABLE",
@@ -2680,6 +2800,11 @@ resource "google_bigquery_table" "promo_codes_raw" {
 		"mode": "NULLABLE",
 		"name": "channel",
 		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "updated_at",
+		"type": "TIMESTAMP"
 	},
 	{
 		"mode": "NULLABLE",
