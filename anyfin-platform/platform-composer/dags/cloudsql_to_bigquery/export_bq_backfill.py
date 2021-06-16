@@ -90,8 +90,8 @@ for DB in DATABASES_INFO:
 		task_upload_schema_to_instance = BashOperator(
 			task_id=f'upload_{DATABASE_NAME}_schema_to_instance',
 			bash_command=f'gcloud compute scp --zone "europe-west1-b" --project "anyfin-platform" \
-						f"{DAG_PATH}/pg_schemas/{DATABASE_NAME}_schemas_state.json" \
-						postgres-bq-backfill:/home/airflow/ ',
+						  "{DAG_PATH}/pg_schemas/{DATABASE_NAME}_schemas_state.json" \
+						  postgres-bq-backfill:/home/airflow/ ',
 			dag=dag
 		)
 	
@@ -233,6 +233,7 @@ for DB in DATABASES_INFO:
 		if nested:
 			task_delete_old_json_extract >> task_export_table
 			task_export_table >> submit_python_split_task >> bq_load_backup
+			task_export_table >> gce_instance_start_task
 			upload_convertion_script_to_instance_task >> task_upload_schema_to_instance >> submit_python_split_task >> gce_instance_stop_task
 			
 
