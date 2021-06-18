@@ -124,7 +124,7 @@ WITH
   ON
     a.ddi_session_id=s.id
   LEFT JOIN `anyfin.main.external_statements` e ON e.id = a.external_statement_id
-  WHERE COALESCE(a.reject_reason, '') != 'duplicate' AND customer_id is not null
+  WHERE COALESCE(a.reject_reason, '') != 'duplicate' AND a.customer_id is not null
   GROUP BY 1,2,3,4,5),
   spent_with_breakdown AS (
   SELECT
