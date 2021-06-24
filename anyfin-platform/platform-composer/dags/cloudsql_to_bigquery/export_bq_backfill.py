@@ -110,7 +110,7 @@ for DB in DATABASES_INFO:
 
 		# Delete old exported table (in the future change to DELETE IF EXISTS)
 		task_delete_old_export = GoogleCloudStorageDeleteOperator(
-			task_id=f'delete_old_{table_name}_export',
+			task_id=f'delete_old_{DATABASE_NAME}_{table_name}_export',
 			bucket_name=GCS_BUCKET,
 			objects=[f'pg_dumps/{DATABASE_NAME}_{table_name}_export.csv'],
 			google_cloud_storage_conn_id='postgres-bq-etl-con',
@@ -119,7 +119,7 @@ for DB in DATABASES_INFO:
 
 		if nested:
 			task_delete_old_json_extract = GoogleCloudStorageDeleteOperator(
-				task_id=f'delete_old_json_{table_name}_extract',
+				task_id=f'delete_old_json_{DATABASE_NAME}_{table_name}_extract',
 				bucket_name=GCS_BUCKET,
 				prefix=f'json_extracts/{DATABASE_NAME}/{table_name}/export-',
 				google_cloud_storage_conn_id='postgres-bq-etl-con',
@@ -129,7 +129,7 @@ for DB in DATABASES_INFO:
 		# Export table
 		columns = ", ".join(content['schema'].keys())
 		task_export_table = BashOperator(
-			task_id=f'export_{table_name}',
+			task_id=f'export_{DATABASE_NAME}_{table_name}',
 			bash_command=f"gcloud sql export csv  {INSTANCE_NAME} --project={PROJECT_NAME} --billing-project={PROJECT_NAME} " # add --log-http  for debugging
 						f"--offload --async gs://{GCS_BUCKET}/pg_dumps/{DATABASE_NAME}_{table_name}_export.csv "
 						f"--database={DATABASE} --query='select {columns}, now() as _ingested_ts from {table_name};'"
