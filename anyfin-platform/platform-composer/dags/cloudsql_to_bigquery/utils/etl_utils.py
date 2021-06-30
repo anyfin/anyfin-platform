@@ -90,13 +90,14 @@ class ETL:
         # Fetches task instance from context and pulls the variable from xcom
         missing_columns = context['ti'].xcom_pull(
             task_ids='extract_tables')['missing_columns']
-
-        # Check if dictionary is empty
-        if not(missing_columns):
-            return True
-        else:
-            raise ValueError(
-                'These columns are either missing or they have changed type: ', str(missing_columns))
+            
+        return True
+        # Check if dictionary is empty - Temporarily deactivating
+        # if not(missing_columns):
+        #     return True
+        # else:
+        #     raise ValueError(
+        #         'These columns are either missing or they have changed type: ', str(missing_columns))
 
 
     def upload_table_names(self, **context):

@@ -101,7 +101,8 @@
         },
         "ts_column": "updated_at",
         "bq_partition_column": "created_at",
-        "backfill_method": "direct_export"
+        "backfill_method": "direct_export",
+        "ignore_sanity_check": true
     },
     "cash_advance_applications": {
         "schema": {
