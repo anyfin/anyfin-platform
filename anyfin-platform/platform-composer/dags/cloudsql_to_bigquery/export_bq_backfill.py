@@ -34,7 +34,7 @@ default_args = {
 	'start_date': datetime(2020, 9, 8),
 	'retries': 2,
 	'retry_delay': timedelta(minutes=10),
-	'email_on_failure': False,
+	'email_on_failure': True,
 	'email_on_retry': False,
 	'email': Variable.get('de_email', 'data-engineering@anyfin.com')
 }
@@ -140,7 +140,7 @@ for DB in DATABASES_INFO:
 						"| grep EXPORT | grep RUNNING | awk '{print $1}'); "
 						"if [ -z '$operation_id' ]; "
 						"then echo ""; "
-						f"else gcloud beta sql operations wait --project {PROJECT_NAME} $operation_id --timeout=3600; "
+						f"else gcloud beta sql operations wait --project {PROJECT_NAME} $operation_id --timeout=7200; "
 						"fi;",
 			pool=f'{DATABASE_NAME}_export_tasks',
 			dag=dag
