@@ -164,21 +164,6 @@ deduplication_success_confirmation = PythonOperator(
     dag=dag
 )
 
-all_tables_updated = BigQueryCheckOperator(
-    task_id='all_tables_updated',
-    sql=f'''
-    SELECT COUNTIF(is_up_to_date)/COUNT(table_id) = 1 all_up_to_date FROM (
-        SELECT
-          table_id,
-          '{{tomorrow_ds}}' <= DATE(TIMESTAMP_MILLIS(last_modified_time)) is_up_to_date
-        FROM
-        `anyfin.{DATABASE_NAME}_staging.__TABLES__`)
-    ''',
-    bigquery_conn_id='bigquery_default',
-    use_legacy_sql=False,
-    dag=dag
-)
-
 task_extract_tables >> task_no_missing_columns
 
 task_extract_tables >> task_upload_result_to_gcs
@@ -190,4 +175,4 @@ first_daily_run >> no_check
 
 task_upload_result_to_gcs >> extract_from_cloudsql >> dedup_tasks
 
-dedup_tasks >> deduplication_success_confirmation >> all_tables_updated
+dedup_tasks >> deduplication_success_confirmation
