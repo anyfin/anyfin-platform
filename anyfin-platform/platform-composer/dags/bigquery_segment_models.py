@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from airflow.contrib.kubernetes import secret
 from airflow import DAG
+from airflow.models import Variable
 from airflow.contrib.operators.kubernetes_pod_operator import KubernetesPodOperator
 from airflow.contrib.operators.bigquery_to_gcs import BigQueryToCloudStorageOperator
 from airflow.operators.sensors import ExternalTaskSensor
