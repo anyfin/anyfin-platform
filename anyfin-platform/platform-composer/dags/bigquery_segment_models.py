@@ -3,8 +3,9 @@ from airflow.contrib.kubernetes import secret
 from airflow import DAG
 from airflow.models import Variable
 from airflow.contrib.operators.kubernetes_pod_operator import KubernetesPodOperator
-from airflow.contrib.operators.bigquery_to_gcs import BigQueryToCloudStorageOperator
+from airflow.providers.google.cloud.operators.bigquery import BigQueryDeleteTableOperator
 from airflow.operators.sensors import ExternalTaskSensor
+from airflow.operators.bash_operator import BashOperator
 
 DBT_IMAGE = "eu.gcr.io/anyfin-platform/dbt-image:latest"
 
@@ -48,3 +49,28 @@ run_dbt = KubernetesPodOperator(
     dag=dag,
     secrets=[secret_volume]
 )
+
+delete_materialized_view = BigQueryDeleteTableOperator(
+    task_id="delete_materialized_view",
+    deletion_dataset_table=f"anyfin.pfm.all_widgets",
+    bigquery_conn_id='bigquery_default',
+    dag=dag
+)
+
+create_materialized_view = BashOperator(
+        task_id='create_materialized_view',
+        # Executing 'bq' command requires Google Cloud SDK which comes
+        # preinstalled in Cloud Composer.
+        bash_command="bq query --use_legacy_sql=false "
+                    "'CREATE MATERIALIZED VIEW  anyfin.pfm.all_widgets AS SELECT  "
+                        "widget_id, "
+                        "user_id, "
+                        "widget_type, "
+                        "MIN(IF(action=\"CREATED\", timestamp, null)) as created_at, "
+                        "MAX(IF(action=\"DELETED\", timestamp, null)) as deleted_at "
+                    "FROM `anyfin.tracking.widget_log` "
+                    "GROUP BY 1, 2, 3'",
+        dag=dag
+)
+
+run_dbt >> delete_materialized_view >> create_materialized_view
