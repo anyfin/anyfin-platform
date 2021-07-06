@@ -42,7 +42,8 @@ run_dbt = KubernetesPodOperator(
     task_id="run-models",
     name="run-models",
     cmds=["/bin/bash", "-c"],
-    arguments=["gsutil -m rsync -r gs://anyfin-data-model/ /dbt/ && dbt run --models tag:segment"],
+                                    # Running segment models in full-refresh for now, should be every week instead 
+    arguments=["gsutil -m rsync -r gs://anyfin-data-model/ /dbt/ && dbt run --full-refresh --models tag:segment"],
     image_pull_policy='Always',
     is_delete_operator_pod=True,
     get_logs=True,
