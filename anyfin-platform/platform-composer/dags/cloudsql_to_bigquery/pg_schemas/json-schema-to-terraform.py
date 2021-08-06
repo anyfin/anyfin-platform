@@ -16,7 +16,7 @@ def convert_type_to_bq(t):
 		return 'DATE'
 
 	elif t == 'numeric':
-		return 'FLOAT'
+		return 'NUMERIC'
 
 	elif t == 'integer':
 		return 'INTEGER'

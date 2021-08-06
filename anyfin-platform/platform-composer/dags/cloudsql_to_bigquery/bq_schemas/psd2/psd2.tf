@@ -67,7 +67,7 @@ resource "google_bigquery_table" "accounts_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "balance",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",

@@ -301,12 +301,12 @@ resource "google_bigquery_table" "assessments_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "interest_rate",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
 		"name": "monthly_fee",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
@@ -336,17 +336,17 @@ resource "google_bigquery_table" "assessments_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "amortization_rate",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
 		"name": "external_score",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
 		"name": "score",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
@@ -603,7 +603,7 @@ resource "google_bigquery_table" "loans_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "monthly_fee",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
@@ -648,7 +648,7 @@ resource "google_bigquery_table" "loans_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "balance",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
@@ -658,7 +658,7 @@ resource "google_bigquery_table" "loans_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "interest_rate",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
@@ -708,12 +708,12 @@ resource "google_bigquery_table" "loans_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "original_amount",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
 		"name": "amortization_rate",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
@@ -980,7 +980,7 @@ resource "google_bigquery_table" "cycles_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "balance",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
@@ -1167,17 +1167,17 @@ resource "google_bigquery_table" "offers_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "amount",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
 		"name": "interest_rate",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
 		"name": "monthly_fee",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
@@ -1192,42 +1192,42 @@ resource "google_bigquery_table" "offers_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "financing_cost",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
 		"name": "saved_amount",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
 		"name": "monthly_payment",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
 		"name": "effective_apr",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
 		"name": "old_interest_rate",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
 		"name": "old_monthly_fee",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
 		"name": "old_financing_cost",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
 		"name": "amortization_rate",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
@@ -1247,7 +1247,7 @@ resource "google_bigquery_table" "offers_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "old_effective_apr",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
@@ -1262,7 +1262,7 @@ resource "google_bigquery_table" "offers_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "original_monthly_payment",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
@@ -1353,7 +1353,7 @@ resource "google_bigquery_table" "external_statements_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "loan_balance",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
@@ -1363,12 +1363,12 @@ resource "google_bigquery_table" "external_statements_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "loan_interest",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
 		"name": "loan_fee",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
@@ -1388,7 +1388,7 @@ resource "google_bigquery_table" "external_statements_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "payment_amount",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
@@ -1443,12 +1443,12 @@ resource "google_bigquery_table" "external_statements_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "loan_credit_limit",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
 		"name": "amortization_rate",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
@@ -1524,7 +1524,7 @@ resource "google_bigquery_table" "transactions_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "amount",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
@@ -1600,7 +1600,7 @@ resource "google_bigquery_table" "payments_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "amount",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
@@ -2425,47 +2425,47 @@ resource "google_bigquery_table" "statements_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "prev_balance",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
 		"name": "sum_payments",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
 		"name": "added_principal",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
 		"name": "sum_interest",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
 		"name": "sum_fees",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
 		"name": "sum_penalties",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
 		"name": "next_balance",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
 		"name": "min_payment",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
 		"name": "min_amortization",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
@@ -2480,7 +2480,7 @@ resource "google_bigquery_table" "statements_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "sum_discounts",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
@@ -2515,7 +2515,7 @@ resource "google_bigquery_table" "statements_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "payment_plan_pull_amount",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
@@ -2667,7 +2667,7 @@ resource "google_bigquery_table" "customer_discounts_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "amount",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
@@ -2764,7 +2764,7 @@ resource "google_bigquery_table" "promo_codes_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "amount",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",
@@ -2875,7 +2875,7 @@ resource "google_bigquery_table" "autogiro_payment_plans_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "amount",
-		"type": "FLOAT"
+		"type": "NUMERIC"
 	},
 	{
 		"mode": "NULLABLE",

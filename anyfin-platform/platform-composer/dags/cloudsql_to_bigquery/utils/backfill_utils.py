@@ -44,7 +44,7 @@ class BACKFILL:
             return 'DATE'
 
         elif t == 'numeric':
-            return 'FLOAT'
+            return 'NUMERIC'
 
         elif t == 'integer':
             return 'INTEGER'
