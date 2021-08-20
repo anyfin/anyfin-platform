@@ -179,9 +179,12 @@ for DB in DATABASES_INFO:
 
 		SCHEMA_OBJECT = f'pg_dumps/{DATABASE_NAME}_{table_name}_schema.json'
 
-		staging = '_staging' if table_name in sanity_check_tables or table_name in daily_tables else ''
-		raw = '_raw' if table_name in daily_tables else ''
-		backup = '_backup' if table_name in sanity_check_tables else ''
+		daily_load = True if table_name in daily_tables else False
+		sanity_check = True if table_name in sanity_check_tables else False
+
+		staging = '_staging' if daily_load or sanity_check else ''
+		raw = '_raw' if daily_load else ''
+		backup = '_backup' if sanity_check else ''
 
 		DESTINATION_TABLE = f'{DATABASE_NAME}{staging}.{table_name}{raw}{backup}'
 
@@ -204,7 +207,7 @@ for DB in DATABASES_INFO:
 			dag=dag
 		)
 
-		if table_name in sanity_check_tables:
+		if sanity_check:
 			sanity_check_bq = PythonOperator(
 				task_id=f"check_{DATABASE_NAME}_{table_name}_against_postgres",
 				python_callable=backfill.fetch_bigquery_data,
@@ -212,14 +215,16 @@ for DB in DATABASES_INFO:
 				provide_context=True,
 				dag=dag
 			)
-
-			DESTINATION_TABLE = f'{DATABASE_NAME}{staging}.{table_name}{raw}'
+			if daily_load: # If daily load - ETL dedup will transfer from staging to prod
+				DESTINATION_TABLE = f'{DATABASE_NAME}{staging}.{table_name}{raw}'
+			else:
+				DESTINATION_TABLE = f'{DATABASE_NAME}.{table_name}' # Transfer directly to prod since there is no dedup here
 
 			bq_load_final = BigQueryToBigQueryOperator(
 				task_id=f'final_load_{DATABASE_NAME}_{table_name}_into_bq',
 				create_disposition='CREATE_NEVER',
 				write_disposition='WRITE_TRUNCATE',
-				source_project_dataset_tables=f'{DESTINATION_TABLE}_backup',
+				source_project_dataset_tables=f'{DATABASE_NAME}{staging}.{table_name}{raw}{backup}',
 				destination_project_dataset_table=DESTINATION_TABLE,
 				bigquery_conn_id='postgres-bq-etl-con',
 				dag=dag

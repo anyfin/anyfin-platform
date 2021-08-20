@@ -625,6 +625,27 @@
     "bq_partition_column": "created_at",
     "backfill_method": "beam_backfill"
   },
+  "assessment_reviews": {
+    "schema": {
+      "id":"uuid", 
+      "created_at":"timestamp with time zone", 
+      "assessment_id":"text", 
+      "status":"text", 
+      "reviewed_at":"timestamp with time zone", 
+      "reviewed_by":"text", 
+      "comment":"text", 
+      "interest_rate":"numeric", 
+      "monthly_fee":"numeric", 
+      "amortization_rate":"numeric", 
+      "acknowledged_warnings":"jsonb", 
+      "sendout_payload":"jsonb"
+    },
+    "ts_column": "created_at",
+    "bq_partition_column": "created_at",
+    "backfill_method": "nested_export",
+    "chunksize": "5000",
+    "ignore_daily": true
+  },
   "customer_events": {
     "schema": {
       "id":"uuid", 

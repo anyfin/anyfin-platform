@@ -195,7 +195,7 @@ for table in ETL.get_tables():
         )
         dedup_tasks.append(dedup)
 
-    else:
+    elif not ETL.get_tables().get(table).get('ignore_daily'):   # If ignore daily is true we dont want to deduplicate
         dedup = BigQueryOperator(
             task_id='deduplicate_' + table,
             sql=f"""
