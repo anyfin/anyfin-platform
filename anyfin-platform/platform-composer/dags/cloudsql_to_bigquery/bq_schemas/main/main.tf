@@ -3090,3 +3090,69 @@ EOF
 }
 
 
+resource "google_bigquery_table" "notes_raw" {
+	dataset_id = "main_staging"
+	table_id   = "notes_raw"
+	project    = "anyfin"
+
+	labels = {
+		env = "default"
+	}
+
+	time_partitioning { 
+    	type = "DAY" 
+		field = "created_at" 
+	}
+
+	schema = <<EOF
+[
+	{
+		"mode": "NULLABLE",
+		"name": "id",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "created_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "created_by",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "content",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "customer_id",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "application_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "files",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "type",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "_ingested_ts",
+		"type": "TIMESTAMP"
+	}
+]
+EOF
+}
+
+

@@ -657,5 +657,20 @@
     "ts_column" : "created_at",
     "bq_partition_column": "created_at",
     "backfill_method": "beam_backfill"
+  },
+  "notes": {
+    "schema": {
+      "id":"integer", 
+      "created_at":"timestamp with time zone", 
+      "created_by":"character varying", 
+      "content":"text", 
+      "customer_id":"integer", 
+      "application_id":"uuid", 
+      "files":"jsonb", 
+      "type":"text"
+    },
+    "ts_column" : "created_at",
+    "bq_partition_column": "created_at",
+    "backfill_method": "beam_backfill"
   }
 }
