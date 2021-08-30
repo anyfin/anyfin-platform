@@ -140,7 +140,7 @@ for DB in DATABASES_INFO:
 						"| grep EXPORT | grep RUNNING | awk '{print $1}'); "
 						"if [ -z '$operation_id' ]; "
 						"then echo ""; "
-						f"else gcloud beta sql operations wait --project {PROJECT_NAME} $operation_id --timeout=7200; "
+						f"else gcloud beta sql operations wait --project {PROJECT_NAME} $operation_id --timeout=14400; "
 						"fi;",
 			pool=f'{DATABASE_NAME}_export_tasks',
 			dag=dag
