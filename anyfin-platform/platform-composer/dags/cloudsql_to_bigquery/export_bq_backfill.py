@@ -200,7 +200,7 @@ for DB in DATABASES_INFO:
 			write_disposition='WRITE_TRUNCATE',
 			allow_jagged_rows=True,
 			ignore_unknown_values=True,
-			max_bad_records=5,
+			max_bad_records=10,
 			destination_project_dataset_table=DESTINATION_TABLE,
 			bigquery_conn_id='postgres-bq-etl-con',
 			google_cloud_storage_conn_id='postgres-bq-etl-con',
