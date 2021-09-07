@@ -636,15 +636,11 @@
       "comment":"text", 
       "interest_rate":"numeric", 
       "monthly_fee":"numeric", 
-      "amortization_rate":"numeric", 
-      "acknowledged_warnings":"jsonb", 
-      "sendout_payload":"jsonb"
+      "amortization_rate":"numeric"
     },
     "ts_column": "created_at",
     "bq_partition_column": "created_at",
-    "backfill_method": "nested_export",
-    "chunksize": "5000",
-    "ignore_daily": true
+    "backfill_method": "direct_export"
   },
   "customer_events": {
     "schema": {

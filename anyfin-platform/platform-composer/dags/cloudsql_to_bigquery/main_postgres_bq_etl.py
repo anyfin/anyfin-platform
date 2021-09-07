@@ -210,7 +210,7 @@ for table in ETL.get_tables():
                 from temp join 
                     anyfin.{DATABASE_NAME}_staging.{table}_raw t on temp.id= t.id and temp.max_ingested_ts=t._ingested_ts""",
             destination_dataset_table=f"anyfin.{DATABASE_NAME}.{table}",
-            cluster_fields=['id'],
+            #cluster_fields=['id'],
             time_partitioning={'field': 'created_at'},
             use_legacy_sql=False,
             write_disposition='WRITE_TRUNCATE',

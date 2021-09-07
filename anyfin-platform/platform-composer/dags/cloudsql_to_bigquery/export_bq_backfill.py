@@ -199,6 +199,7 @@ for DB in DATABASES_INFO:
 			create_disposition='CREATE_NEVER',
 			write_disposition='WRITE_TRUNCATE',
 			allow_jagged_rows=True,
+			allow_quoted_newlines=True,
 			ignore_unknown_values=True,
 			max_bad_records=10,
 			destination_project_dataset_table=DESTINATION_TABLE,
