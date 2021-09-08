@@ -196,6 +196,7 @@ for table in ETL.get_tables():
         dedup_tasks.append(dedup)
 
     elif not ETL.get_tables().get(table).get('ignore_daily'):   # If ignore daily is true we dont want to deduplicate
+        cluster_field = ['id'] if 'id' in ETL.get_tables().get(table).get('schema').keys() else []
         dedup = BigQueryOperator(
             task_id='deduplicate_' + table,
             sql=f"""
@@ -210,7 +211,7 @@ for table in ETL.get_tables():
                 from temp join 
                     anyfin.{DATABASE_NAME}_staging.{table}_raw t on temp.id= t.id and temp.max_ingested_ts=t._ingested_ts""",
             destination_dataset_table=f"anyfin.{DATABASE_NAME}.{table}",
-            #cluster_fields=['id'],
+            cluster_fields=cluster_field,
             time_partitioning={'field': 'created_at'},
             use_legacy_sql=False,
             write_disposition='WRITE_TRUNCATE',
