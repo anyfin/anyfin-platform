@@ -668,5 +668,30 @@
     "ts_column" : "created_at",
     "bq_partition_column": "created_at",
     "backfill_method": "beam_backfill"
+  },
+  "customer_consents": {
+    "schema": {
+      "id":"integer", 
+      "created_at":"timestamp with time zone", 
+      "customer_id":"integer", 
+      "key":"character varying", 
+      "payload":"jsonb", 
+      "signature_id":"uuid", 
+      "agreement_id":"integer", 
+      "is_active":"boolean"
+    },
+    "ts_column": "created_at",
+    "bq_partition_column": "created_at",
+    "backfill_method": "beam_backfill"
+  },
+  "customer_features": {
+    "schema": {
+      "id":"uuid", 
+      "customer_id":"integer", 
+      "created_at":"timestamp with time zone", 
+      "updated_at":"timestamp with time zone", 
+      "key":"text", "value":"text"
+    },
+    "bq_partition_column": "created_at"
   }
 }
