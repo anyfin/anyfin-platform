@@ -30,7 +30,7 @@ dag = DAG(
 
 secret_volume = secret.Secret(
     'volume',
-    '/dbt/credentials/',  
+    '/dbt/dbt/credentials/',  
     'dbt-service-account', 
     'service-account.json'
 )

@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from airflow.contrib.kubernetes import secret
 from airflow import DAG
+from airflow.models import Variable
 from airflow.contrib.operators.kubernetes_pod_operator import KubernetesPodOperator
 from airflow.contrib.operators.bigquery_to_gcs import BigQueryToCloudStorageOperator
 from airflow.operators.sensors import ExternalTaskSensor
@@ -11,7 +12,8 @@ default_args = {
     'owner': 'ds-anyfin',
     'depends_on_past': False, 
     'retries': 0,
-    'email_on_failure': False,
+    'email_on_failure': True,
+    'email': Variable.get('de_email', 'data-engineering@anyfin.com'),
     'start_date': datetime(2020, 12, 14),
 }
 
@@ -25,7 +27,7 @@ dag = DAG(
 
 secret_volume = secret.Secret(
     'volume',
-    '/dbt/credentials/',  
+    '/dbt/dbt/credentials/',  
     'dbt-service-account', 
     'service-account.json'
 )
