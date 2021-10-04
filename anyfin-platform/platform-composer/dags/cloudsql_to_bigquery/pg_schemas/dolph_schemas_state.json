@@ -157,5 +157,20 @@
             "cash_advance_id": "integer"
         },
         "bq_partition_column": "created_at"
+    },
+    "activities": {
+        "schema": {
+            "id":"integer", 
+            "user_id":"integer", 
+            "type":"character varying", 
+            "status":"character varying", 
+            "metadata":"jsonb", 
+            "created_at":"timestamp with time zone", 
+            "updated_at":"timestamp with time zone", 
+            "ref_id":"character varying"
+        },
+        "ts_column": "updated_at",
+        "bq_partition_column": "created_at",
+        "backfill_method": "beam_backfill"
     }
 }

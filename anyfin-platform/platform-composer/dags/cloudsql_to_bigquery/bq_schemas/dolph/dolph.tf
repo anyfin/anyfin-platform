@@ -747,3 +747,69 @@ EOF
 }
 
 
+resource "google_bigquery_table" "activities_raw" {
+	dataset_id = "dolph_staging"
+	table_id   = "activities_raw"
+	project    = "anyfin"
+
+	labels = {
+		env = "default"
+	}
+
+	time_partitioning { 
+    	type = "DAY" 
+		field = "created_at" 
+	}
+
+	schema = <<EOF
+[
+	{
+		"mode": "NULLABLE",
+		"name": "id",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "user_id",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "type",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "status",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "metadata",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "created_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "updated_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "ref_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "_ingested_ts",
+		"type": "TIMESTAMP"
+	}
+]
+EOF
+}
+
+
