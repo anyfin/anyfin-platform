@@ -1811,7 +1811,7 @@ resource "google_bigquery_table" "customer_kalp_input_raw" {
 	},
 	{
 		"mode": "NULLABLE",
-		"name": "income_gross",
+		"name": "income",
 		"type": "INTEGER"
 	},
 	{
@@ -1862,6 +1862,11 @@ resource "google_bigquery_table" "customer_kalp_input_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "source_of_income",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "income_type",
 		"type": "STRING"
 	},
 	{

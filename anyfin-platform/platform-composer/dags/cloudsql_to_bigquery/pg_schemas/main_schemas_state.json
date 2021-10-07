@@ -378,7 +378,7 @@
       "customer_id":"integer",
       "submission_id":"uuid",
       "number_of_kids":"integer",
-      "income_gross":"integer",
+      "income":"integer",
       "has_spouse":"boolean",
       "accommodation_arrangement":"text",
       "created_at":"timestamp with time zone",
@@ -388,7 +388,9 @@
       "updated_at":"timestamp with time zone",
       "country_code":"character varying",
       "currency_code":"character varying",
-      "source_of_income":"text"
+      "source_of_income":"text",
+      "income_type":"text"
+
     },
     "ts_column" : "created_at",
     "bq_partition_column": "created_at",
