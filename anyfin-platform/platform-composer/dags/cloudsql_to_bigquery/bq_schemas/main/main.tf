@@ -3273,3 +3273,124 @@ EOF
 }
 
 
+resource "google_bigquery_table" "autogiro_payments_raw" {
+	dataset_id = "main_staging"
+	table_id   = "autogiro_payments_raw"
+	project    = "anyfin"
+
+	labels = {
+		env = "default"
+	}
+
+	time_partitioning { 
+    	type = "DAY" 
+		field = "created_at" 
+	}
+
+	schema = <<EOF
+[
+	{
+		"mode": "NULLABLE",
+		"name": "id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "created_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "updated_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "customer_id",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "status",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "authorization_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "amount",
+		"type": "NUMERIC"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "reference",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "status_log",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "s3_key",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "pull_date",
+		"type": "DATE"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "statement_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "payment_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "success_source",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "payment_date",
+		"type": "DATE"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "creditor_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "currency_code",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "autogiro_payment_plan_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "product",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "_ingested_ts",
+		"type": "TIMESTAMP"
+	}
+]
+EOF
+}
+
+

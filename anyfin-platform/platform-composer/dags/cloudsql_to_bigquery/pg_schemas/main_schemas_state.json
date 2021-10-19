@@ -390,7 +390,6 @@
       "currency_code":"character varying",
       "source_of_income":"text",
       "income_type":"text"
-
     },
     "ts_column" : "created_at",
     "bq_partition_column": "created_at",
@@ -695,5 +694,31 @@
       "key":"text", "value":"text"
     },
     "bq_partition_column": "created_at"
+  },
+  "autogiro_payments": {
+    "schema": {
+      "id":"uuid", 
+      "created_at":"timestamp with time zone", 
+      "updated_at":"timestamp with time zone", 
+      "customer_id":"integer", 
+      "status":"text", 
+      "authorization_id":"uuid", 
+      "amount":"numeric", 
+      "reference":"character varying", 
+      "status_log":"jsonb", 
+      "s3_key":"character varying", 
+      "pull_date":"date", 
+      "statement_id":"uuid", 
+      "payment_id":"uuid", 
+      "success_source":"character varying", 
+      "payment_date":"date", 
+      "creditor_id":"uuid", 
+      "currency_code":"character varying", 
+      "autogiro_payment_plan_id":"uuid", 
+      "product":"character varying"
+    },
+    "ts_column" : "updated_at",
+    "bq_partition_column": "created_at",
+    "backfill_method": "beam_backfill"  
   }
 }
