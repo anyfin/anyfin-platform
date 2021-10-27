@@ -180,7 +180,11 @@ for table in ETL.get_tables():
                     json_extract(main_policy,  '$.data.CustomerPolicy' )  as `customer_policy`,
                     json_extract(main_policy,  '$.data.CustomerMatcherSchufaId' )  as `customer_matcher_schufa_id`,
                     json_extract(main_policy,  '$.data.SCLookup' )  as `sc_lookup`,
-                    json_extract(main_policy,  '$.data.CRIFBuergelLookup' )  as `crif_buergel_lookup`
+                    json_extract(main_policy,  '$.data.CRIFBuergelLookup' )  as `crif_buergel_lookup`,
+                    json_extract_scalar(main_policy,  '$.data.InternalLookup.exposure' )  as `exposure`,
+                    json_extract_scalar(main_policy,  '$.data.request.loanBalance' )  as `loan_balance`,
+                    cast(json_extract_scalar(main_policy,  '$.data.Customer.returning' ) as bool)  as `is_returning`,
+                    json_extract_string_array(main_policy,  '$.data.response.reasons' )  as `response_reasons`,
                     from temp join 
                     anyfin.{DATABASE_NAME}_staging.{table}_raw t on temp.id= t.id and temp.max_ingested_ts=t._ingested_ts
             """,
