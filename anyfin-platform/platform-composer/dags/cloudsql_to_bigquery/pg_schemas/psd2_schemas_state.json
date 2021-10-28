@@ -11,10 +11,8 @@
         "type": "character varying", 
         "name": "character varying", 
         "currency_code": "character varying", 
-        "balance": "numeric", 
         "last_synced_at": "date", 
-        "backfilled_until": "date", 
-        "raw_data": "jsonb"
+        "backfilled_until": "date"
       },
       "bq_partition_column": "created_at",
       "backfill_method": null
