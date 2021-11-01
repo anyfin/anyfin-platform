@@ -805,6 +805,11 @@ resource "google_bigquery_table" "activities_raw" {
 	},
 	{
 		"mode": "NULLABLE",
+		"name": "provider_name",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
 		"name": "_ingested_ts",
 		"type": "TIMESTAMP"
 	}
