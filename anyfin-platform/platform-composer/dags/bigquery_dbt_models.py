@@ -4,6 +4,7 @@ from airflow import DAG
 from airflow.models import Variable
 from airflow.contrib.operators.kubernetes_pod_operator import KubernetesPodOperator
 from airflow.contrib.operators.bigquery_to_gcs import BigQueryToCloudStorageOperator
+from airflow.contrib.operators.bigquery_to_bigquery import BigQueryToBigQueryOperator
 from airflow.operators.sensors import ExternalTaskSensor
 
 DBT_IMAGE = "eu.gcr.io/anyfin-platform/dbt-image:latest"
@@ -82,13 +83,23 @@ current_date = f"{now.year}{now.month}{now.day}"
 
 task_export_latest_user_facts_partition_to_gcs = BigQueryToCloudStorageOperator(
     task_id="export_latest_user_facts_partition_to_gcs",
-    source_project_dataset_table="anyfin.product.intercom_sync",
+    source_project_dataset_table="anyfin.product.intercom_diff_sync",
     destination_cloud_storage_uris=[f"gs://anyfin-customer-facts/current-partition.json"],
     export_format='NEWLINE_DELIMITED_JSON',
     bigquery_conn_id="bigquery_default",
     dag=dag
 )
 
+task_save_intercom_previous_sync = BigQueryToBigQueryOperator(
+    task_id=f'save_intercom_previous_sync',
+    create_disposition='CREATE_IF_NEEDED',
+    write_disposition='WRITE_TRUNCATE',
+    source_project_dataset_tables=f'anyfin.product.intercom_sync',
+    destination_project_dataset_table='anyfin.product.intercom_previous_sync',
+    bigquery_conn_id='postgres-bq-etl-con',
+    dag=dag
+)
+
 
 [task_sensor_main_bq_etl, task_sensor_dolph_bq_etl] >> run_dbt
-run_dbt >> task_export_latest_user_facts_partition_to_gcs
+task_save_intercom_previous_sync >> run_dbt >> task_export_latest_user_facts_partition_to_gcs
