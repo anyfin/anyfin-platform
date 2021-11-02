@@ -22,7 +22,7 @@ default_args = {
 dag = DAG(
     dag_id="bigquery_dbt_models", 
     default_args=default_args, 
-    schedule_interval="0 3,10,12 * * *",  # Run this DAG three times per day at the specified hours
+    schedule_interval="0 4,10,12 * * *",  # Run this DAG three times per day at the specified hours
     max_active_runs=1,
     catchup=False
 )

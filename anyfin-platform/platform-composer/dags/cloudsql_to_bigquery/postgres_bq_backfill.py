@@ -40,7 +40,7 @@ dag = DAG(
 	'postgres_bq_backfill',
 	default_args=default_args,
 	catchup=False,
-	schedule_interval='0 2 * * SUN',
+	schedule_interval='0 0 * * SUN',
 	max_active_runs=1,
 	concurrency=3
 )

@@ -38,7 +38,7 @@ dag = DAG(
     f'{DATABASE_NAME}_postgres_bq_etl',
     default_args=default_args,
     catchup=False,
-    schedule_interval='0 2,9,11 * * *',
+    schedule_interval='0 3,9,11 * * *',
     max_active_runs=1,
     concurrency=3
 )

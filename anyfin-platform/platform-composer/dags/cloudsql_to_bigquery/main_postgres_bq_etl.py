@@ -42,7 +42,7 @@ dag = DAG(
     catchup=False,
     schedule_interval='0 2,9,11 * * *',
     max_active_runs=1,
-    concurrency=3
+    concurrency=10
 )
 
 task_extract_tables = PythonOperator(
