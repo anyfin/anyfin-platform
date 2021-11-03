@@ -44,7 +44,7 @@ default_args = {
     'email_on_retry': False
 }
 
-dag = DAG('marketing_costs_snapchat', 
+dag = DAG('marketing_cost_snapchat', 
     default_args = default_args, 
     catchup = True,
     schedule_interval='0 03 * * *',
@@ -89,7 +89,8 @@ def parse_request(ds, **kwargs):
             ad_id = ad.get('id')
             #Get midnight in Europe/Stockholm timezone to use in api call                
             start_time = kwargs['execution_date'].astimezone(pytz.timezone("Europe/Stockholm")).replace(hour=0)
-            end_time =  (start_time + timedelta(days=1)).replace(hour=0)
+            end_time = (kwargs['execution_date'] + timedelta(days=1)).astimezone(pytz.timezone("Europe/Stockholm")).replace(hour=0)
+            
             payload = {
                 'granularity': 'DAY',
                 'fields': 'impressions,swipes,view_time_millis,screen_time_millis,spend,video_views,android_installs,ios_installs,swipe_up_percent,uniques',
