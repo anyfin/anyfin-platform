@@ -1,0 +1,45 @@
+{
+    "sendouts": {
+      "schema": {
+        "id":"integer", 
+        "public_id":"uuid", 
+        "created_at":"timestamp with time zone", 
+        "updated_at":"timestamp with time zone", 
+        "status":"text", 
+        "type":"text", 
+        "recipient":"text", 
+        "content":"jsonb", 
+        "options":"jsonb", 
+        "scheduled_at":"timestamp with time zone", 
+        "sent_at":"timestamp with time zone", 
+        "delivered_at":"timestamp with time zone", 
+        "failed_at":"timestamp with time zone", 
+        "retry_count":"integer", 
+        "retry_at":"timestamp with time zone", 
+        "key":"text", 
+        "channel_id":"uuid", 
+        "customer_id":"integer", 
+        "external_id":"character varying", 
+        "request_id":"uuid", 
+        "namespace":"text"
+      },
+      "ts_column": "updated_at",
+      "bq_partition_column": "created_at",
+      "backfill_method": "direct_export",
+      "ignore_sanity_check": true
+    },
+    "sendout_settings": {
+      "schema": {
+        "id":"integer", 
+        "created_at":"timestamp with time zone", 
+        "updated_at":"timestamp with time zone", 
+        "customer_id":"integer", 
+        "type":"text", 
+        "value":"text", 
+        "status":"text"
+      },
+      "bq_partition_column": "created_at",
+      "ts_column": "updated_at",
+      "backfill_method": "beam_backfill"
+    }
+  }

@@ -35,6 +35,7 @@
             table_name,
             string_agg(
                 '"' || column_name::text ||  '":"' || data_type::text || '"', ', '
+                
                 ) as columns
         FROM  information_schema.columns
         WHERE table_name = [table name string]

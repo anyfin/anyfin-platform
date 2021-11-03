@@ -19,8 +19,8 @@ from cloudsql_to_bigquery.utils.backfill_utils import BACKFILL
 PROJECT_NAME = 'anyfin'
 GCS_BUCKET = 'sql-to-bq-etl'
 DATAFLOW_BUCKET = 'etl-dataflow-bucket'
-DATABASE_NAMES = ['main', 'dolph', 'pfm', 'psd2', 'ddi']
-INSTANCE_NAMES = ['anyfin-main-replica', 'anyfin-dolph-read-replica', 'pfm-replica', 'psd2-replica', 'anyfin-ddi-service-replica']
+DATABASE_NAMES = ['main', 'dolph', 'pfm', 'psd2', 'ddi', 'sendout']
+INSTANCE_NAMES = ['anyfin-main-replica', 'anyfin-dolph-read-replica', 'pfm-replica', 'psd2-replica', 'anyfin-ddi-service-replica', 'sendout-replica']
 TEMPLATE_FILE = os.path.dirname(os.path.realpath(__file__)) + '/beam_utils/pg_bq_etl.py'
 SETUP_FILE = os.path.dirname(os.path.realpath(__file__)) + '/beam_utils/setup.py'
 DAG_PATH = os.path.dirname(os.path.realpath(__file__))
