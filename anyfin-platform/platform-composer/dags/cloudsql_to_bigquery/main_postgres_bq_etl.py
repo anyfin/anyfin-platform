@@ -185,6 +185,10 @@ for table in ETL.get_tables():
                     CAST(json_extract_scalar(main_policy,  '$.data.request.loanBalance' ) as NUMERIC) as `loan_balance`,
                     CAST(json_extract_scalar(main_policy,  '$.data.Customer.returning' ) as bool)  as `is_returning`,
                     json_extract_string_array(main_policy,  '$.data.response.reasons' )  as `response_reasons`,
+                    json_extract(main_policy,'$.request.income' )  as `customer_provided_income`,
+                    json_extract_scalar(main_policy,'$.pricing.new.monthlyPayment')  as `new_monthly_payment`,
+                    json_extract_scalar(main_policy,'$.pricing.old.monthlyPayment')  as `old_monthly_payment`,
+                    json_extract_scalar(main_policy,'$.response.scorecard_version') as scorecard_version,
                     from temp join 
                     anyfin.{DATABASE_NAME}_staging.{table}_raw t on temp.id= t.id and temp.max_ingested_ts=t._ingested_ts
             """,
