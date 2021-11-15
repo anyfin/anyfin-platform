@@ -32,7 +32,7 @@ task_sensor_main_bq_etl = ExternalTaskSensor (
     task_id='check_if_main_bq_etl_dedup_succeeded',
     external_dag_id='main_postgres_bq_etl',
     external_task_id='deduplication_success_confirmation',
-    execution_delta=timedelta(hours=1),
+    execution_delta=timedelta(hours=2),
     allowed_states=['success'],
     timeout=1800,                      # 1800 seconds = 30min of sensoring before retry is triggered
     retry_delay=timedelta(minutes=40), # Wait 40min before sensoring again
