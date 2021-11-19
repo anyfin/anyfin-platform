@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from airflow.contrib.kubernetes import secret
 from airflow import DAG
 from airflow.models import Variable
@@ -6,6 +6,7 @@ from airflow.contrib.operators.kubernetes_pod_operator import KubernetesPodOpera
 from airflow.contrib.operators.bigquery_to_gcs import BigQueryToCloudStorageOperator
 from airflow.contrib.operators.bigquery_to_bigquery import BigQueryToBigQueryOperator
 from airflow.operators.sensors import ExternalTaskSensor
+import logging
 
 DBT_IMAGE = "eu.gcr.io/anyfin-platform/dbt-image:latest"
 
@@ -28,11 +29,21 @@ dag = DAG(
 )
 
 
-task_sensor_main_bq_etl = ExternalTaskSensor (
+def get_execution_date(execution_date, **kwargs):
+    
+    if execution_date.strftime("%H") == '04':
+        logging.info('Timedelta 2h') # This log stays for debugging purposes
+        return execution_date - timedelta(hours=2)
+    else:
+        logging.info('Timedelta 1h') # This log stays for debugging purposes
+        return execution_date - timedelta(hours=1)
+
+
+task_sensor_main_bq_etl =  ExternalTaskSensor (
     task_id='check_if_main_bq_etl_dedup_succeeded',
     external_dag_id='main_postgres_bq_etl',
     external_task_id='deduplication_success_confirmation',
-    execution_delta=timedelta(hours=2),
+    execution_date_fn=get_execution_date,
     allowed_states=['success'],
     timeout=1800,                      # 1800 seconds = 30min of sensoring before retry is triggered
     retry_delay=timedelta(minutes=40), # Wait 40min before sensoring again
@@ -76,10 +87,6 @@ run_dbt = KubernetesPodOperator(
     dag=dag,
     secrets=[secret_volume]
 )
-
-
-now = datetime.now()
-current_date = f"{now.year}{now.month}{now.day}"
 
 task_export_latest_user_facts_partition_to_gcs = BigQueryToCloudStorageOperator(
     task_id="export_latest_user_facts_partition_to_gcs",
