@@ -106,6 +106,7 @@ spec:
       port: 5438
       targetPort: 5438
     - name: savings-replica
-      protocol: 5439
+      protocol: TCP
+      port: 5439
       targetPort: 5439
 
