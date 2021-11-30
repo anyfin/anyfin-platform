@@ -1,0 +1,69 @@
+{
+    "savings_customers": {
+      "schema": {
+        "id":"integer", 
+        "created_at":"timestamp with time zone", 
+        "updated_at":"timestamp with time zone", 
+        "customer_id":"integer", 
+        "has_external_account":"boolean"
+      },
+      "ts_column": "updated_at",
+      "bq_partition_column": "created_at",
+      "backfill_method": "beam_backfill"
+    },
+    "customer_triggers": {
+      "schema": {
+        "id":"integer", 
+        "created_at":"timestamp with time zone", 
+        "updated_at":"timestamp with time zone", 
+        "active":"boolean", 
+        "trigger_id":"integer", 
+        "customer_id":"integer", 
+        "trigger_name":"character varying", 
+        "last_enabled_at":"timestamp with time zone"
+      },
+      "bq_partition_column": "created_at",
+      "ts_column": "updated_at",
+      "backfill_method": "beam_backfill"
+    },
+    "roundup_triggers": {
+      "schema": {
+        "id":"integer", 
+        "created_at":"timestamp with time zone", 
+        "updated_at":"timestamp with time zone", 
+        "multiplier":"integer", 
+        "customer_trigger_id":"integer", 
+        "account_ids":"ARRAY", 
+        "last_scheduled_at":"timestamp with time zone"
+      },
+      "bq_partition_column": "created_at",
+      "ts_column": "updated_at",
+      "backfill_method": "beam_backfill"
+    },
+    "save_on_payday_triggers": {
+      "schema": {
+        "id":"integer", 
+        "created_at":"timestamp with time zone", 
+        "updated_at":"timestamp with time zone", 
+        "amount":"numeric", 
+        "monthly_pull_day":"integer", 
+        "customer_trigger_id":"integer"
+      },
+      "bq_partition_column": "created_at",
+      "ts_column": "updated_at",
+      "backfill_method": "beam_backfill"
+    },
+    "happy_monday_triggers": {
+      "schema": {
+        "id":"integer", 
+        "created_at":"timestamp with time zone", 
+        "updated_at":"timestamp with time zone", 
+        "min_amount":"numeric", 
+        "max_amount":"numeric", 
+        "customer_trigger_id":"integer"
+      },
+      "bq_partition_column": "created_at",
+      "ts_column": "updated_at",
+      "backfill_method": "beam_backfill"
+    }
+  }

@@ -24,7 +24,8 @@ DATABASES_INFO = [
 					{'DATABASE_NAME': 'dolph', 'INSTANCE_NAME': 'anyfin-dolph-read-replica', 'DATABASE':'postgres'},
 					{'DATABASE_NAME': 'pfm', 'INSTANCE_NAME': 'pfm-replica', 'DATABASE':'postgres'},
 					{'DATABASE_NAME': 'psd2', 'INSTANCE_NAME': 'psd2-replica', 'DATABASE':'postgres'},
-					{'DATABASE_NAME': 'sendout', 'INSTANCE_NAME': 'sendout-replica', 'DATABASE':'postgres'}
+					{'DATABASE_NAME': 'sendout', 'INSTANCE_NAME': 'sendout-replica', 'DATABASE':'postgres'},
+					{'DATABASE_NAME': 'savings', 'INSTANCE_NAME': 'savings-replica', 'DATABASE':'postgres'},
 				 ]
 
 DAG_PATH = os.path.dirname(os.path.realpath(__file__))

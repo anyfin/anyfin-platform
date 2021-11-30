@@ -34,8 +34,8 @@
         SELECT
             table_name,
             string_agg(
-                '"' || column_name::text ||  '":"' || data_type::text || '"', ', '
-                
+                '"' || column_name::text ||  '":"' || data_type::text || '"', ', 
+                '
                 ) as columns
         FROM  information_schema.columns
         WHERE table_name = [table name string]
@@ -66,5 +66,8 @@
             "password": ""
         } 
         ```
+- Additional
+    - If you have added any tables to the beam_backfill you need to add the database details in the postgres_bq_backfill.py file
+    - If you have added any tables to the export_backfill you need to add db details to the export_bq_backfil.py file in the same manner
 
 ### You should now be able to run the pipeline
