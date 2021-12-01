@@ -65,5 +65,17 @@
       "bq_partition_column": "created_at",
       "ts_column": "updated_at",
       "backfill_method": "beam_backfill"
+    },
+    "customer_events": {
+      "schema": {
+        "id":"integer", 
+        "created_at":"timestamp with time zone", 
+        "customer_id":"integer", 
+        "event":"character varying", 
+        "metadata":"json"
+      },
+      "bq_partition_column": "created_at",
+      "ts_column": "created_at",
+      "backfill_method": "beam_backfill"
     }
   }
