@@ -1,6 +1,5 @@
 import argparse
 from datetime import datetime, timedelta
-import logging
 import json
 import os
 import apache_beam as beam
@@ -110,7 +109,6 @@ def run(backfill, start_date, pipeline_args=None):
 
 
 if __name__ == "__main__":
-    logging.getLogger().setLevel(logging.INFO)
 
     parser = argparse.ArgumentParser()
 
