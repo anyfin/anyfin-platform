@@ -189,6 +189,7 @@ for table in ETL.get_tables():
                     json_extract_scalar(main_policy,'$.pricing.new.monthlyPayment')  as `new_monthly_payment`,
                     json_extract_scalar(main_policy,'$.pricing.old.monthlyPayment')  as `old_monthly_payment`,
                     json_extract_scalar(main_policy,'$.response.scorecard_version') as scorecard_version,
+                    CAST(json_extract_scalar(main_policy,  '$.data.InternalLookup._id' ) as INT64) as `internal_lookup_id`,
                     from temp join 
                     anyfin.{DATABASE_NAME}_staging.{table}_raw t on temp.id= t.id and temp.max_ingested_ts=t._ingested_ts
             """,
