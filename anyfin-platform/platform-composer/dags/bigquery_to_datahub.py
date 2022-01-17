@@ -48,7 +48,7 @@ for k, v in METADATA_RECIPES.items():
     ingest_task = PythonVirtualenvOperator(
         task_id=f"{k}_metadata_ingest",
         python_callable=datahub_recipe,
-        requirements=['acryl-datahub[bigquery]'],
+        requirements=['acryl-datahub[bigquery]==0.8.23.0'],
         op_args=[v],
         dag=dag
     )   
@@ -58,7 +58,7 @@ usage_ingest_task = PythonVirtualenvOperator(
     task_id="bigquery_usage_metadata_ingest",
     python_callable=datahub_recipe,
     op_args=[USAGE_RECIPE],
-    requirements= ['acryl-datahub[bigquery-usage]'],
+    requirements= ['acryl-datahub[bigquery-usage]==0.8.21.0'],
     dag=dag
 )   
 

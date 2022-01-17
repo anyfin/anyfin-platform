@@ -70,7 +70,7 @@ def build_url(path, query=""):
     return urlunparse((scheme, netloc, path, "", query, ""))
 
 def get_ad_report(ds, **kwargs):
-    PATH = "/open_api/v1.1/reports/integrated/get/"
+    PATH = "/open_api/v1.2/reports/integrated/get/"
 
     #metric description in docs https://ads.tiktok.com/marketing_api/docs?id=1685764234508290
     metrics_list = ["ad_name","adgroup_id","adgroup_name","campaign_id","campaign_name","spend","reach","impressions","clicks","video_play_actions","video_watched_2s","video_watched_6s","average_video_play","video_views_p25","video_views_p50","video_views_p75","video_views_p100","profile_visits","likes","comments","shares","follows"] 
@@ -126,7 +126,7 @@ def get_ad_report(ds, **kwargs):
         else:
             logging.info(f"Looks like there was no spend on tiktok for date {ds}")
     else:
-        raise AirflowFailException("The http request was not successful")
+        raise AirflowFailException(f"The http request was not successful: {response['message']}")
 
 
 ingest_ad_report = PythonOperator(
