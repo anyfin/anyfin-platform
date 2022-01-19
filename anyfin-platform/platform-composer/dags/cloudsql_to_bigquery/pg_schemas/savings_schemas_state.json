@@ -77,5 +77,35 @@
       "bq_partition_column": "created_at",
       "ts_column": "created_at",
       "backfill_method": "beam_backfill"
+    },
+    "savings_payout": {
+      "schema": {
+        "id":"uuid", 
+        "created_at":"timestamp with time zone", 
+        "updated_at":"timestamp with time zone", 
+        "customer_id":"integer", 
+        "code":"character varying", 
+        "amount":"real", 
+        "status":"character varying", 
+        "transaction_rowkey":"character varying", 
+        "country_code":"character varying", 
+        "currency_code":"character varying", 
+        "metadata":"json"
+      },
+      "bq_partition_column": "created_at"
+    },
+    "promo_codes": {
+      "schema": {
+        "id":"integer", 
+        "created_at":"timestamp with time zone", 
+        "updated_at":"timestamp with time zone", 
+        "start_date":"timestamp with time zone", 
+        "expiry_date":"timestamp with time zone", 
+        "code":"character varying", 
+        "amount":"numeric", 
+        "max_applicants":"integer", 
+        "type":"text"
+      },
+      "bq_partition_column": "updated_at"
     }
   }
