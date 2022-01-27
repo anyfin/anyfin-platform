@@ -12,6 +12,8 @@ from airflow.exceptions import AirflowFailException
 
 ADVERTISER_ID = 6955479302334906369 
 ACCESS_TOKEN = models.Variable.get('tiktok_api_secret')
+ALLOWED_COUNTRIES = ['SE', 'DE', 'FI']
+DEFAULT_COUNTRY = 'SE'
 
 schema = [
     bigquery.SchemaField("date", "TIMESTAMP", mode="NULLABLE"),
@@ -107,7 +109,13 @@ def get_ad_report(ds, **kwargs):
             if float(ad["metrics"].get("spend")) > 0.0:
                 dims = [ad["dimensions"].get(dim) for dim in dimensions_list]
                 metr = [ad["metrics"].get(met) for met in metrics_list]
-                vals = dims + ['SE', 'SEK'] + metr
+                #TODO: see if country_code can be fetched from api, but it doesn't look like it 
+                country_code = ad["metrics"].get('campaign_name', DEFAULT_COUNTRY)[0:2].upper()
+
+                #before we had a naming convention we didn't prefix campaigns with country. Hence setting the default country to SE
+                if country_code not in ALLOWED_COUNTRIES:
+                    country_code = DEFAULT_COUNTRY
+                vals = dims + [country_code, 'SEK'] + metr
                 record = dict(zip(columns,vals))
                 rows.append(record)
                 
