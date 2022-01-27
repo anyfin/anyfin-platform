@@ -571,6 +571,11 @@ resource "google_bigquery_table" "applications_raw" {
 	},
 	{
 		"mode": "NULLABLE",
+		"name": "sub_product",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
 		"name": "_ingested_ts",
 		"type": "TIMESTAMP"
 	}
@@ -729,6 +734,16 @@ resource "google_bigquery_table" "loans_raw" {
 		"mode": "NULLABLE",
 		"name": "last_processed",
 		"type": "DATE"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "contract_sent_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "sub_product",
+		"type": "STRING"
 	},
 	{
 		"mode": "NULLABLE",
@@ -1762,6 +1777,31 @@ resource "google_bigquery_table" "lenders_raw" {
 		"mode": "NULLABLE",
 		"name": "duplicate",
 		"type": "BOOLEAN"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "has_branches",
+		"type": "BOOLEAN"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "available_loan_products",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "default_reciever_name",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "has_multiple_product_flows",
+		"type": "BOOLEAN"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "sub_product",
+		"type": "STRING"
 	},
 	{
 		"mode": "NULLABLE",

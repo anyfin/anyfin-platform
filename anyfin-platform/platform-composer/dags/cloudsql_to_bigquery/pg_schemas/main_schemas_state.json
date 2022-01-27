@@ -113,7 +113,8 @@
       "updated_at":"timestamp with time zone",
       "customer_provided":"jsonb",
       "creditor_id":"uuid",
-      "rejected_by":"character varying"
+      "rejected_by":"character varying",
+      "sub_product": "text"
     },
     "ts_column": "updated_at",
     "bq_partition_column": "created_at",
@@ -147,7 +148,9 @@
       "amortization_rate": "numeric",
       "contract_id": "uuid",
       "dpd": "integer",
-      "last_processed": "date"
+      "last_processed": "date",
+      "contract_sent_at": "timestamp with time zone",
+      "sub_product": "text"
     },
     "ts_column": "updated_at",
     "bq_partition_column": "created_at",
@@ -209,7 +212,7 @@
     },
     "ts_column": "updated_at",
     "bq_partition_column": "created_at",
-    "backfill_method": "beam_backfill"
+    "backfill_method": "direct_export"
   },
   "ddi_providers": {
     "schema": {
@@ -369,7 +372,12 @@
       "description":"text",
       "display_name":"text",
       "brand_attributes":"jsonb",
-      "duplicate":"boolean"
+      "duplicate":"boolean",
+      "has_branches": "boolean",
+      "available_loan_products": "jsonb",
+      "default_reciever_name": "character varying",
+      "has_multiple_product_flows": "boolean",
+      "sub_product": "text"
     }
   },
   "customer_kalp_input": {
@@ -624,7 +632,7 @@
     },
     "ts_column" : "updated_at",
     "bq_partition_column": "created_at",
-    "backfill_method": "beam_backfill"
+    "backfill_method": "direct_export"
   },
   "assessment_reviews": {
     "schema": {
