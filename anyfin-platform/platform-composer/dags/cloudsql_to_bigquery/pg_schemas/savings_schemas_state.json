@@ -90,7 +90,8 @@
         "transaction_rowkey":"character varying", 
         "country_code":"character varying", 
         "currency_code":"character varying", 
-        "metadata":"json"
+        "metadata":"json", 
+        "type":"text"
       },
       "bq_partition_column": "created_at"
     },

@@ -339,9 +339,9 @@ EOF
 }
 
 
-resource "google_bigquery_table" "savings_payout_raw" {
+resource "google_bigquery_table" "savings_payouts_raw" {
 	dataset_id = "savings_staging"
-	table_id   = "savings_payout_raw"
+	table_id   = "savings_payouts_raw"
 	project    = "anyfin"
 
 	labels = {
@@ -408,6 +408,11 @@ resource "google_bigquery_table" "savings_payout_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "metadata",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "type",
 		"type": "STRING"
 	},
 	{
