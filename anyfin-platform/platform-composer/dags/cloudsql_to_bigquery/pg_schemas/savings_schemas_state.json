@@ -105,7 +105,8 @@
         "code":"character varying", 
         "amount":"numeric", 
         "max_applicants":"integer", 
-        "type":"text"
+        "type":"text", 
+        "channel":"character varying"
       },
       "bq_partition_column": "updated_at"
     }

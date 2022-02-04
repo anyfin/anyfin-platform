@@ -488,6 +488,11 @@ resource "google_bigquery_table" "promo_codes_raw" {
 	},
 	{
 		"mode": "NULLABLE",
+		"name": "channel",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
 		"name": "_ingested_ts",
 		"type": "TIMESTAMP"
 	}
