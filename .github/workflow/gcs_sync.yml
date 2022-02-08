@@ -19,4 +19,4 @@ jobs:
           service_account_key: ${{ secrets.GCP_KEY }}
           project_id: ${{ env.PROJECT_ID }}
       - run: |-
-          gsutil -m rsync -r -c -i -x '\.git.*|composer-cloudsql/.*' anyfin-platform/platform-composer/ ${{ env.FOLDER }}
+          gsutil -m rsync -r -c -i -x '\.git.*|composer-cloudsql' anyfin-platform/platform-composer/ ${{ env.FOLDER }}
