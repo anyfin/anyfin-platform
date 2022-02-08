@@ -1,0 +1,22 @@
+name: Sync repo
+on:
+  push:
+    branches:
+      - main
+env:
+  PROJECT_ID: anyfin-platform
+  FOLDER: gs://europe-west1-platform-compo-14729054-bucket
+jobs:
+  sync-datahub:
+    name: Sync with GCS
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Sync repo to gcs
+        uses: google-github-actions/setup-gcloud@v0
+        with:
+          service_account_key: ${{ secrets.GCP_KEY }}
+          project_id: ${{ env.PROJECT_ID }}
+      - run: |-
+          gsutil -m rsync -r -c -i -x '\.git.*|composer-cloudsql/.*' anyfin-platform/platform-composer/ ${{ env.FOLDER }}
