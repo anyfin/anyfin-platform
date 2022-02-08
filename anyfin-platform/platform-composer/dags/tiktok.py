@@ -107,6 +107,7 @@ def get_ad_report(ds, **kwargs):
         columns = ['date', 'ad_id', 'country_code', 'currency_code'] + metrics_list
         for ad in ads:
             if float(ad["metrics"].get("spend")) > 0.0:
+                ad["metrics"]["spend"] = float(ad["metrics"]["spend"]) * 1.25 #adding VAT to spend
                 dims = [ad["dimensions"].get(dim) for dim in dimensions_list]
                 metr = [ad["metrics"].get(met) for met in metrics_list]
                 #TODO: see if country_code can be fetched from api, but it doesn't look like it 
