@@ -16,11 +16,11 @@ do
 	mvn compile exec:java \
     -Dexec.mainClass=org.anyfin.ReadJdbc \
     -Dexec.args="--project=anyfin-platform \
-                --tempLocation=gs://babis-testing/beam/Temp/ \
-                --stagingLocation=gs://babis-testing/beam/Staging/ \
-                --templateLocation=gs://babis-testing/beam/Templates/postgres-backfill-$QUERY_BREAKDOWN-$DB-$TABLE_NAME \
+                --tempLocation=gs://sql-to-bq-etl/beam_backfill/Temp/ \
+                --stagingLocation=gs://sql-to-bq-etl/beam_backfill/Staging/ \
+                --templateLocation=gs://sql-to-bq-etl/beam_templates/postgres-backfill-$QUERY_BREAKDOWN-$DB-$TABLE_NAME \
                 --sourceTable=$TABLE_NAME \
-                --gcpTempLocation=gs://babis-testing/beam/Temp/ \
+                --gcpTempLocation=gs://sql-to-bq-etl/beam_backfill/Temp/ \
                 --runner=DataflowRunner \
                 --credentialsFile=$CREDENTIALS \
                 --queryBreakdown=$QUERY_BREAKDOWN \
