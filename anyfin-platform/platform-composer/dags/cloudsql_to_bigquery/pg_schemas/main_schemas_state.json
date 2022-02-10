@@ -544,7 +544,10 @@
       "currency_code": "character varying", 
       "creditor_migration": "boolean", 
       "country_code": "character varying", 
-      "updated_at": "timestamp with time zone"
+      "updated_at": "timestamp with time zone",
+      "min_electricity_payment":"numeric", 
+      "added_electricity_principal":"numeric", 
+      "sum_electricity_payments":"numeric"
     },
     "ts_column": "COALESCE(updated_at, created_at)",
     "bq_partition_column": "created_at",

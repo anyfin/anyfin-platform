@@ -2584,6 +2584,21 @@ resource "google_bigquery_table" "statements_raw" {
 	},
 	{
 		"mode": "NULLABLE",
+		"name": "min_electricity_payment",
+		"type": "NUMERIC"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "added_electricity_principal",
+		"type": "NUMERIC"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "sum_electricity_payments",
+		"type": "NUMERIC"
+	},
+	{
+		"mode": "NULLABLE",
 		"name": "_ingested_ts",
 		"type": "TIMESTAMP"
 	}
