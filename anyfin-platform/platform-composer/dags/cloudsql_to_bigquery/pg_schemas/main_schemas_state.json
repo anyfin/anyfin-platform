@@ -551,7 +551,7 @@
     },
     "ts_column": "COALESCE(updated_at, created_at)",
     "bq_partition_column": "created_at",
-    "backfill_method": "beam_backfill"
+    "backfill_method": "direct_export"
   },
   "custom_terms": {
     "schema": {
