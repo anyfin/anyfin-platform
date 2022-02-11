@@ -15,7 +15,7 @@ for TABLE_NAME in "${TABLES[@]}"
 do
 	mvn compile exec:java \
     -Dexec.mainClass=org.anyfin.ReadJdbc \
-    -Dexec.args="--project=anyfin-platform \
+    -Dexec.args="--project=anyfin \
                 --tempLocation=gs://sql-to-bq-etl/beam_backfill/Temp/ \
                 --stagingLocation=gs://sql-to-bq-etl/beam_backfill/Staging/ \
                 --templateLocation=gs://sql-to-bq-etl/beam_templates/postgres-backfill-$QUERY_BREAKDOWN-$DB-$TABLE_NAME \
