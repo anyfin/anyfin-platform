@@ -12,6 +12,7 @@ from airflow.contrib.operators.gcp_compute_operator import GceInstanceStartOpera
 from airflow.contrib.operators.gcs_delete_operator import GoogleCloudStorageDeleteOperator
 from airflow.contrib.operators.gcs_to_bq import GoogleCloudStorageToBigQueryOperator
 from airflow.operators.bash_operator import BashOperator
+from airflow.contrib.operators.dataflow_operator import DataflowTemplateOperator
 
 from cloudsql_to_bigquery.utils.backfill_utils import BACKFILL
 
@@ -232,12 +233,36 @@ for DB in DATABASES_INFO:
 				bigquery_conn_id='postgres-bq-etl-con',
 				dag=dag
 			)
+		
+		beam_loaded_tables = {
+			"assessments": "daily",
+			"transactions": "daily",
+			"cycles": "daily",
+			"messages": "daily"
+		}
+
+		if table_name in list(beam_loaded_tables.keys()):
+			table_scan = beam_loaded_tables[table_name]
+			beam_backfill_job = DataflowTemplateOperator(
+				task_id=f"postgres-beam-backfill-{table_name}",
+				template=f"gs://sql-to-bq-etl/beam_templates/postgres-backfill-{table_scan}-{DATABASE_NAME}-{table_name}",
+				parameters={
+					"destinationTable": f"anyfin:{DATABASE_NAME}{staging}.{table_name}_beam",
+					"workerMachineType": "n1-standard-2",
+					"numWorkers": "4",
+					"maxNumWorkers": "4"
+				},
+				gcp_conn_id='postgres-bq-etl-con',
+				region='europe-west1',
+				dag=dag,
+			)
+
 
 		# Create dependencies
 		task_delete_old_export >> task_export_table >> task_generate_schema_object >> bq_load_backup
 		if table_name in sanity_check_tables:
 			postgres_check >> sanity_check_bq
-			bq_load_backup >> sanity_check_bq >> bq_load_final
+			bq_load_backup >> sanity_check_bq >> bq_load_final >> beam_backfill_job
 		if nested:
 			task_delete_old_json_extract >> task_export_table
 			task_export_table >> submit_python_split_task >> bq_load_backup
