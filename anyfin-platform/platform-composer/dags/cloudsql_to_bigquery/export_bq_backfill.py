@@ -234,17 +234,18 @@ for DB in DATABASES_INFO:
 				dag=dag
 			)
 		
-		beam_loaded_tables = [
-			{"name": "assessments", "scan": "daily"},
-			{"name": "transactions", "scan": "daily"},
-			{"name": "cycles", "scan": "daily"},
-			{"name": "messages", "scan": "daily"}
-		]
+		beam_loaded_tables = {
+			"assessments": "daily",
+			"transactions": "daily",
+			"cycles": "daily",
+			"messages": "daily"
+		}
 
 		if table_name in list(beam_loaded_tables.keys()):
+			table_scan = beam_loaded_tables[table_name]
 			beam_backfill_job = DataflowTemplateOperator(
 				task_id=f"postgres-beam-backfill-{table_name}",
-				template=f"gs://sql-to-bq-etl/beam_templates/postgres-backfill-{beam_loaded_tables['scan']}-{DATABASE_NAME}-{table_name}",
+				template=f"gs://sql-to-bq-etl/beam_templates/postgres-backfill-{table_scan}-{DATABASE_NAME}-{table_name}",
 				parameters={
 					"destinationTable": f"anyfin:{DATABASE_NAME}{staging}.{table_name}_beam",
 					"workerMachineType": "n1-standard-2",
