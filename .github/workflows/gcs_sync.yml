@@ -2,7 +2,7 @@ name: Sync repo
 on:
   push:
     branches:
-      - main
+      - master
 env:
   PROJECT_ID: anyfin-platform
   FOLDER: gs://europe-west1-platform-compo-14729054-bucket
