@@ -151,7 +151,7 @@ public class ReadJdbc {
                 .withDataSourceConfiguration(JdbcIO.DataSourceConfiguration.create(driver, dbConfig.getLocation())
                 .withUsername(dbConfig.getUsername())
                 .withPassword(dbConfig.getPassword()))
-                .withFetchSize(100)
+                .withFetchSize(1000)
                 .withCoder(TableRowJsonCoder.of())
                 .withParameterSetter(new JdbcIO.PreparedStatementSetter<KV<String,Iterable<Integer>>>() {
                   @Override

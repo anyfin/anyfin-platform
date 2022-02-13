@@ -249,12 +249,12 @@ for DB in DATABASES_INFO:
 				dataflow_default_options= {
 					'project': 'anyfin',
 					'region': 'europe-west1',
+					'numWorkers': '4',
+					'maxWorkers': '4',
+					'machineType': 'n1-standard-2'
 				},
 				parameters={
-					"destinationTable": f"anyfin:{DATABASE_NAME}{staging}.{table_name}_beam",
-					"workerMachineType": "n1-standard-2",
-					"numWorkers": "4",
-					"maxNumWorkers": "4"
+					"destinationTable": f"anyfin:{DATABASE_NAME}{staging}.{table_name}_beam"
 				},
 				gcp_conn_id='postgres-bq-etl-con',
 				region='europe-west1',
