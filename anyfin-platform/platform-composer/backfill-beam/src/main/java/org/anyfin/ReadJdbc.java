@@ -8,10 +8,6 @@ import org.apache.beam.sdk.io.jdbc.JdbcIO;
 
 import java.nio.file.Paths;
 import java.sql.PreparedStatement;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.ZoneOffset;
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 
@@ -24,7 +20,6 @@ import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.apache.beam.sdk.options.ValueProvider;
 import org.apache.beam.sdk.options.ValueProvider.StaticValueProvider;
-import org.apache.beam.sdk.transforms.Create;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.GroupByKey;
 import org.apache.beam.sdk.transforms.ParDo;
@@ -50,10 +45,10 @@ public class ReadJdbc {
         ValueProvider<String> getDestinationTable();
         void setDestinationTable(ValueProvider<String> value);
 
-        @Description("Query Breakdown - daily/full")
-        @Default.String("daily")
-        StaticValueProvider<String> getQueryBreakdown();
-        void setQueryBreakdown(StaticValueProvider<String> value);
+        @Description("Step Size - How many rows per query should be read")
+        @Default.String("50000")
+        StaticValueProvider<String> getStepSize();
+        void setStepSize(StaticValueProvider<String> value);
 
         @Description("Credentials - JSON file with DB credentials")
         @Default.String("main.json")
@@ -61,13 +56,38 @@ public class ReadJdbc {
         void setCredentialsFile(StaticValueProvider<String> value);
     }
     
-    private static final String minDate = "2017-10-26";
     private static final String driver = "org.postgresql.Driver";
+
+    static class PrintFn extends DoFn<KV<String, Iterable<Integer>>, KV<String, Iterable<Integer>>> {
+        @ProcessElement
+        public void processElement(@Element KV<String, Iterable<Integer>> query, OutputReceiver<KV<String, Iterable<Integer>>> out) {
+          System.out.println(query);
+          out.output(query);
+        }
+    }
 
     static class ToKVFn extends DoFn<String, KV<String, Integer>> {
         @ProcessElement
         public void processElement(@Element String word, OutputReceiver<KV<String, Integer>> out) {
           out.output(KV.of(word, 1));
+        }
+    }
+
+    static class GenerateQueriesFn extends DoFn<String, String> {
+        ValueProvider<String> stepSize;
+
+        GenerateQueriesFn(StaticValueProvider<String> stepSize) {
+            this.stepSize = stepSize;
+        }
+
+        @ProcessElement
+        public void processElement(ProcessContext cnt) {
+            int totalRows = Integer.parseInt(cnt.element());
+            int intStepSize = Integer.parseInt(stepSize.get());
+            //Adding two more offsets to make sure we don't miss newly created rows
+            for(int i = 0; i<(totalRows + 2*intStepSize); i+=intStepSize) {
+                cnt.output(String.format("%s", i));
+            }
         }
     }
 
@@ -110,20 +130,6 @@ public class ReadJdbc {
 
     static void runReadJdbc(BackfillerOptions options) {
 
-        String currentDate = Instant.now().atZone(ZoneOffset.UTC).format(DateTimeFormatter.ISO_LOCAL_DATE);
-
-        DateRange dateRange = new DateRange(LocalDate.parse(minDate), LocalDate.parse(currentDate));
-
-        List<String> datesDaily = dateRange.toStringList();
-        List<String> datesEarliest = dateRange.toStringListEarliest();
-
-        String selectStatement = "select *, now() as _ingested_ts from ";
-
-        String queryTemplateFull = " where created_at >= to_date(?::text, 'YYYYMMDD')::date";
-
-        String queryTemplateDaily = " where created_at >= to_date(?::text, 'YYYYMMDD')::date "
-        + "and created_at < (to_date(?::text, 'YYYYMMDD')::date + 1)";
-
         DBConfig dbConfig = new DBConfig();
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -133,35 +139,41 @@ public class ReadJdbc {
             ex.printStackTrace();
         }
 
-        String queryTemplate = queryTemplateDaily;
-        List<String> dates = datesDaily;
-        
-        if (!options.getQueryBreakdown().toString().equals("daily")) {
-            queryTemplate = queryTemplateFull;
-            dates = datesEarliest;
-        }
-
         Pipeline pipeline = Pipeline.create(options);
 
         pipeline
-            .apply("Generate queries", Create.of(dates)).setCoder(StringUtf8Coder.of())
+            .apply("Get Rowcount", JdbcIO.<String>read()
+                .withDataSourceConfiguration(JdbcIO.DataSourceConfiguration.create(driver, dbConfig.getLocation())
+                .withUsername(dbConfig.getUsername())
+                .withPassword(dbConfig.getPassword()))
+                .withQuery("select count(*)::text from " + options.getSourceTable().get())
+                .withRowMapper((JdbcIO.RowMapper<String>) resultSet -> {
+                    return resultSet.getString(1);
+                })
+                .withOutputParallelization(false)
+                .withCoder(StringUtf8Coder.of()))
+            .apply("Generate Queries", ParDo.of(new GenerateQueriesFn(options.getStepSize())))
             .apply("Split to KV", ParDo.of(new ToKVFn()))
             .apply("Reshuffle", GroupByKey.create())
+            // .apply(ParDo.of(new PrintFn()))
             .apply("Read from DB", JdbcIO.<KV<String,Iterable<Integer>>, TableRow>readAll()
                 .withDataSourceConfiguration(JdbcIO.DataSourceConfiguration.create(driver, dbConfig.getLocation())
                 .withUsername(dbConfig.getUsername())
                 .withPassword(dbConfig.getPassword()))
-                .withFetchSize(1000)
+                // .withFetchSize(1000)
                 .withCoder(TableRowJsonCoder.of())
                 .withParameterSetter(new JdbcIO.PreparedStatementSetter<KV<String,Iterable<Integer>>>() {
                   @Override
                   public void setParameters(KV<String,Iterable<Integer>> element, PreparedStatement preparedStatement) throws Exception {
                     preparedStatement.setInt(1, Integer.parseInt(element.getKey()));
-                    preparedStatement.setInt(2, Integer.parseInt(element.getKey()));
                   }
                 })
                 .withOutputParallelization(false)
-                .withQuery(selectStatement + options.getSourceTable().get() + queryTemplate)
+                .withQuery(String.format("%s %s limit %s %s",
+                    "select *, now() as _ingested_ts from ", 
+                    options.getSourceTable().get(),
+                    options.getStepSize().get(), 
+                    " offset ?"))
                 .withRowMapper((JdbcIO.RowMapper<TableRow>) resultSet -> {
                     TableRow row = new TableRow();
                     

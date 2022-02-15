@@ -245,7 +245,7 @@ for DB in DATABASES_INFO:
 			table_scan = beam_loaded_tables[table_name]
 			beam_backfill_job = DataflowTemplateOperator(
 				task_id=f"postgres-beam-backfill-{table_name}",
-				template=f"gs://sql-to-bq-etl/beam_templates/postgres-backfill-{table_scan}-{DATABASE_NAME}-{table_name}",
+				template=f"gs://sql-to-bq-etl/beam_templates/postgres-backfill-{DATABASE_NAME}-{table_name}",
 				dataflow_default_options= {
 					'project': 'anyfin',
 					'region': 'europe-west1',
