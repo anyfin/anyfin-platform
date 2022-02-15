@@ -189,10 +189,12 @@ for table in ETL.get_tables():
                     CAST(json_extract_scalar(main_policy, '$.data.UCLookup.credit_history[0].credit_used_instalment') as int64) as uc_credit_used_instalment,
                     json_extract_string_array(main_policy,  '$.data.response.reasons' )  as `response_reasons`,
                     json_extract(main_policy,'$.request.income' )  as `customer_provided_income`,
-                    json_extract_scalar(main_policy,'$.pricing.new.monthlyPayment')  as `new_monthly_payment`,
-                    json_extract_scalar(main_policy,'$.pricing.old.monthlyPayment')  as `old_monthly_payment`,
+                    json_extract_scalar(json_extract(main_policy,'$.data.Pricing'), '$.new.monthlyPayment')  as `new_monthly_payment`,
+                    json_extract_scalar(json_extract(main_policy,'$.data.Pricing'), '$.old.monthlyPayment')  as `old_monthly_payment`,
                     json_extract_scalar(main_policy,'$.response.scorecard_version') as scorecard_version,
                     CAST(json_extract_scalar(main_policy,  '$.data.InternalLookup._id' ) as INT64) as `internal_lookup_id`,
+                    COALESCE(json_extract(main_policy, '$.data.Limit.limit'), json_extract(main_policy, '$.data.Limit.suggested_limit')) as suggested_limit,
+                    COALESCE(json_extract_scalar(main_policy, '$.data.Limit.limit_source'),  json_extract_scalar(main_policy, '$.data.Limit.customer_type')) as customer_type,
                     from temp join 
                     anyfin.{DATABASE_NAME}_staging.{table}_raw t on temp.id= t.id and temp.max_ingested_ts=t._ingested_ts
             """,
