@@ -501,3 +501,160 @@ EOF
 }
 
 
+resource "google_bigquery_table" "user_stats_raw" {
+	dataset_id = "savings_staging"
+	table_id   = "user_stats_raw"
+	project    = "anyfin"
+
+	labels = {
+		env = "default"
+	}
+
+	time_partitioning { 
+    	type = "DAY" 
+		field = "updated_at" 
+	}
+
+	schema = <<EOF
+[
+	{
+		"mode": "NULLABLE",
+		"name": "id",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "created_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "updated_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "customer_id",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "week",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "month",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "year",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "deposit",
+		"type": "FLOAT"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "withdrawal",
+		"type": "FLOAT"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "triggers",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "bucket_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "pot_id",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "_ingested_ts",
+		"type": "TIMESTAMP"
+	}
+]
+EOF
+}
+
+
+resource "google_bigquery_table" "customer_external_facts_raw" {
+	dataset_id = "savings_staging"
+	table_id   = "customer_external_facts_raw"
+	project    = "anyfin"
+
+	labels = {
+		env = "default"
+	}
+
+	time_partitioning { 
+    	type = "DAY" 
+		field = "updated_at" 
+	}
+
+	schema = <<EOF
+[
+	{
+		"mode": "NULLABLE",
+		"name": "id",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "created_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "updated_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "customer_id",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "external_customer_created",
+		"type": "BOOLEAN"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "kyc_answered",
+		"type": "BOOLEAN"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "external_account_created",
+		"type": "BOOLEAN"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "direct_debit_mandate_created",
+		"type": "BOOLEAN"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "direct_debit_mandate_status",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "_ingested_ts",
+		"type": "TIMESTAMP"
+	}
+]
+EOF
+}
+
+
