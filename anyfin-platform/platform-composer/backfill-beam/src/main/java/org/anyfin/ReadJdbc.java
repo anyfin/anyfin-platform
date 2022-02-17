@@ -8,6 +8,10 @@ import org.apache.beam.sdk.io.jdbc.JdbcIO;
 
 import java.nio.file.Paths;
 import java.sql.PreparedStatement;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 
@@ -23,6 +27,7 @@ import org.apache.beam.sdk.options.ValueProvider.StaticValueProvider;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.GroupByKey;
 import org.apache.beam.sdk.transforms.ParDo;
+import org.apache.beam.sdk.transforms.Create;
 import org.apache.beam.sdk.values.KV;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +59,16 @@ public class ReadJdbc {
         @Default.String("main.json")
         StaticValueProvider<String> getCredentialsFile();
         void setCredentialsFile(StaticValueProvider<String> value);
+
+        @Description("Query By - Whether the underlying tables should be queried by offset or created_at")
+        @Default.String("offset")
+        StaticValueProvider<String> getQueryBy();
+        void setQueryBy(StaticValueProvider<String> value);
+
+        @Description("Start Date - The earliest date of the query by timestamp in the underlying table")
+        @Default.String("2017-10-26")
+        String getStartDate();
+        void setStartDate(String value);
     }
     
     private static final String driver = "org.postgresql.Driver";
@@ -130,6 +145,12 @@ public class ReadJdbc {
 
     static void runReadJdbc(BackfillerOptions options) {
 
+        String currentDate = Instant.now().atZone(ZoneOffset.UTC).format(DateTimeFormatter.ISO_LOCAL_DATE);
+
+        DateRange dateRange = new DateRange(LocalDate.parse(options.getStartDate()), LocalDate.parse(currentDate));
+        List<String> dates = dateRange.toStringList();
+
+
         DBConfig dbConfig = new DBConfig();
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -141,61 +162,112 @@ public class ReadJdbc {
 
         Pipeline pipeline = Pipeline.create(options);
 
-        pipeline
-            .apply("Get Rowcount", JdbcIO.<String>read()
-                .withDataSourceConfiguration(JdbcIO.DataSourceConfiguration.create(driver, dbConfig.getLocation())
-                .withUsername(dbConfig.getUsername())
-                .withPassword(dbConfig.getPassword()))
-                .withQuery("select count(*)::text from " + options.getSourceTable().get())
-                .withRowMapper((JdbcIO.RowMapper<String>) resultSet -> {
-                    return resultSet.getString(1);
-                })
-                .withOutputParallelization(false)
-                .withCoder(StringUtf8Coder.of()))
-            .apply("Generate Queries", ParDo.of(new GenerateQueriesFn(options.getStepSize())))
-            .apply("Split to KV", ParDo.of(new ToKVFn()))
-            .apply("Reshuffle", GroupByKey.create())
-            // .apply(ParDo.of(new PrintFn()))
-            .apply("Read from DB", JdbcIO.<KV<String,Iterable<Integer>>, TableRow>readAll()
-                .withDataSourceConfiguration(JdbcIO.DataSourceConfiguration.create(driver, dbConfig.getLocation())
-                .withUsername(dbConfig.getUsername())
-                .withPassword(dbConfig.getPassword()))
-                // .withFetchSize(1000)
-                .withCoder(TableRowJsonCoder.of())
-                .withParameterSetter(new JdbcIO.PreparedStatementSetter<KV<String,Iterable<Integer>>>() {
-                  @Override
-                  public void setParameters(KV<String,Iterable<Integer>> element, PreparedStatement preparedStatement) throws Exception {
-                    preparedStatement.setInt(1, Integer.parseInt(element.getKey()));
-                  }
-                })
-                .withOutputParallelization(false)
-                .withQuery(String.format("%s %s limit %s %s",
-                    "select *, now() as _ingested_ts from ", 
-                    options.getSourceTable().get(),
-                    options.getStepSize().get(), 
-                    " offset ?"))
-                .withRowMapper((JdbcIO.RowMapper<TableRow>) resultSet -> {
-                    TableRow row = new TableRow();
-                    
-                    for (int i = 1; i <= resultSet.getMetaData().getColumnCount(); i++) {
-                        String columnTypeIntKey ="";
-                        try {
-                            row.set(resultSet.getMetaData().getColumnName(i).toString(), resultSet.getString(i));
-                        } catch (Exception e) {
-                            LOG.error("problem columnTypeIntKey: " +  columnTypeIntKey);
-                            throw e;
-                        }
+        System.out.println(options.getQueryBy().get());
+
+        if (options.getQueryBy().get().equals("offset")) {
+            pipeline
+                .apply("Get Rowcount", JdbcIO.<String>read()
+                    .withDataSourceConfiguration(JdbcIO.DataSourceConfiguration.create(driver, dbConfig.getLocation())
+                    .withUsername(dbConfig.getUsername())
+                    .withPassword(dbConfig.getPassword()))
+                    .withQuery("select count(*)::text from " + options.getSourceTable().get())
+                    .withRowMapper((JdbcIO.RowMapper<String>) resultSet -> {
+                        return resultSet.getString(1);
+                    })
+                    .withOutputParallelization(false)
+                    .withCoder(StringUtf8Coder.of()))
+                .apply("Generate Queries", ParDo.of(new GenerateQueriesFn(options.getStepSize())))
+                .apply("Split to KV", ParDo.of(new ToKVFn()))
+                .apply("Reshuffle", GroupByKey.create())
+                // .apply(ParDo.of(new PrintFn()))
+                .apply("Read from DB", JdbcIO.<KV<String,Iterable<Integer>>, TableRow>readAll()
+                    .withDataSourceConfiguration(JdbcIO.DataSourceConfiguration.create(driver, dbConfig.getLocation())
+                    .withUsername(dbConfig.getUsername())
+                    .withPassword(dbConfig.getPassword()))
+                    // .withFetchSize(1000)
+                    .withCoder(TableRowJsonCoder.of())
+                    .withParameterSetter(new JdbcIO.PreparedStatementSetter<KV<String,Iterable<Integer>>>() {
+                    @Override
+                    public void setParameters(KV<String,Iterable<Integer>> element, PreparedStatement preparedStatement) throws Exception {
+                        preparedStatement.setInt(1, Integer.parseInt(element.getKey()));
                     }
-                    return row;
-                })
-            )
-            .apply("Convert", ParDo.of(new ConvertFn()))
-            .apply("Write to BigQuery", BigQueryIO.writeTableRows()
-                .withoutValidation()
-                .to(options.getDestinationTable())
-                .withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_NEVER)
-                .withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_TRUNCATE)
-            );
+                    })
+                    .withOutputParallelization(false)
+                    .withQuery(String.format("%s %s limit %s %s",
+                        "select *, now() as _ingested_ts from ", 
+                        options.getSourceTable().get(),
+                        options.getStepSize().get(), 
+                        " offset ?"))
+                    .withRowMapper((JdbcIO.RowMapper<TableRow>) resultSet -> {
+                        TableRow row = new TableRow();
+                        
+                        for (int i = 1; i <= resultSet.getMetaData().getColumnCount(); i++) {
+                            String columnTypeIntKey ="";
+                            try {
+                                row.set(resultSet.getMetaData().getColumnName(i).toString(), resultSet.getString(i));
+                            } catch (Exception e) {
+                                LOG.error("problem columnTypeIntKey: " +  columnTypeIntKey);
+                                throw e;
+                            }
+                        }
+                        return row;
+                    })
+                )
+                .apply("Convert", ParDo.of(new ConvertFn()))
+                .apply("Write to BigQuery", BigQueryIO.writeTableRows()
+                    .withoutValidation()
+                    .to(options.getDestinationTable())
+                    .withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_NEVER)
+                    .withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_TRUNCATE)
+                );
+        }
+        else {
+            pipeline
+                .apply("Generate queries", Create.of(dates)).setCoder(StringUtf8Coder.of())
+                .apply("Split to KV", ParDo.of(new ToKVFn()))
+                .apply("Reshuffle", GroupByKey.create())
+                .apply("Read from DB", JdbcIO.<KV<String,Iterable<Integer>>, TableRow>readAll()
+                    .withDataSourceConfiguration(JdbcIO.DataSourceConfiguration.create(driver, dbConfig.getLocation())
+                    .withUsername(dbConfig.getUsername())
+                    .withPassword(dbConfig.getPassword()))
+                    .withFetchSize(1000)
+                    .withCoder(TableRowJsonCoder.of())
+                    .withParameterSetter(new JdbcIO.PreparedStatementSetter<KV<String,Iterable<Integer>>>() {
+                    @Override
+                    public void setParameters(KV<String,Iterable<Integer>> element, PreparedStatement preparedStatement) throws Exception {
+                        preparedStatement.setInt(1, Integer.parseInt(element.getKey()));
+                        preparedStatement.setInt(2, Integer.parseInt(element.getKey()));
+                    }
+                    })
+                    .withOutputParallelization(false)
+                    .withQuery(String.format("%s %s %s", 
+                        "select *, now() as _ingested_ts from", 
+                        options.getSourceTable().get(), 
+                        "where created_at >= to_date(?::text, 'YYYYMMDD')::date and created_at < (to_date(?::text, 'YYYYMMDD')::date + 1)")
+                    )
+                    .withRowMapper((JdbcIO.RowMapper<TableRow>) resultSet -> {
+                        TableRow row = new TableRow();
+                        
+                        for (int i = 1; i <= resultSet.getMetaData().getColumnCount(); i++) {
+                            String columnTypeIntKey ="";
+                            try {
+                                row.set(resultSet.getMetaData().getColumnName(i).toString(), resultSet.getString(i));
+                            } catch (Exception e) {
+                                LOG.error("problem columnTypeIntKey: " +  columnTypeIntKey);
+                                throw e;
+                            }
+                        }
+                        return row;
+                    })
+                )
+                .apply("Convert", ParDo.of(new ConvertFn()))
+                .apply("Write to BigQuery", BigQueryIO.writeTableRows()
+                    .withoutValidation()
+                    .to(options.getDestinationTable())
+                    .withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_NEVER)
+                    .withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_TRUNCATE)
+                );
+        }
 
         PipelineResult result = pipeline.run();
         try {
