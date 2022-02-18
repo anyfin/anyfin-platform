@@ -259,7 +259,7 @@ for DB in DATABASES_INFO:
 		task_delete_old_export >> task_export_table >> task_generate_schema_object >> bq_load_backup
 		if table_name in sanity_check_tables:
 			postgres_check >> sanity_check_bq
-			bq_load_backup >> sanity_check_bq >> bq_load_final >> beam_backfill_job
+			bq_load_backup >> sanity_check_bq >> bq_load_final
 		if nested:
 			task_delete_old_json_extract >> task_export_table
 			task_export_table >> submit_python_split_task >> bq_load_backup
