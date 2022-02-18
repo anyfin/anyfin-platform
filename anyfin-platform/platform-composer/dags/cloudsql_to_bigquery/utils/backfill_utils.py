@@ -22,6 +22,7 @@ class BACKFILL:
         self.BEAM_TABLES = [(table_name, content) for table_name, content in self.TABLES.items() if 'backfill_method' in content and content['backfill_method'] == 'beam_backfill']
         self.DIRECT_EXPORT_TABLES = [(table_name, content) for table_name, content in self.TABLES.items() if 'backfill_method' in content and content['backfill_method'] == 'direct_export']
         self.NESTED_EXPORT_TABLES = [(table_name, content) for table_name, content in self.TABLES.items() if 'backfill_method' in content and content['backfill_method'] == 'nested_export']
+        self.BEAM_EXPORT_TABLES = [(table_name, content) for table_name, content in self.TABLES.items() if 'backfill_method' in content and content['backfill_method'] == 'beam_export']
         
     def get_tables(self):
         return self.TABLES
@@ -33,6 +34,8 @@ class BACKFILL:
         return self.DIRECT_EXPORT_TABLES
     def get_nested_export_tables(self):
         return self.NESTED_EXPORT_TABLES
+    def get_beam_export_tables(self):
+        return self.BEAM_EXPORT_TABLES
 
 
     # Function to convert postgres schema types into BQ format

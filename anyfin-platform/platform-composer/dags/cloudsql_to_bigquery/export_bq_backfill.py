@@ -46,7 +46,7 @@ dag = DAG(
 	f'export_postgres_bq_backfill',
 	default_args=default_args,
 	catchup=False,
-	schedule_interval='0 0 * * SUN',
+	schedule_interval='0 13 * * SUN',
 	max_active_runs=1,
 	concurrency=3
 )
@@ -106,6 +106,26 @@ for DB in DATABASES_INFO:
 		)
 
 	split_tasks = []
+
+	for table_name, content in backfill.get_beam_export_tables():
+		beam_backfill_job = DataflowTemplateOperator(
+			task_id=f"postgres-beam-backfill-{table_name}",
+			template=f"gs://sql-to-bq-etl/beam_templates/postgres-backfill-{DATABASE_NAME}-{table_name}",
+			dataflow_default_options= {
+				'project': 'anyfin',
+				'region': 'europe-west1',
+				'numWorkers': '4',
+				'maxWorkers': '4',
+				'machineType': 'n1-standard-2'
+			},
+			parameters={
+				"destinationTable": f"anyfin:{DATABASE_NAME}{staging}.{table_name}"
+			},
+			gcp_conn_id='postgres-bq-etl-con',
+			region='europe-west1',
+			dag=dag,
+		)
+
 
 	# Iterate over all tables to backfill and create tasks
 	for table_name, content in backfill.get_export_tables():
@@ -232,33 +252,6 @@ for DB in DATABASES_INFO:
 				destination_project_dataset_table=DESTINATION_TABLE,
 				bigquery_conn_id='postgres-bq-etl-con',
 				dag=dag
-			)
-		
-		beam_loaded_tables = {
-			"assessments": "daily",
-			"transactions": "daily",
-			"cycles": "daily",
-			"messages": "daily"
-		}
-
-		if table_name in list(beam_loaded_tables.keys()):
-			table_scan = beam_loaded_tables[table_name]
-			beam_backfill_job = DataflowTemplateOperator(
-				task_id=f"postgres-beam-backfill-{table_name}",
-				template=f"gs://sql-to-bq-etl/beam_templates/postgres-backfill-{DATABASE_NAME}-{table_name}",
-				dataflow_default_options= {
-					'project': 'anyfin',
-					'region': 'europe-west1',
-					'numWorkers': '4',
-					'maxWorkers': '4',
-					'machineType': 'n1-standard-2'
-				},
-				parameters={
-					"destinationTable": f"anyfin:{DATABASE_NAME}{staging}.{table_name}_beam"
-				},
-				gcp_conn_id='postgres-bq-etl-con',
-				region='europe-west1',
-				dag=dag,
 			)
 
 

@@ -21,6 +21,11 @@ TABLES=(
     "main|cycles|offset|500000"
     "main|assessments|offset|5000"
     "main|transactions|timestamp|1"
+    "main|offers|offset|3000"
+    "main|signatures|offset|5000"
+    "main|statements|offset|50000"
+    "main|ddi_sessions|offset|100000"
+    "main|assessment_reviews|offset|100000"
 )
 
 for ENTRY in "${TABLES[@]}"

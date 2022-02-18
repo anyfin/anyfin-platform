@@ -38,6 +38,7 @@ import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO;
 public class ReadJdbc {
 
     private static final Logger LOG = LoggerFactory.getLogger(ReadJdbc.class);
+    private static final int BUFFERRUNS = 20;
 
     public interface BackfillerOptions extends PipelineOptions {
         @Description("Source Table")
@@ -100,7 +101,7 @@ public class ReadJdbc {
             int totalRows = Integer.parseInt(cnt.element());
             int intStepSize = Integer.parseInt(stepSize.get());
             //Adding two more offsets to make sure we don't miss newly created rows
-            for(int i = 0; i<(totalRows + 2*intStepSize); i+=intStepSize) {
+            for(int i = 0; i<(totalRows + BUFFERRUNS*intStepSize); i+=intStepSize) {
                 cnt.output(String.format("%s", i));
             }
         }
