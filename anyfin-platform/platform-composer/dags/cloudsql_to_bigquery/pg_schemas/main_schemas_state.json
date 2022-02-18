@@ -74,8 +74,9 @@
     },
     "ts_column" : "updated_at",
     "bq_partition_column": "created_at",
-    "backfill_method": "nested_export",
-    "chunksize": "5000"
+    "backfill_method": "beam_export",
+    "chunksize": "5000",
+    "ignore_sanity_check": true
   },
   "applications": {
     "schema": {
@@ -212,7 +213,8 @@
     },
     "ts_column": "updated_at",
     "bq_partition_column": "created_at",
-    "backfill_method": "direct_export"
+    "backfill_method": "beam_export",
+    "ignore_sanity_check": true
   },
   "ddi_providers": {
     "schema": {
@@ -328,7 +330,7 @@
     },
     "ts_column" : "created_at",
     "bq_partition_column": "created_at",
-    "backfill_method": "direct_export",
+    "backfill_method": "beam_export",
     "ignore_sanity_check": true
   },
   "payments": {
@@ -483,8 +485,9 @@
     },
     "ts_column": "created_at",
     "bq_partition_column": "created_at",
-    "backfill_method": "nested_export",
-    "chunksize": "50000"
+    "backfill_method": "beam_export",
+    "chunksize": "50000",
+    "ignore_sanity_check": true
   },
   "customer_alarms": {
     "schema": {
