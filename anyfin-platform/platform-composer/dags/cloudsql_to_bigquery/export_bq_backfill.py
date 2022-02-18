@@ -119,7 +119,7 @@ for DB in DATABASES_INFO:
 				'machineType': 'n1-standard-2'
 			},
 			parameters={
-				"destinationTable": f"anyfin:{DATABASE_NAME}{staging}.{table_name}"
+				"destinationTable": f"anyfin:{DATABASE_NAME}_staging.{table_name}"
 			},
 			gcp_conn_id='postgres-bq-etl-con',
 			region='europe-west1',
