@@ -48,7 +48,7 @@ dag = DAG(
 	catchup=False,
 	schedule_interval='0 13 * * SUN',
 	max_active_runs=1,
-	concurrency=3
+	concurrency=1
 )
 
 
@@ -110,7 +110,7 @@ for DB in DATABASES_INFO:
 	for table_name, content in backfill.get_beam_export_tables():
 		beam_backfill_job = DataflowTemplateOperator(
 			task_id=f"postgres-beam-backfill-{table_name}",
-			template=f"gs://sql-to-bq-etl/beam_templates/postgres-backfill-{DATABASE_NAME}-{table_name}",
+			template=f"gs://sql-to-bq-etl/beam_templates/postgres-backfill-{DATABASE_NAME}-{table_name}_raw",
 			dataflow_default_options= {
 				'project': 'anyfin',
 				'region': 'europe-west1',
