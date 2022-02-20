@@ -110,7 +110,7 @@ for DB in DATABASES_INFO:
 	for table_name, content in backfill.get_beam_export_tables():
 		beam_backfill_job = DataflowTemplateOperator(
 			task_id=f"postgres-beam-backfill-{table_name}",
-			template=f"gs://sql-to-bq-etl/beam_templates/postgres-backfill-{DATABASE_NAME}-{table_name}_raw",
+			template=f"gs://sql-to-bq-etl/beam_templates/postgres-backfill-{DATABASE_NAME}-{table_name}",
 			dataflow_default_options= {
 				'project': 'anyfin',
 				'region': 'europe-west1',
@@ -119,7 +119,7 @@ for DB in DATABASES_INFO:
 				'machineType': 'n1-standard-2'
 			},
 			parameters={
-				"destinationTable": f"anyfin:{DATABASE_NAME}_staging.{table_name}"
+				"destinationTable": f"anyfin:{DATABASE_NAME}_staging.{table_name}_raw"
 			},
 			gcp_conn_id='postgres-bq-etl-con',
 			region='europe-west1',
