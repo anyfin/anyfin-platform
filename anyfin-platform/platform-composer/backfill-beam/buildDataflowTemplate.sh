@@ -17,15 +17,15 @@ CREDENTIALS=$1
 # "main|cycles|offset|100000"
 # "main|transactions|timestamp|1|2017-10-10"
 TABLES=(
-    "main|messages|offset|100000"
-    "main|cycles|offset|500000"
-    "main|assessments|offset|5000"
-    "main|transactions|timestamp|1"
-    "main|offers|offset|3000"
-    "main|signatures|offset|5000"
-    "main|statements|offset|50000"
-    "main|ddi_sessions|offset|100000"
-    "main|assessment_reviews|offset|100000"
+    # "main|messages|offset|100000|id"
+    # "main|cycles|offset|500000|created_at"
+    # "main|assessments|timestamp|1|_"
+    "main|transactions|timestamp|1|_"
+    # "main|offers|offset|10000|created_at"
+    # "main|signatures|offset|10000|created_at"
+    # "main|statements|offset|50000|created_at"
+    # "main|ddi_sessions|offset|100000|created_at"
+    # "main|assessment_reviews|offset|100000|created_at"
 )
 
 for ENTRY in "${TABLES[@]}"
@@ -34,7 +34,8 @@ do
     TABLE_NAME="$(echo $ENTRY | cut -d '|' -f 2)"
     QUERY_BY="$(echo $ENTRY | cut -d '|' -f 3)"
     STEP_SIZE="$(echo $ENTRY | cut -d '|' -f 4)"
-    START_DATE="$(echo $ENTRY | cut -d '|' -f 5)"
+    ORDERED_BY="$(echo $ENTRY | cut -d '|' -f 5)"
+    START_DATE="$(echo $ENTRY | cut -d '|' -f 6)"
     if [ ! -z "$START_DATE" ]; then START_DATE="--startDate=$START_DATE"; fi
     echo $START_DATE
 	mvn compile exec:java \
@@ -45,6 +46,7 @@ do
                 --templateLocation=gs://sql-to-bq-etl/beam_templates/postgres-backfill-$DB-$TABLE_NAME \
                 --sourceTable=$TABLE_NAME \
                 --stepSize=$STEP_SIZE \
+                --orderedBy=$ORDERED_BY \
                 --queryBy=$QUERY_BY \
                 --gcpTempLocation=gs://sql-to-bq-etl/beam_backfill/Temp/ \
                 --runner=DataflowRunner \

@@ -268,7 +268,7 @@
     },
     "ts_column" : "updated_at",
     "bq_partition_column": "created_at",
-    "backfill_method": "nested_export",
+    "backfill_method": "beam_export",
     "chunksize": "30000"
   },
   "external_statements": {
@@ -465,7 +465,7 @@
     },
     "ts_column": "created_at",
     "bq_partition_column": "created_at",
-    "backfill_method": "nested_export",
+    "backfill_method": "beam_export",
     "chunksize": "30000"
   },
   "messages": {
@@ -554,7 +554,7 @@
     },
     "ts_column": "COALESCE(updated_at, created_at)",
     "bq_partition_column": "created_at",
-    "backfill_method": "direct_export"
+    "backfill_method": "beam_export"
   },
   "custom_terms": {
     "schema": {
@@ -638,7 +638,7 @@
     },
     "ts_column" : "updated_at",
     "bq_partition_column": "created_at",
-    "backfill_method": "direct_export"
+    "backfill_method": "beam_export"
   },
   "assessment_reviews": {
     "schema": {
@@ -655,7 +655,7 @@
     },
     "ts_column": "created_at",
     "bq_partition_column": "created_at",
-    "backfill_method": "direct_export"
+    "backfill_method": "beam_export"
   },
   "customer_events": {
     "schema": {

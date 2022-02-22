@@ -1,7 +1,7 @@
 import os
-from datetime import datetime, timedelta
 import psycopg2
-
+import datetime
+from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.models import Variable
 from airflow.operators.python_operator import PythonOperator
@@ -108,6 +108,9 @@ for DB in DATABASES_INFO:
 	split_tasks = []
 
 	for table_name, content in backfill.get_beam_export_tables():
+		daily_load = True if table_name in daily_tables else False
+
+		raw = '_raw' if daily_load else ''
 		beam_backfill_job = DataflowTemplateOperator(
 			task_id=f"postgres-beam-backfill-{table_name}",
 			template=f"gs://sql-to-bq-etl/beam_templates/postgres-backfill-{DATABASE_NAME}-{table_name}",
@@ -119,7 +122,8 @@ for DB in DATABASES_INFO:
 				'machineType': 'n1-standard-2'
 			},
 			parameters={
-				"destinationTable": f"anyfin:{DATABASE_NAME}_staging.{table_name}_raw"
+				"destinationTable": f"anyfin:{DATABASE_NAME}_staging.{table_name}{raw}",
+				"currentDate": (datetime.date.today() + datetime.timedelta(days=1)).strftime('%y-%m-%d')
 			},
 			gcp_conn_id='postgres-bq-etl-con',
 			region='europe-west1',
