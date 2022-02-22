@@ -17,15 +17,15 @@ CREDENTIALS=$1
 # "main|cycles|offset|100000"
 # "main|transactions|timestamp|1|2017-10-10"
 TABLES=(
-    # "main|messages|offset|100000|id"
-    # "main|cycles|offset|500000|created_at"
-    # "main|assessments|timestamp|1|_"
+    "main|messages|offset|100000|id"
+    "main|cycles|offset|500000|created_at"
+    "main|assessments|timestamp|1|_"
     "main|transactions|timestamp|1|_"
-    # "main|offers|offset|10000|created_at"
-    # "main|signatures|offset|10000|created_at"
-    # "main|statements|offset|50000|created_at"
-    # "main|ddi_sessions|offset|100000|created_at"
-    # "main|assessment_reviews|offset|100000|created_at"
+    "main|offers|offset|10000|created_at"
+    "main|signatures|offset|10000|created_at"
+    "main|statements|offset|50000|created_at"
+    "main|ddi_sessions|offset|100000|created_at"
+    "main|assessment_reviews|offset|100000|created_at"
 )
 
 for ENTRY in "${TABLES[@]}"
