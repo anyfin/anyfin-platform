@@ -1,6 +1,5 @@
 import os
 import psycopg2
-import datetime
 from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.models import Variable
@@ -123,7 +122,7 @@ for DB in DATABASES_INFO:
 			},
 			parameters={
 				"destinationTable": f"anyfin:{DATABASE_NAME}_staging.{table_name}{raw}",
-				"currentDate": (datetime.date.today() + datetime.timedelta(days=1)).strftime('%y-%m-%d')
+				"currentDate": datetime.today().strftime('%Y-%m-%d')
 			},
 			gcp_conn_id='postgres-bq-etl-con',
 			region='europe-west1',
