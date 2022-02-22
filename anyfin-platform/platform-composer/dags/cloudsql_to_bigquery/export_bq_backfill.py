@@ -141,7 +141,7 @@ for DB in DATABASES_INFO:
 			dag=dag
 		)
 
-		bq_load_final = BigQueryToBigQueryOperator(
+		load_from_backup = BigQueryToBigQueryOperator(
 			task_id=f'load_{DATABASE_NAME}_{table_name}_from_backup',
 			create_disposition='CREATE_NEVER',
 			write_disposition='WRITE_TRUNCATE',
@@ -151,7 +151,7 @@ for DB in DATABASES_INFO:
 			dag=dag
 		)
 
-		beam_backfill_job >> check_against_prod >> bq_load_final
+		beam_backfill_job >> check_against_prod >> load_from_backup
 
 
 	# Iterate over all tables to backfill and create tasks
