@@ -107,9 +107,8 @@ for DB in DATABASES_INFO:
 	split_tasks = []
 
 	for table_name, content in backfill.get_beam_export_tables():
-		daily_load = True if table_name in daily_tables else False
-
-		raw = '_raw' if daily_load else ''
+		raw = '_raw'
+		backup = '_backup'
 		beam_backfill_job = DataflowTemplateOperator(
 			task_id=f"postgres-beam-backfill-{table_name}",
 			template=f"gs://sql-to-bq-etl/beam_templates/postgres-backfill-{DATABASE_NAME}-{table_name}",
@@ -121,7 +120,7 @@ for DB in DATABASES_INFO:
 				'machineType': 'n1-standard-2'
 			},
 			parameters={
-				"destinationTable": f"anyfin:{DATABASE_NAME}_staging.{table_name}{raw}_backup",
+				"destinationTable": f"anyfin:{DATABASE_NAME}_staging.{table_name}{raw}{backup}",
 				"currentDate": datetime.today().strftime('%Y-%m-%d')
 			},
 			gcp_conn_id='postgres-bq-etl-con',
@@ -133,7 +132,7 @@ for DB in DATABASES_INFO:
 			task_id=f'check_{DATABASE_NAME}_{table_name}_against_prod',
 			sql=f'''
 			with
-			backup as (SELECT DATE(created_at) dt, count( *) cnt FROM `anyfin.{DATABASE_NAME}_staging.{table_name}{raw}_backup` group by 1),
+			backup as (SELECT DATE(created_at) dt, count( *) cnt FROM `anyfin.{DATABASE_NAME}_staging.{table_name}{raw}{backup}` group by 1),
 			prod as (SELECT DATE(created_at) dt, count(*) cnt FROM `anyfin.{DATABASE_NAME}.{table_name}` group by 1),
 			final_check as (select  p.dt, p.cnt - b.cnt diff from prod p left join backup b on p.dt=b.dt)
 			select count(*)=0 from final_check where (diff<>0 or diff is null) and dt < CURRENT_DATE()
@@ -145,7 +144,7 @@ for DB in DATABASES_INFO:
 			task_id=f'load_{DATABASE_NAME}_{table_name}_from_backup',
 			create_disposition='CREATE_NEVER',
 			write_disposition='WRITE_TRUNCATE',
-			source_project_dataset_tables=f'{DATABASE_NAME}_staging.{table_name}{raw}_backup',
+			source_project_dataset_tables=f'{DATABASE_NAME}_staging.{table_name}{raw}{backup}',
 			destination_project_dataset_table=f'{DATABASE_NAME}_staging.{table_name}{raw}',
 			bigquery_conn_id='postgres-bq-etl-con',
 			dag=dag
