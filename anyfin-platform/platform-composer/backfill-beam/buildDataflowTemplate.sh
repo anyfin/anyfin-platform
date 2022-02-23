@@ -1,9 +1,13 @@
+#!/bin/bash
 # Run below with arguments, under the /backfill-beam directory 
 # $1 - main.json    | This will be the credentials file containing: {"username": <>, "password": <> ,"location": <>}
 #                     for the DB. location is the DB URI, i.e. "jdbc:postgresql://<url>:<port>/<db>"
+# $2 - main         | This will be the database for which we need to build the templates. Information is fetched from
+#                     the respective _schemas_state.json file (e.g. for main that will be main_schemas_state.json)
 # example command
-# sh buildDataflowTemplate.sh main.json
+# sh buildDataflowTemplate.sh main.json main
 CREDENTIALS=$1
+DB=$2
 
 # TABLES - An array with all the tables to create templates for
 # The format of each entry should be:
@@ -16,20 +20,30 @@ CREDENTIALS=$1
 # entry examples:
 # "main|cycles|offset|100000"
 # "main|transactions|timestamp|1|2017-10-10"
-TABLES=(
-    "main|messages|offset|100000|id"
-    "main|cycles|offset|500000|created_at"
-    "main|assessments|timestamp|1|_"
-    "main|transactions|timestamp|1|_"
-    "main|offers|offset|10000|created_at"
-    "main|signatures|offset|10000|created_at"
-    "main|statements|offset|50000|created_at"
-    "main|ddi_sessions|offset|100000|created_at"
-    "main|assessment_reviews|offset|100000|created_at"
-)
+
+# NOTE: To run the script below make sure you have installed jq command-line JSON processor in your linux/macOS environment
+
+echo "Fetching DB configuration."
+TABLES=()
+schemas_file="../dags/cloudsql_to_bigquery/pg_schemas/${DB}_schemas_state.json"
+while read table;
+do
+    backfill_method=$(cat ${schemas_file} | jq ".${table}.backfill_method")
+    if [[ $backfill_method == "\"beam_export\"" ]]; then 
+        query_by=$(cat ${schemas_file} | jq ".${table}.query_by")
+        step_size=$(cat ${schemas_file} | jq ".${table}.step_size")
+        ordered_by=$(cat ${schemas_file} | jq ".${table}.ordered_by")
+        table_entry="$DB|$table|$query_by|$step_size|$ordered_by"
+        table_entry_cleared=$(echo $table_entry | tr -d \")
+        # echo "$table_entry_cleared"
+        TABLES+=("$table_entry_cleared")
+    fi
+done < <(cat ${schemas_file} | jq 'keys[]')
+echo "DB configuration fetched. Building the templates."
 
 for ENTRY in "${TABLES[@]}"
 do
+    echo $ENTRY
     DB="$(echo $ENTRY | cut -d '|' -f 1)"
     TABLE_NAME="$(echo $ENTRY | cut -d '|' -f 2)"
     QUERY_BY="$(echo $ENTRY | cut -d '|' -f 3)"
