@@ -18,8 +18,8 @@ DB=$2
 #                                                               If we don't query by offset any value will be fine
 # (optional) start date - By default, if we query by timestamp, first date to query for will be the 2017-10-26. 
 # entry examples:
-# "main|cycles|offset|100000"
-# "main|transactions|timestamp|1|2017-10-10"
+# "main|cycles|offset|100000|created_at"
+# "main|transactions|timestamp|1|_"
 
 # NOTE: To run the script below make sure you have installed jq command-line JSON processor in your linux/macOS environment
 
