@@ -2584,6 +2584,16 @@ resource "google_bigquery_table" "statements_raw" {
 	},
 	{
 		"mode": "NULLABLE",
+		"name": "sendouts_schedule_log",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "status",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
 		"name": "min_electricity_payment",
 		"type": "NUMERIC"
 	},
@@ -3078,6 +3088,16 @@ resource "google_bigquery_table" "assessment_reviews_raw" {
 		"mode": "NULLABLE",
 		"name": "amortization_rate",
 		"type": "NUMERIC"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "acknowledged_warnings",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "sendout_payload",
+		"type": "STRING"
 	},
 	{
 		"mode": "NULLABLE",

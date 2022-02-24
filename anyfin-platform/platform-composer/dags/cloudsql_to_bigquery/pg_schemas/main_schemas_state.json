@@ -75,6 +75,9 @@
     "ts_column" : "updated_at",
     "bq_partition_column": "created_at",
     "backfill_method": "beam_export",
+    "query_by": "timestamp",
+    "step_size": "1",
+    "ordered_by": "_",
     "chunksize": "5000",
     "ignore_sanity_check": true
   },
@@ -214,6 +217,9 @@
     "ts_column": "updated_at",
     "bq_partition_column": "created_at",
     "backfill_method": "beam_export",
+    "query_by": "offset",
+    "step_size": "500000",
+    "ordered_by": "created_at",
     "ignore_sanity_check": true
   },
   "ddi_providers": {
@@ -268,7 +274,10 @@
     },
     "ts_column" : "updated_at",
     "bq_partition_column": "created_at",
-    "backfill_method": "nested_export",
+    "backfill_method": "beam_export",
+    "query_by": "offset",
+    "step_size": "10000",
+    "ordered_by": "created_at",
     "chunksize": "30000"
   },
   "external_statements": {
@@ -331,6 +340,9 @@
     "ts_column" : "created_at",
     "bq_partition_column": "created_at",
     "backfill_method": "beam_export",
+    "query_by": "timestamp",
+    "step_size": "1",
+    "ordered_by": "_",
     "ignore_sanity_check": true
   },
   "payments": {
@@ -465,7 +477,10 @@
     },
     "ts_column": "created_at",
     "bq_partition_column": "created_at",
-    "backfill_method": "nested_export",
+    "backfill_method": "beam_export",
+    "query_by": "offset",
+    "step_size": "10000",
+    "ordered_by": "created_at",
     "chunksize": "30000"
   },
   "messages": {
@@ -487,6 +502,9 @@
     "bq_partition_column": "created_at",
     "backfill_method": "beam_export",
     "chunksize": "50000",
+    "query_by": "offset",
+    "step_size": "100000",
+    "ordered_by": "id",
     "ignore_sanity_check": true
   },
   "customer_alarms": {
@@ -548,13 +566,18 @@
       "creditor_migration": "boolean", 
       "country_code": "character varying", 
       "updated_at": "timestamp with time zone",
+      "sendouts_schedule_log":"jsonb",
+      "status":"text",
       "min_electricity_payment":"numeric", 
       "added_electricity_principal":"numeric", 
       "sum_electricity_payments":"numeric"
     },
     "ts_column": "COALESCE(updated_at, created_at)",
     "bq_partition_column": "created_at",
-    "backfill_method": "direct_export"
+    "backfill_method": "beam_export",
+    "query_by": "offset",
+    "step_size": "50000",
+    "ordered_by": "created_at"
   },
   "custom_terms": {
     "schema": {
@@ -638,7 +661,10 @@
     },
     "ts_column" : "updated_at",
     "bq_partition_column": "created_at",
-    "backfill_method": "direct_export"
+    "backfill_method": "beam_export",
+    "query_by": "offset",
+    "step_size": "100000",
+    "ordered_by": "created_at"
   },
   "assessment_reviews": {
     "schema": {
@@ -651,11 +677,16 @@
       "comment":"text", 
       "interest_rate":"numeric", 
       "monthly_fee":"numeric", 
-      "amortization_rate":"numeric"
+      "amortization_rate":"numeric",
+      "acknowledged_warnings":"jsonb",
+      "sendout_payload":"jsonb"
     },
     "ts_column": "created_at",
     "bq_partition_column": "created_at",
-    "backfill_method": "direct_export"
+    "backfill_method": "beam_export",
+    "query_by": "offset",
+    "step_size": "100000",
+    "ordered_by": "created_at"
   },
   "customer_events": {
     "schema": {

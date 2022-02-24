@@ -8,10 +8,7 @@ import org.apache.beam.sdk.io.jdbc.JdbcIO;
 
 import java.nio.file.Paths;
 import java.sql.PreparedStatement;
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 
@@ -23,6 +20,7 @@ import org.apache.beam.sdk.options.Description;
 import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.apache.beam.sdk.options.ValueProvider;
+import org.apache.beam.sdk.options.Validation.Required;
 import org.apache.beam.sdk.options.ValueProvider.StaticValueProvider;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.GroupByKey;
@@ -48,6 +46,7 @@ public class ReadJdbc {
 
         @Description("Destination Table - <project>:<dataset>.<table>")
         @Default.String("project:dataset.table")
+        @Required
         ValueProvider<String> getDestinationTable();
         void setDestinationTable(ValueProvider<String> value);
 
@@ -66,6 +65,17 @@ public class ReadJdbc {
         StaticValueProvider<String> getQueryBy();
         void setQueryBy(StaticValueProvider<String> value);
 
+        @Description("Ordered By - If queried by offset, order by this column")
+        @Default.String("id")
+        StaticValueProvider<String> getOrderedBy();
+        void setOrderedBy(StaticValueProvider<String> value);
+
+        @Description("Current Date")
+        @Default.String("2022-02-22")
+        @Required
+        ValueProvider<String> getCurrentDate();
+        void setCurrentDate(ValueProvider<String> value);
+
         @Description("Start Date - The earliest date of the query by timestamp in the underlying table")
         @Default.String("2017-10-26")
         String getStartDate();
@@ -74,9 +84,9 @@ public class ReadJdbc {
     
     private static final String driver = "org.postgresql.Driver";
 
-    static class PrintFn extends DoFn<KV<String, Iterable<Integer>>, KV<String, Iterable<Integer>>> {
+    static class PrintFn extends DoFn<String, String> {
         @ProcessElement
-        public void processElement(@Element KV<String, Iterable<Integer>> query, OutputReceiver<KV<String, Iterable<Integer>>> out) {
+        public void processElement(@Element String query, OutputReceiver<String> out) {
           System.out.println(query);
           out.output(query);
         }
@@ -126,6 +136,22 @@ public class ReadJdbc {
         }
     }
 
+    static class CreateDatesFn extends DoFn<String, String> {
+        @ProcessElement
+        public void processElement(ProcessContext cnt) {
+            BackfillerOptions options  = cnt.getPipelineOptions().as(BackfillerOptions.class);
+            DateRange dateRange = new DateRange(LocalDate.parse(options.getStartDate()), LocalDate.parse("2100-02-01"));
+            List<String> dates = dateRange.toStringList();
+            // Implemented to always run the final iteartion with the current date
+            cnt.output(dates.get(0));
+            int i = 1 ;
+            while(i < dates.size() && !dates.get(i-1).equals((options.getCurrentDate().get()).replace("-", ""))) {
+                cnt.output(dates.get(i));
+                i ++;
+            }
+        }
+    }
+
     private static class DBConfig {
         private String location;
         private String username;
@@ -146,24 +172,15 @@ public class ReadJdbc {
 
     static void runReadJdbc(BackfillerOptions options) {
 
-        String currentDate = Instant.now().atZone(ZoneOffset.UTC).format(DateTimeFormatter.ISO_LOCAL_DATE);
-
-        DateRange dateRange = new DateRange(LocalDate.parse(options.getStartDate()), LocalDate.parse(currentDate));
-        List<String> dates = dateRange.toStringList();
-
-
         DBConfig dbConfig = new DBConfig();
         try {
             ObjectMapper mapper = new ObjectMapper();
             dbConfig = mapper.readValue(Paths.get(options.getCredentialsFile().get()).toFile(), DBConfig.class);
-            System.out.println(dbConfig);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
 
         Pipeline pipeline = Pipeline.create(options);
-
-        System.out.println(options.getQueryBy().get());
 
         if (options.getQueryBy().get().equals("offset")) {
             pipeline
@@ -194,9 +211,10 @@ public class ReadJdbc {
                     }
                     })
                     .withOutputParallelization(false)
-                    .withQuery(String.format("%s %s limit %s %s",
+                    .withQuery(String.format("%s %s order by %s limit %s %s",
                         "select *, now() as _ingested_ts from ", 
                         options.getSourceTable().get(),
+                        options.getOrderedBy().get(),
                         options.getStepSize().get(), 
                         " offset ?"))
                     .withRowMapper((JdbcIO.RowMapper<TableRow>) resultSet -> {
@@ -224,7 +242,9 @@ public class ReadJdbc {
         }
         else {
             pipeline
-                .apply("Generate queries", Create.of(dates)).setCoder(StringUtf8Coder.of())
+                .apply("Input Query", Create.of("queries"))
+                .apply("Generate queries", ParDo.of(new CreateDatesFn()))
+                // .apply(ParDo.of(new PrintFn()));
                 .apply("Split to KV", ParDo.of(new ToKVFn()))
                 .apply("Reshuffle", GroupByKey.create())
                 .apply("Read from DB", JdbcIO.<KV<String,Iterable<Integer>>, TableRow>readAll()
@@ -283,7 +303,10 @@ public class ReadJdbc {
 
     public static void main(String[] args) {
 
-        BackfillerOptions options = PipelineOptionsFactory.fromArgs(args).as(BackfillerOptions.class);
+        BackfillerOptions options = PipelineOptionsFactory
+                                        .fromArgs(args)
+                                        .withValidation()
+                                        .as(BackfillerOptions.class);
 
         runReadJdbc(options);
     }
