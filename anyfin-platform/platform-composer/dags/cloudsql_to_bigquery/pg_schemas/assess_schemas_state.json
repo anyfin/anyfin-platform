@@ -7,8 +7,11 @@
             "data": "character varying",
             "ts": "timestamp without time zone"
         },
-        "ts_column": "created_at",
-        "bq_partition_column": "created_at",
-        "backfill_method": "beam_export"
+        "ts_column": "ts",
+        "bq_partition_column": "ts",
+        "backfill_method": "beam_export",
+        "query_by": "offset",
+        "step_size": "50000",
+        "ordered_by": "ts"
     }
 }

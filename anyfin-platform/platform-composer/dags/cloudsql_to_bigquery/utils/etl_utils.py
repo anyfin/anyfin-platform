@@ -26,6 +26,18 @@ class ETL:
     def deduplication_success(self, **context):
         return True
 
+    def get_pg_columns(self, table):
+        schema = self.TABLES.get(table).get('schema')
+        columns = [f"{k}::timestamp as {k}" if 'timestamp' in schema.get(k) else f"{k} as {k}" for k in list(schema.keys())]
+        columns.append('now()::timestamp as _ingested_ts')
+        return ', '.join(list(columns))
+
+    def get_bq_columns(self, table):
+        schema = self.TABLES.get(table).get('schema')
+        columns = [f"CAST({k} AS TIMESTAMP) as {k}" if 'timestamp' in schema.get(k) else k for k in list(schema.keys())]
+        columns.append("CAST(_ingested_ts AS TIMESTAMP) as _ingested_ts")
+        return ', '.join(list(columns))
+
     # Extract a list of tables seperated by if they have been updated or not
     # Return: Dictionary with extractable tables and tables containing unknown columns
 
