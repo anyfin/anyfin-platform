@@ -7,7 +7,7 @@ from airflow.operators.python_operator import PythonOperator
 from airflow.utils.trigger_rule import TriggerRule
 from airflow.contrib.operators.bigquery_check_operator import BigQueryCheckOperator
 from airflow.contrib.operators.bigquery_to_bigquery import BigQueryToBigQueryOperator
-from airflow.contrib.operators.gcp_compute_operator import GceInstanceStartOperator, GceInstanceStopOperator
+# from airflow.contrib.operators.gcp_compute_operator import GceInstanceStartOperator, GceInstanceStopOperator
 from airflow.contrib.operators.gcs_delete_operator import GoogleCloudStorageDeleteOperator
 from airflow.contrib.operators.gcs_to_bq import GoogleCloudStorageToBigQueryOperator
 from airflow.operators.bash_operator import BashOperator
@@ -51,31 +51,31 @@ dag = DAG(
 )
 
 
-gce_instance_start_task = GceInstanceStartOperator(
-	project_id='anyfin-platform',
-	zone='europe-west1-b',
-	resource_id='postgres-bq-backfill',
-	task_id='gcp_compute_start',
-	trigger_rule=TriggerRule.ONE_SUCCESS,
-	dag=dag
-)
+# gce_instance_start_task = GceInstanceStartOperator(
+# 	project_id='anyfin-platform',
+# 	zone='europe-west1-b',
+# 	resource_id='postgres-bq-backfill',
+# 	task_id='gcp_compute_start',
+# 	trigger_rule=TriggerRule.ONE_SUCCESS,
+# 	dag=dag
+# )
 
-upload_convertion_script_to_instance_task = BashOperator(
-	task_id='upload_convertion_script_to_instance',
-	bash_command=f'gcloud compute scp --zone "europe-west1-b" --project "anyfin-platform" \
-				  "{DAG_PATH}/utils/convert_csv_to_json.py" \
-			      postgres-bq-backfill:/home/airflow/ ',
-	dag=dag
-)
+# upload_convertion_script_to_instance_task = BashOperator(
+# 	task_id='upload_convertion_script_to_instance',
+# 	bash_command=f'gcloud compute scp --zone "europe-west1-b" --project "anyfin-platform" \
+# 				  "{DAG_PATH}/utils/convert_csv_to_json.py" \
+# 			      postgres-bq-backfill:/home/airflow/ ',
+# 	dag=dag
+# )
 
-gce_instance_stop_task = GceInstanceStopOperator(
-	project_id='anyfin-platform',
-	zone='europe-west1-b',
-	resource_id='postgres-bq-backfill',
-	task_id='gcp_compute_stop',
-	trigger_rule=TriggerRule.ALL_DONE,
-	dag=dag
-)
+# gce_instance_stop_task = GceInstanceStopOperator(
+# 	project_id='anyfin-platform',
+# 	zone='europe-west1-b',
+# 	resource_id='postgres-bq-backfill',
+# 	task_id='gcp_compute_stop',
+# 	trigger_rule=TriggerRule.ALL_DONE,
+# 	dag=dag
+# )
 
 
 
@@ -286,11 +286,11 @@ for DB in DATABASES_INFO:
 		if table_name in sanity_check_tables:
 			postgres_check >> sanity_check_bq
 			bq_load_backup >> sanity_check_bq >> bq_load_final
-		if nested:
-			task_delete_old_json_extract >> task_export_table
-			task_export_table >> submit_python_split_task >> bq_load_backup
-			task_export_table >> gce_instance_start_task
-			upload_convertion_script_to_instance_task >> task_upload_schema_to_instance >> submit_python_split_task >> gce_instance_stop_task
+		# if nested:
+		# 	task_delete_old_json_extract >> task_export_table
+		# 	task_export_table >> submit_python_split_task >> bq_load_backup
+		# 	task_export_table >> gce_instance_start_task
+		# 	upload_convertion_script_to_instance_task >> task_upload_schema_to_instance >> submit_python_split_task >> gce_instance_stop_task
 			
 
-gce_instance_start_task >> upload_convertion_script_to_instance_task
+# gce_instance_start_task >> upload_convertion_script_to_instance_task
