@@ -3091,16 +3091,6 @@ resource "google_bigquery_table" "assessment_reviews_raw" {
 	},
 	{
 		"mode": "NULLABLE",
-		"name": "acknowledged_warnings",
-		"type": "STRING"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "sendout_payload",
-		"type": "STRING"
-	},
-	{
-		"mode": "NULLABLE",
 		"name": "_ingested_ts",
 		"type": "TIMESTAMP"
 	}
