@@ -6,7 +6,10 @@ import org.apache.beam.sdk.coders.StringUtf8Coder;
 import org.apache.beam.sdk.io.gcp.bigquery.TableRowJsonCoder;
 import org.apache.beam.sdk.io.jdbc.JdbcIO;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.sql.PreparedStatement;
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -27,6 +30,8 @@ import org.apache.beam.sdk.transforms.GroupByKey;
 import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.transforms.Create;
 import org.apache.beam.sdk.values.KV;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,6 +85,11 @@ public class ReadJdbc {
         @Default.String("2017-10-26")
         String getStartDate();
         void setStartDate(String value);
+
+        @Description("DB name - The name of the DB to access tables from")
+        @Default.String("main")
+        StaticValueProvider<String> getDbName();
+        void setDbName(StaticValueProvider<String> value);
     }
     
     private static final String driver = "org.postgresql.Driver";
@@ -152,6 +162,14 @@ public class ReadJdbc {
         }
     }
 
+    private static String parseJSONFile(String db, String table) throws JSONException, IOException {
+        String currentDir = System.getProperty("user.dir").replace("backfill-beam", "");
+        String fullPath = String.format("%s/dags/cloudsql_to_bigquery/pg_schemas/%s_schemas_state.json", currentDir, db);
+        Path path = Paths.get(fullPath);
+        String content = new String(Files.readAllBytes(path));
+        return new JSONObject(content).getJSONObject(table).getJSONObject("schema").names().join(", ").replace("\"", "");
+    }
+
     private static class DBConfig {
         private String location;
         private String username;
@@ -170,7 +188,7 @@ public class ReadJdbc {
         }
     }
 
-    static void runReadJdbc(BackfillerOptions options) {
+    static void runReadJdbc(BackfillerOptions options) throws JSONException, IOException {
 
         DBConfig dbConfig = new DBConfig();
         try {
@@ -179,6 +197,8 @@ public class ReadJdbc {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+
+        String queryColumns = parseJSONFile(options.getDbName().get(), options.getSourceTable().get());
 
         Pipeline pipeline = Pipeline.create(options);
 
@@ -212,7 +232,7 @@ public class ReadJdbc {
                     })
                     .withOutputParallelization(false)
                     .withQuery(String.format("%s %s order by %s limit %s %s",
-                        "select *, now() as _ingested_ts from ", 
+                        String.format("select %s, now() as _ingested_ts from ", queryColumns), 
                         options.getSourceTable().get(),
                         options.getOrderedBy().get(),
                         options.getStepSize().get(), 
@@ -262,7 +282,7 @@ public class ReadJdbc {
                     })
                     .withOutputParallelization(false)
                     .withQuery(String.format("%s %s %s", 
-                        "select *, now() as _ingested_ts from", 
+                        String.format("select %s, now() as _ingested_ts from", queryColumns), 
                         options.getSourceTable().get(), 
                         "where created_at >= to_date(?::text, 'YYYYMMDD')::date and created_at < (to_date(?::text, 'YYYYMMDD')::date + 1)")
                     )
@@ -301,7 +321,7 @@ public class ReadJdbc {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws JSONException, IOException {
 
         BackfillerOptions options = PipelineOptionsFactory
                                         .fromArgs(args)
