@@ -11,7 +11,7 @@
         "bq_partition_column": "ts",
         "backfill_method": "beam_export",
         "query_by": "offset",
-        "step_size": "50000",
-        "ordered_by": "ts"
+        "step_size": "3000",
+        "ordered_by": "id"
     }
 }
