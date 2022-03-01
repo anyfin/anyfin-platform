@@ -62,6 +62,7 @@ do
                 --stepSize=$STEP_SIZE \
                 --orderedBy=$ORDERED_BY \
                 --queryBy=$QUERY_BY \
+                --dbName=$DB \
                 --gcpTempLocation=gs://sql-to-bq-etl/beam_backfill/Temp/ \
                 --runner=DataflowRunner \
                 --credentialsFile=$CREDENTIALS \
