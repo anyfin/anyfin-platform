@@ -25,8 +25,28 @@
       },
       "ts_column": "updated_at",
       "bq_partition_column": "created_at",
-      "backfill_method": "direct_export",
+      "backfill_method": "beam_export",
+      "query_by": "offset",
+      "step_size": "10000",
+      "ordered_by": "id",
       "ignore_sanity_check": true
+    },
+    "sendout_events": {
+      "schema": {
+        "id":"integer", 
+        "created_at":"timestamp with time zone", 
+        "updated_at":"timestamp with time zone", 
+        "sendout_id":"integer", 
+        "source":"text", 
+        "event":"text", 
+        "data":"jsonb"
+      },
+      "ts_column": "updated_at",
+      "bq_partition_column": "created_at",
+      "backfill_method": "beam_export",
+      "query_by": "offset",
+      "step_size": "20000",
+      "ordered_by": "id"
     },
     "sendout_settings": {
       "schema": {
