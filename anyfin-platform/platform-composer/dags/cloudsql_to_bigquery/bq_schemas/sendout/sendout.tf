@@ -129,6 +129,67 @@ EOF
 }
 
 
+resource "google_bigquery_table" "sendout_events_raw" {
+	dataset_id = "sendout_staging"
+	table_id   = "sendout_events_raw"
+	project    = "anyfin"
+
+	labels = {
+		env = "default"
+	}
+
+	time_partitioning { 
+    	type = "DAY" 
+		field = "created_at" 
+	}
+
+	schema = <<EOF
+[
+	{
+		"mode": "NULLABLE",
+		"name": "id",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "created_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "updated_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "sendout_id",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "source",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "event",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "data",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "_ingested_ts",
+		"type": "TIMESTAMP"
+	}
+]
+EOF
+}
+
+
 resource "google_bigquery_table" "sendout_settings_raw" {
 	dataset_id = "sendout_staging"
 	table_id   = "sendout_settings_raw"
