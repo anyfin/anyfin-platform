@@ -139,7 +139,10 @@
         "kyc_answered":"boolean", 
         "external_account_created":"boolean", 
         "direct_debit_mandate_created":"boolean", 
-        "direct_debit_mandate_status":"character varying"
+        "direct_debit_mandate_status":"character varying", 
+        "external_account_created_at":"date", 
+        "mandate_created_at":"date", 
+        "mandate_established_at":"date"
       },
       "bq_partition_column": "updated_at",
       "ts_column": "updated_at",

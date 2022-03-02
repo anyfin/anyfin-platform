@@ -650,6 +650,21 @@ resource "google_bigquery_table" "customer_external_facts_raw" {
 	},
 	{
 		"mode": "NULLABLE",
+		"name": "external_account_created_at",
+		"type": "DATE"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "mandate_created_at",
+		"type": "DATE"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "mandate_established_at",
+		"type": "DATE"
+	},
+	{
+		"mode": "NULLABLE",
 		"name": "_ingested_ts",
 		"type": "TIMESTAMP"
 	}
