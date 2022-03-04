@@ -1851,11 +1851,6 @@ resource "google_bigquery_table" "customer_kalp_input_raw" {
 	},
 	{
 		"mode": "NULLABLE",
-		"name": "income",
-		"type": "INTEGER"
-	},
-	{
-		"mode": "NULLABLE",
 		"name": "has_spouse",
 		"type": "BOOLEAN"
 	},
@@ -1871,12 +1866,12 @@ resource "google_bigquery_table" "customer_kalp_input_raw" {
 	},
 	{
 		"mode": "NULLABLE",
-		"name": "rent",
+		"name": "rent_monthly",
 		"type": "INTEGER"
 	},
 	{
 		"mode": "NULLABLE",
-		"name": "debt",
+		"name": "debt_monthly",
 		"type": "INTEGER"
 	},
 	{
@@ -1906,8 +1901,13 @@ resource "google_bigquery_table" "customer_kalp_input_raw" {
 	},
 	{
 		"mode": "NULLABLE",
-		"name": "income_type",
-		"type": "STRING"
+		"name": "income_gross_monthly",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "income_net_monthly",
+		"type": "INTEGER"
 	},
 	{
 		"mode": "NULLABLE",
@@ -2581,16 +2581,6 @@ resource "google_bigquery_table" "statements_raw" {
 		"mode": "NULLABLE",
 		"name": "updated_at",
 		"type": "TIMESTAMP"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "sendouts_schedule_log",
-		"type": "STRING"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "status",
-		"type": "STRING"
 	},
 	{
 		"mode": "NULLABLE",
