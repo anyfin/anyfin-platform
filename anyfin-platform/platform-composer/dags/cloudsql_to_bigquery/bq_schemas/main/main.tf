@@ -3449,3 +3449,295 @@ EOF
 }
 
 
+resource "google_bigquery_table" "payouts_raw" {
+	dataset_id = "main_staging"
+	table_id   = "payouts_raw"
+	project    = "anyfin"
+
+	labels = {
+		env = "default"
+	}
+
+	time_partitioning { 
+    	type = "DAY" 
+		field = "created_at" 
+	}
+
+	schema = <<EOF
+[
+	{
+		"mode": "NULLABLE",
+		"name": "id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "created_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "updated_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "type",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "status",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "transfer_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "customer_id",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "payment_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "payout_account",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "payment_type",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "account_type",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "account_number",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "reference",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "amount",
+		"type": "NUMERIC"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "currency",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "allocated_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "expected_payout_date",
+		"type": "DATE"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "rejected_reason",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "admin_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "comment",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "product",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "receiver_name",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "country_code",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "rejected_by",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "failed_reason",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "initial_signed_by_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "initial_signed_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "signed_off_by_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "signed_off_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "creditor_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "allocation_needed",
+		"type": "BOOLEAN"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "completed_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "application_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "bank_transaction_date",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "_ingested_ts",
+		"type": "TIMESTAMP"
+	}
+]
+EOF
+}
+
+
+resource "google_bigquery_table" "transfers_raw" {
+	dataset_id = "main_staging"
+	table_id   = "transfers_raw"
+	project    = "anyfin"
+
+	labels = {
+		env = "default"
+	}
+
+	time_partitioning { 
+    	type = "DAY" 
+		field = "created_at" 
+	}
+
+	schema = <<EOF
+[
+	{
+		"mode": "NULLABLE",
+		"name": "id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "created_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "status",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "application_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "reviewed_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "reviewed_by",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "completed_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "completed_by",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "amount",
+		"type": "NUMERIC"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "updated_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "updated_by",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "metadata",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "customer_id",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "creditor_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "_ingested_ts",
+		"type": "TIMESTAMP"
+	}
+]
+EOF
+}
+
+
