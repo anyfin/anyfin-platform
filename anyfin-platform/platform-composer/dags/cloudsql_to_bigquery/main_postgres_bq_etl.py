@@ -188,7 +188,7 @@ for table in ETL.get_tables():
                     CAST(json_extract_scalar(main_policy, '$.data.UCLookup.credit_history[0].credit_used_account') as int64) as uc_credit_used_account,
                     CAST(json_extract_scalar(main_policy, '$.data.UCLookup.credit_history[0].credit_used_instalment') as int64) as uc_credit_used_instalment,
                     json_extract_string_array(main_policy,  '$.data.response.reasons' )  as `response_reasons`,
-                    json_extract(main_policy,'$.request.income' )  as `customer_provided_income`,
+                    json_extract(main_policy,'$.data.InternalLookup.customer_provided_income_gross')  as `customer_provided_income_gross`,
                     json_extract_scalar(json_extract(main_policy,'$.data.Pricing'), '$.new.monthlyPayment')  as `new_monthly_payment`,
                     json_extract_scalar(json_extract(main_policy,'$.data.Pricing'), '$.old.monthlyPayment')  as `old_monthly_payment`,
                     json_extract_scalar(main_policy,'$.response.scorecard_version') as scorecard_version,
