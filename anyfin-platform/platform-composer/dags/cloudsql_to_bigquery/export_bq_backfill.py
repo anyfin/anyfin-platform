@@ -139,6 +139,7 @@ for DB in DATABASES_INFO:
 				final_check as (select  p.dt, p.cnt - b.cnt diff from prod p left join backup b on p.dt=b.dt)
 				select count(*)=0 from final_check where (diff<>0 or diff is null) and dt < CURRENT_DATE()
 				''',
+				use_legacy_sql=False,
 				dag=dag
 			)
 
