@@ -123,7 +123,7 @@
     "ts_column": "updated_at",
     "bq_partition_column": "created_at",
     "backfill_method": "beam_export",
-    "query_by": "offset",
+    "query_by": "timestamp",
     "step_size": "100000",
     "ordered_by": "created_at"
   },
@@ -322,7 +322,7 @@
     "bq_partition_column": "created_at",
     "backfill_method": "beam_export",
     "query_by": "offset",
-    "step_size": "100000",
+    "step_size": "300000",
     "ordered_by": "created_at"
   },
   "transactions": {
@@ -381,7 +381,7 @@
     "bq_partition_column": "created_at",
     "backfill_method": "beam_export",
     "query_by": "offset",
-    "step_size": "100000",
+    "step_size": "10000",
     "ordered_by": "created_at"
   },
   "lenders": {
@@ -770,7 +770,7 @@
     "ts_column" : "updated_at",
     "bq_partition_column": "created_at",
     "backfill_method": "beam_export",
-    "query_by": "offset",
+    "query_by": "timestamp",
     "step_size": "100000",
     "ordered_by": "created_at"
   },
