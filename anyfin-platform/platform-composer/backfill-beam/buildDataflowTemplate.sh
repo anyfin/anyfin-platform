@@ -8,6 +8,7 @@
 # sh buildDataflowTemplate.sh main.json main
 CREDENTIALS=$1
 DB=$2
+START_DATE=$3
 
 # TABLES - An array with all the tables to create templates for
 # The format of each entry should be:
@@ -35,7 +36,6 @@ do
         ordered_by=$(cat ${schemas_file} | jq ".${table}.ordered_by")
         table_entry="$DB|$table|$query_by|$step_size|$ordered_by"
         table_entry_cleared=$(echo $table_entry | tr -d \")
-        # echo "$table_entry_cleared"
         TABLES+=("$table_entry_cleared")
     fi
 done < <(cat ${schemas_file} | jq 'keys[]')
@@ -49,7 +49,6 @@ do
     QUERY_BY="$(echo $ENTRY | cut -d '|' -f 3)"
     STEP_SIZE="$(echo $ENTRY | cut -d '|' -f 4)"
     ORDERED_BY="$(echo $ENTRY | cut -d '|' -f 5)"
-    START_DATE="$(echo $ENTRY | cut -d '|' -f 6)"
     if [ ! -z "$START_DATE" ]; then START_DATE="--startDate=$START_DATE"; fi
     echo $START_DATE
 	mvn compile exec:java \

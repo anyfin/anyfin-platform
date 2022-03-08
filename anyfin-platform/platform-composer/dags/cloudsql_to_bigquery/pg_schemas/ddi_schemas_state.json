@@ -18,6 +18,9 @@
       },
       "bq_partition_column": "created_at",
       "ts_column": "updated_at",
-      "backfill_method": "beam_backfill"
+      "backfill_method": "beam_export",
+      "query_by": "timestamp",
+      "step_size": "100000",
+      "ordered_by": "created_at"
     }
 }
