@@ -198,7 +198,7 @@ public class ReadJdbc {
             ex.printStackTrace();
         }
 
-        String queryColumns = parseJSONFile(options.getDbName().get(), options.getSourceTable().get());
+        String queryColumns = parseJSONFile(options.getDbName().get(), options.getSourceTable().get().replace("\\", ""));
 
         Pipeline pipeline = Pipeline.create(options);
 
