@@ -177,7 +177,6 @@ class ETL:
     # Return absolute number of percentage difference between two numbers
     @staticmethod
     def __calculate_percentage_difference(val1, val2):
-        print(val1, val2)
         return abs((val1 - val2) * 100 / val1)
 
 
