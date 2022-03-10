@@ -132,7 +132,7 @@ public class ReadJdbc {
         public void processElement(@Element TableRow row, OutputReceiver<TableRow> out) {
           TableRow outputRow = new TableRow();
           // array_fields are fields that are of type text[] in postgres and will be REPEATED in BQ
-          String[] array_fields = {"file_urls", "reject_tags"};
+          String[] array_fields = {"file_urls", "reject_tags", "decision_tree"};
           outputRow = row.clone();
 
           for (String field : array_fields) {
