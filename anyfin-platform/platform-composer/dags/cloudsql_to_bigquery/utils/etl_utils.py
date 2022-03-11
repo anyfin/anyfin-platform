@@ -174,6 +174,10 @@ class ETL:
             counts[row.table_name] = row.num_of_unique_rows
         return counts
 
+    # Return absolute number of percentage difference between two numbers
+    @staticmethod
+    def __calculate_percentage_difference(val1, val2):
+        return abs((val1 - val2) * 100 / val1)
 
 
     def bq_pg_comparison(self, **kwargs):
@@ -185,7 +189,7 @@ class ETL:
         for table_name in self.TABLES:
             if not self.TABLES.get(table_name).get('ignore_daily'):
                 logging.info(f"Table: {table_name}: Postgres - {postgres_results[table_name]} || BQ - {bq_results[table_name]}")
-                if postgres_results[table_name] != bq_results[table_name]:
+                if ETL.__calculate_percentage_difference(postgres_results[table_name], bq_results[table_name]) > 5:
                     discrepancies[table_name] = {'postgres': postgres_results[table_name], 'bq': bq_results[table_name]}
         
         if not discrepancies:
