@@ -84,14 +84,12 @@
         "created_at":"timestamp with time zone", 
         "updated_at":"timestamp with time zone", 
         "customer_id":"integer", 
-        "code":"character varying", 
         "amount":"real", 
         "status":"character varying", 
         "transaction_rowkey":"character varying", 
         "country_code":"character varying", 
         "currency_code":"character varying", 
-        "metadata":"json", 
-        "type":"text"
+        "metadata":"json"
       },
       "bq_partition_column": "created_at"
     },
