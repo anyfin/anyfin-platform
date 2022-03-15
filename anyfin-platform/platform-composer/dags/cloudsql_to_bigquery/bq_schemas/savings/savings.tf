@@ -790,3 +790,69 @@ EOF
 }
 
 
+resource "google_bigquery_table" "savings_bonuses_raw" {
+	dataset_id = "savings_staging"
+	table_id   = "savings_bonuses_raw"
+	project    = "anyfin"
+
+	labels = {
+		env = "default"
+	}
+
+	time_partitioning { 
+    	type = "DAY" 
+		field = "updated_at" 
+	}
+
+	schema = <<EOF
+[
+	{
+		"mode": "NULLABLE",
+		"name": "id",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "created_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "updated_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "bonus_code",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "bonus_description",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "admin_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "customer_id",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "payout_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "_ingested_ts",
+		"type": "TIMESTAMP"
+	}
+]
+EOF
+}
+
+
