@@ -377,11 +377,6 @@ resource "google_bigquery_table" "savings_payouts_raw" {
 	},
 	{
 		"mode": "NULLABLE",
-		"name": "code",
-		"type": "STRING"
-	},
-	{
-		"mode": "NULLABLE",
 		"name": "amount",
 		"type": "FLOAT"
 	},
@@ -408,11 +403,6 @@ resource "google_bigquery_table" "savings_payouts_raw" {
 	{
 		"mode": "NULLABLE",
 		"name": "metadata",
-		"type": "STRING"
-	},
-	{
-		"mode": "NULLABLE",
-		"name": "type",
 		"type": "STRING"
 	},
 	{
@@ -662,6 +652,133 @@ resource "google_bigquery_table" "customer_external_facts_raw" {
 		"mode": "NULLABLE",
 		"name": "mandate_established_at",
 		"type": "DATE"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "_ingested_ts",
+		"type": "TIMESTAMP"
+	}
+]
+EOF
+}
+
+
+resource "google_bigquery_table" "savings_referrals_raw" {
+	dataset_id = "savings_staging"
+	table_id   = "savings_referrals_raw"
+	project    = "anyfin"
+
+	labels = {
+		env = "default"
+	}
+
+	time_partitioning { 
+    	type = "DAY" 
+		field = "updated_at" 
+	}
+
+	schema = <<EOF
+[
+	{
+		"mode": "NULLABLE",
+		"name": "id",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "created_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "updated_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "referral_code",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "referral_context",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "customer_id",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "referrer_id",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "referrer_payout_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "referent_payout_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "_ingested_ts",
+		"type": "TIMESTAMP"
+	}
+]
+EOF
+}
+
+
+resource "google_bigquery_table" "promo_code_usages_raw" {
+	dataset_id = "savings_staging"
+	table_id   = "promo_code_usages_raw"
+	project    = "anyfin"
+
+	labels = {
+		env = "default"
+	}
+
+	time_partitioning { 
+    	type = "DAY" 
+		field = "updated_at" 
+	}
+
+	schema = <<EOF
+[
+	{
+		"mode": "NULLABLE",
+		"name": "id",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "created_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "updated_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "customer_id",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "promo_code_id",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "payout_id",
+		"type": "STRING"
 	},
 	{
 		"mode": "NULLABLE",

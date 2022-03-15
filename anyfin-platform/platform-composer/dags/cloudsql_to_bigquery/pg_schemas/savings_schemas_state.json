@@ -145,5 +145,34 @@
       "bq_partition_column": "updated_at",
       "ts_column": "updated_at",
       "backfill_method": "beam_backfill"
+    },
+    "savings_referrals": {
+      "schema": {
+        "id": "integer",
+        "created_at": "timestamp with time zone",
+        "updated_at": "timestamp with time zone",
+        "referral_code": "character varying",
+        "referral_context": "character varying",
+        "customer_id": "integer",
+        "referrer_id": "integer",
+        "referrer_payout_id": "uuid",
+        "referent_payout_id": "uuid"
+      },
+      "bq_partition_column": "updated_at",
+      "ts_column": "updated_at",
+      "backfill_method": "beam_backfill"
+    },
+    "promo_code_usages": {
+      "schema": {
+        "id": "integer",
+        "created_at": "timestamp with time zone",
+        "updated_at": "timestamp with time zone",
+        "customer_id": "integer",
+        "promo_code_id": "integer",
+        "payout_id": "uuid"
+      },
+      "bq_partition_column": "updated_at",
+      "ts_column": "updated_at",
+      "backfill_method": "beam_backfill"
     }
   }
