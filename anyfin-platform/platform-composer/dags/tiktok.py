@@ -47,7 +47,7 @@ schema = [
 
 default_args = {
     'owner': 'growth',
-    'depends_on_past': True,
+    'depends_on_past': False,
     'start_date': datetime(2021,4,29),
     'retries': 3,
     'retry_delay': timedelta(minutes=4),
