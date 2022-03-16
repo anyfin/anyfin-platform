@@ -52,7 +52,7 @@ default_args = {
     'retries': 3,
     'retry_delay': timedelta(minutes=4),
     'email_on_failure': True,
-    'email': models.Variable.get('data_engineering'),
+    'email': models.Variable.get('de_email'),
     'email_on_retry': False
 }
 
