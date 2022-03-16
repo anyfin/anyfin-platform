@@ -4,13 +4,14 @@ import logging
 from google.cloud import bigquery
 from six import string_types
 from six.moves.urllib.parse import urlencode, urlunparse
-from airflow import DAG, macros, models
+from airflow import DAG, models
 from datetime import datetime, timedelta
 from airflow.operators.python_operator import PythonOperator
 from airflow.contrib.hooks.bigquery_hook import BigQueryHook
 from airflow.exceptions import AirflowFailException
 
-ADVERTISER_ID = 6955479302334906369 
+SE_FI_ADVERTISER_ID = 6955479302334906369
+DE_ADVERTISER_ID = 7068632801515520002 
 ACCESS_TOKEN = models.Variable.get('tiktok_api_secret')
 ALLOWED_COUNTRIES = ['SE', 'DE', 'FI']
 DEFAULT_COUNTRY = 'SE'
@@ -46,12 +47,12 @@ schema = [
 
 default_args = {
     'owner': 'growth',
-    'depends_on_past': True,
+    'depends_on_past': False,
     'start_date': datetime(2021,4,29),
     'retries': 3,
     'retry_delay': timedelta(minutes=4),
     'email_on_failure': True,
-    'email': models.Variable.get('growth_email'),
+    'email': models.Variable.get('de_email'),
     'email_on_retry': False
 }
 
@@ -71,7 +72,7 @@ def build_url(path, query=""):
     scheme, netloc = "https", "ads.tiktok.com"
     return urlunparse((scheme, netloc, path, "", query, ""))
 
-def get_ad_report(ds, **kwargs):
+def get_ad_report(advertiser_id, countries,  ds, **kwargs):
     PATH = "/open_api/v1.2/reports/integrated/get/"
 
     #metric description in docs https://ads.tiktok.com/marketing_api/docs?id=1685764234508290
@@ -79,7 +80,6 @@ def get_ad_report(ds, **kwargs):
     metrics = json.dumps(metrics_list)
     dimensions_list = ["stat_time_day","ad_id"]
     dimensions = json.dumps(dimensions_list)
-    advertiser_id = ADVERTISER_ID
     data_level = 'AUCTION_AD' #eventually RESERVATION_ADs also?
     start_date = ds
     end_date = ds
@@ -125,7 +125,7 @@ def get_ad_report(ds, **kwargs):
             table = 'anyfin.marketing.daily_tiktok_ads'
             hook = BigQueryHook('postgres-bq-etl-con')
             client = bigquery.Client(project = 'anyfin', credentials = hook._get_credentials())
-            client.query(f"DELETE FROM `{table}` WHERE date = '{ds}'")
+            client.query(f"DELETE FROM `{table}` WHERE date = '{ds}' and country_code in {countries}")
             ins = client.insert_rows(table=table, rows=rows, selected_fields=schema)
             if ins == []:
                 logging.info(f"New rows for date {ds} inserted to table - {table}")
@@ -133,14 +133,23 @@ def get_ad_report(ds, **kwargs):
                 raise AirflowFailException("No rows were inserted due to these errors: ", ins)
 
         else:
-            logging.info(f"Looks like there was no spend on tiktok for date {ds}")
+            logging.info(f"Looks like there was no spend on tiktok for date {ds} in countries {countries}")
     else:
         raise AirflowFailException(f"The http request was not successful: {response['message']}")
 
 
-ingest_ad_report = PythonOperator(
-    task_id = 'ingest_daily_ad_report',
+ingest_nordic_ad_report = PythonOperator(
+    task_id = 'ingest_daily_ad_report_se_fi',
     python_callable = get_ad_report,
     provide_context = True,
+    op_args = [SE_FI_ADVERTISER_ID, ('SE', 'FI')],
+    dag = dag
+)
+
+ingest_german_ad_report = PythonOperator(
+    task_id = 'ingest_daily_ad_report_de',
+    python_callable = get_ad_report,
+    provide_context = True,
+    op_args = [DE_ADVERTISER_ID, ('DE')],
     dag = dag
 )
