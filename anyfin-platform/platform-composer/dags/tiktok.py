@@ -124,8 +124,9 @@ def get_ad_report(advertiser_id, countries,  ds, **kwargs):
         if len(rows) > 0:
             table = 'anyfin.marketing.daily_tiktok_ads'
             hook = BigQueryHook('postgres-bq-etl-con')
+            countries = "','".join(countries)
             client = bigquery.Client(project = 'anyfin', credentials = hook._get_credentials())
-            client.query(f"DELETE FROM `{table}` WHERE date = '{ds}' and country_code in {countries}")
+            client.query(f"DELETE FROM `{table}` WHERE date = '{ds}' and country_code in ('{countries}')")
             ins = client.insert_rows(table=table, rows=rows, selected_fields=schema)
             if ins == []:
                 logging.info(f"New rows for date {ds} inserted to table - {table}")
@@ -142,7 +143,7 @@ ingest_nordic_ad_report = PythonOperator(
     task_id = 'ingest_daily_ad_report_se_fi',
     python_callable = get_ad_report,
     provide_context = True,
-    op_args = [SE_FI_ADVERTISER_ID, ('SE', 'FI')],
+    op_args = [SE_FI_ADVERTISER_ID, ['SE', 'FI']],
     dag = dag
 )
 
@@ -150,6 +151,6 @@ ingest_german_ad_report = PythonOperator(
     task_id = 'ingest_daily_ad_report_de',
     python_callable = get_ad_report,
     provide_context = True,
-    op_args = [DE_ADVERTISER_ID, ('DE')],
+    op_args = [DE_ADVERTISER_ID, ['DE']],
     dag = dag
 )
