@@ -44,7 +44,7 @@ schufa_parser = DataflowStartFlexTemplateOperator(
 schufa_features = DataflowStartFlexTemplateOperator(
     body={
         "launchParameter": {
-            "containerSpecGcsPath": "gs://{GCS_BUCKET}/{FLEX_TEMPLATES_DIR}/flex_template_schufa_features",
+            "containerSpecGcsPath": f"gs://{GCS_BUCKET}/{FLEX_TEMPLATES_DIR}/flex_template_schufa_features",
             "jobName": "schufafeatures",
             "environment": {
                 "enableStreamingEngine": "false"
