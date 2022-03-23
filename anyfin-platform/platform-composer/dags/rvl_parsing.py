@@ -18,7 +18,7 @@ default_args = {
 dag = DAG(
     dag_id="risk-variable-library", 
     default_args=default_args, 
-    schedule_interval="0 2 * * *",  # Run this DAG once per day
+    schedule_interval="0 5 * * *",  # Run this DAG once per day
     max_active_runs=1,
     catchup=False
 )
