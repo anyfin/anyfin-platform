@@ -3,6 +3,9 @@ from airflow import DAG
 from airflow.models import Variable
 from airflow.providers.google.cloud.operators.dataflow import DataflowStartFlexTemplateOperator
 
+GCS_BUCKET = "anyfin-rvl"
+FLEX_TEMPLATES_DIR = "flex_templates"
+
 default_args = {
     'owner': 'ds-anyfin',
     'depends_on_past': False, 
@@ -23,7 +26,7 @@ dag = DAG(
 schufa_parser = DataflowStartFlexTemplateOperator(
     body={
         "launchParameter": {
-            "containerSpecGcsPath": "gs://sql-to-bq-etl/flex_templates/flex_template_schufa_parser",
+            "containerSpecGcsPath": f"gs://{GCS_BUCKET}/{FLEX_TEMPLATES_DIR}/flex_template_schufa_parser",
             "jobName": "schufaparser",
             "environment": {
                 "enableStreamingEngine": "false"
@@ -41,7 +44,7 @@ schufa_parser = DataflowStartFlexTemplateOperator(
 schufa_features = DataflowStartFlexTemplateOperator(
     body={
         "launchParameter": {
-            "containerSpecGcsPath": "gs://sql-to-bq-etl/flex_templates/flex_template_schufa_features",
+            "containerSpecGcsPath": "gs://{GCS_BUCKET}/{FLEX_TEMPLATES_DIR}/flex_template_schufa_features",
             "jobName": "schufafeatures",
             "environment": {
                 "enableStreamingEngine": "false"
