@@ -11,7 +11,7 @@ default_args = {
     'depends_on_past': False, 
     'retries': 0,
     'email_on_failure': True,
-    'email': Variable.get('de_email', 'data-engineering@anyfin.com'),
+    # 'email': Variable.get('de_email', 'data-engineering@anyfin.com'),
     'start_date': datetime(2022, 3, 21),
 }
 
@@ -27,7 +27,7 @@ schufa_parser = DataflowStartFlexTemplateOperator(
     body={
         "launchParameter": {
             "containerSpecGcsPath": f"gs://{GCS_BUCKET}/{FLEX_TEMPLATES_DIR}/flex_template_schufa_parser",
-            "jobName": "schufaParser",
+            "jobName": "schufaparser",
             "environment": {
                 "enableStreamingEngine": "false"
             },
@@ -45,7 +45,7 @@ schufa_features = DataflowStartFlexTemplateOperator(
     body={
         "launchParameter": {
             "containerSpecGcsPath": f"gs://{GCS_BUCKET}/{FLEX_TEMPLATES_DIR}/flex_template_schufa_features",
-            "jobName": "schufaFeatures",
+            "jobName": "schufafeatures",
             "environment": {
                 "enableStreamingEngine": "false"
             },
@@ -63,7 +63,7 @@ asiakastieto_ccis_parser = DataflowStartFlexTemplateOperator(
     body={
         "launchParameter": {
             "containerSpecGcsPath": f"gs://{GCS_BUCKET}/{FLEX_TEMPLATES_DIR}/flex_template_asiakastieto_ccis_parser",
-            "jobName": "asiakastietoCcisParser",
+            "jobName": "asiakastietoccisparser",
             "environment": {
                 "enableStreamingEngine": "false"
             },
@@ -81,7 +81,7 @@ asiakastieto_delta_parser = DataflowStartFlexTemplateOperator(
     body={
         "launchParameter": {
             "containerSpecGcsPath": f"gs://{GCS_BUCKET}/{FLEX_TEMPLATES_DIR}/flex_template_asiakastieto_delta_parser",
-            "jobName": "asiakastietoDeltaParser",
+            "jobName": "asiakastietodeltaparser",
             "environment": {
                 "enableStreamingEngine": "false"
             },
