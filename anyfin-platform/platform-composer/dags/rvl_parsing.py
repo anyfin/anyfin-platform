@@ -77,4 +77,22 @@ asiakastieto_ccis_parser = DataflowStartFlexTemplateOperator(
     dag=dag
 )
 
+asiakastieto_delta_parser = DataflowStartFlexTemplateOperator(
+    body={
+        "launchParameter": {
+            "containerSpecGcsPath": f"gs://{GCS_BUCKET}/{FLEX_TEMPLATES_DIR}/flex_template_asiakastieto_delta_parser",
+            "jobName": "asiakastietoDeltaParser",
+            "environment": {
+                "enableStreamingEngine": "false"
+            },
+        }
+    },
+    task_id="asiakastieto_delta_parser",
+    location="europe-west1",
+    project_id="anyfin",
+    gcp_conn_id="postgres-bq-etl-con",
+    wait_until_finished=True,
+    dag=dag
+)
+
 schufa_parser >> schufa_features
