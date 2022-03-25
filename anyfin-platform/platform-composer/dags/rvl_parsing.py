@@ -27,7 +27,7 @@ schufa_parser = DataflowStartFlexTemplateOperator(
     body={
         "launchParameter": {
             "containerSpecGcsPath": f"gs://{GCS_BUCKET}/{FLEX_TEMPLATES_DIR}/flex_template_schufa_parser",
-            "jobName": "schufaparser",
+            "jobName": "schufaParser",
             "environment": {
                 "enableStreamingEngine": "false"
             },
@@ -45,13 +45,31 @@ schufa_features = DataflowStartFlexTemplateOperator(
     body={
         "launchParameter": {
             "containerSpecGcsPath": f"gs://{GCS_BUCKET}/{FLEX_TEMPLATES_DIR}/flex_template_schufa_features",
-            "jobName": "schufafeatures",
+            "jobName": "schufaFeatures",
             "environment": {
                 "enableStreamingEngine": "false"
             },
         }
     },
     task_id="schufa_features",
+    location="europe-west1",
+    project_id="anyfin",
+    gcp_conn_id="postgres-bq-etl-con",
+    wait_until_finished=True,
+    dag=dag
+)
+
+asiakastieto_ccis_parser = DataflowStartFlexTemplateOperator(
+    body={
+        "launchParameter": {
+            "containerSpecGcsPath": f"gs://{GCS_BUCKET}/{FLEX_TEMPLATES_DIR}/flex_template_asiakastieto_ccis_parser",
+            "jobName": "asiakastietoCcisParser",
+            "environment": {
+                "enableStreamingEngine": "false"
+            },
+        }
+    },
+    task_id="asiakastieto_ccis_parser",
     location="europe-west1",
     project_id="anyfin",
     gcp_conn_id="postgres-bq-etl-con",
