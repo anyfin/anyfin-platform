@@ -36,11 +36,11 @@ bq_schema = [
 default_args = {
     'owner': 'growth',
     'depends_on_past': True,
-    'start_date': datetime(2021,6,20),
+    'start_date': datetime(2022,3,27),
     'retries': 3,
     'retry_delay': timedelta(minutes=4),
     'email_on_failure': True,
-    'email': models.Variable.get('growth_email'),
+    'email': models.Variable.get('de_email'),
     'email_on_retry': False
 }
 
