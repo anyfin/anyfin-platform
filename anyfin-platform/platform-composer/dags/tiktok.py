@@ -46,7 +46,7 @@ schema = [
 ]
 
 default_args = {
-    'owner': 'growth',
+    'owner': 'ds-anyfin',
     'depends_on_past': False,
     'start_date': datetime(2022,3,27),
     'retries': 3,
