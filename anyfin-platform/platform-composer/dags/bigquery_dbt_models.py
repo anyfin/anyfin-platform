@@ -1,14 +1,17 @@
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta
 from airflow.contrib.kubernetes import secret
 from airflow import DAG
 from airflow.models import Variable
-from airflow.contrib.operators.kubernetes_pod_operator import KubernetesPodOperator
 from airflow.contrib.operators.bigquery_to_gcs import BigQueryToCloudStorageOperator
 from airflow.contrib.operators.bigquery_to_bigquery import BigQueryToBigQueryOperator
 from airflow.operators.sensors import ExternalTaskSensor
+from airflow.operators.bash_operator import BashOperator
+import json
 import logging
 
-DBT_IMAGE = "eu.gcr.io/anyfin-platform/dbt-image:latest"
+
+DBT_DIR = '/home/airflow/gcs/dags/anyfin-data-model'
+MODEL_TAG = 'thrice-daily'
 
 default_args = {
     'owner': 'ds-anyfin',
@@ -25,7 +28,8 @@ dag = DAG(
     default_args=default_args, 
     schedule_interval="0 4,10,12 * * *",  # Run this DAG three times per day at the specified hours
     max_active_runs=1,
-    catchup=False
+    catchup=False,
+    concurrency=100
 )
 
 
@@ -65,31 +69,8 @@ task_sensor_dolph_bq_etl = ExternalTaskSensor (
     dag=dag
 )
 
-
-secret_volume = secret.Secret(
-    'volume',
-    '/dbt/dbt/credentials/',  
-    'dbt-service-account', 
-    'service-account.json'
-)
-
-
-run_dbt = KubernetesPodOperator(
-    image=DBT_IMAGE,
-    namespace='default',
-    task_id="run-models",
-    name="run-models",
-    cmds=["/bin/bash", "-c"],
-    arguments=["gsutil -m rsync -r gs://anyfin-data-model/ /dbt/ && dbt run --models tag:thrice-daily --exclude tag:daily"],
-    image_pull_policy='Always',
-    is_delete_operator_pod=True,
-    get_logs=True,
-    dag=dag,
-    secrets=[secret_volume]
-)
-
-task_export_latest_user_facts_partition_to_gcs = BigQueryToCloudStorageOperator(
-    task_id="export_latest_user_facts_partition_to_gcs",
+task_export_intercom_diff = BigQueryToCloudStorageOperator(
+    task_id="export_intercom_diff",
     source_project_dataset_table="anyfin.product.intercom_diff_sync",
     destination_cloud_storage_uris=[f"gs://anyfin-customer-facts/current-partition.json"],
     export_format='NEWLINE_DELIMITED_JSON',
@@ -107,6 +88,63 @@ task_save_intercom_previous_sync = BigQueryToBigQueryOperator(
     dag=dag
 )
 
+def load_manifest():
+    local_filepath = f"{DBT_DIR}/target/manifest.json"
+    with open(local_filepath) as f:
+        data = json.load(f)
 
-[task_sensor_main_bq_etl, task_sensor_dolph_bq_etl] >> run_dbt
-task_save_intercom_previous_sync >> run_dbt >> task_export_latest_user_facts_partition_to_gcs
+    return data
+
+def make_dbt_task(node, dbt_verb):
+    """Returns an Airflow operator either run and test an individual model"""
+    GLOBAL_CLI_FLAGS = "--no-write-json"
+    model = node.split(".")[-1]
+
+    if dbt_verb == "run":
+        dbt_task = BashOperator(
+            task_id=node, 
+            bash_command=f"dbt {GLOBAL_CLI_FLAGS} {dbt_verb} --project-dir {DBT_DIR} --profiles-dir {DBT_DIR} --target prod --select {model}",
+            dag=dag,
+        )
+
+    return dbt_task
+
+data = load_manifest()
+
+dbt_tasks = {}
+nodes = {node:value for node, value in data['nodes'].items() 
+         if node.split(".")[0] == "model" and MODEL_TAG in value["config"]["tags"]}
+
+
+for node, node_info in nodes.items():
+    if node_info["config"]["materialized"] == "ephemeral":
+        continue
+    dbt_tasks[node] = make_dbt_task(node, "run")
+
+
+for node, node_info in nodes.items():
+    if node_info["config"]["materialized"] == "ephemeral":
+        continue
+
+    # Set all model -> model dependencies
+    dependencies = node_info["depends_on"]["nodes"]
+    while dependencies:
+        upstream_node = dependencies.pop()
+        
+        if not upstream_node in nodes:
+            continue
+
+        upstream_node_type = upstream_node.split(".")[0]
+        if upstream_node_type != "model":
+            continue
+        
+        if data["nodes"][upstream_node]["config"]["materialized"] == "ephemeral":
+            dependencies += data["nodes"][upstream_node]["depends_on"]["nodes"]
+        else:
+            dbt_tasks[upstream_node] >> dbt_tasks[node]
+
+
+#[task_sensor_main_bq_etl, task_sensor_dolph_bq_etl] >> run_dbt
+
+task_save_intercom_previous_sync >> dbt_tasks["model.anyfin_bigquery.intercom_sync"] 
+dbt_tasks["model.anyfin_bigquery.intercom_diff_sync"] >> task_export_intercom_diff
