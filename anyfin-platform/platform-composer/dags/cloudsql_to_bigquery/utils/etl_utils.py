@@ -7,10 +7,10 @@ from datetime import datetime, timedelta, date
 from google.cloud import bigquery
 from airflow import AirflowException
 from airflow.hooks.postgres_hook import PostgresHook
-from airflow.contrib.hooks.gcs_hook import GoogleCloudStorageHook
+from airflow.providers.google.cloud.hooks.gcs import GCSHook
 
 
-class ETL:
+class ETL(object):
 
     # Constructor
     def __init__(self, GCS_BUCKET, DATABASE_NAME):
@@ -101,7 +101,7 @@ class ETL:
 
         # Fetches task instance from context and pulls the variable from xcom
         missing_columns = context['ti'].xcom_pull(
-            task_ids='extract_tables')['missing_columns']
+            task_ids=f'{self.DATABASE_NAME}_etl.extract_tables')['missing_columns']
             
         return True
         # Check if dictionary is empty - Temporarily deactivating
@@ -118,7 +118,7 @@ class ETL:
         json_tables = json.dumps(dict_tables)
 
         # Connect to GCS
-        gcs_hook = GoogleCloudStorageHook(
+        gcs_hook = GCSHook(
             google_cloud_storage_conn_id='postgres-bq-etl-con')
 
         # Create a temporary JSON file and upload it to GCS
@@ -126,8 +126,8 @@ class ETL:
             file.write(json_tables)
             file.flush()
             gcs_hook.upload(
-                bucket=self.GCS_BUCKET,
-                object=f'{self.DATABASE_NAME}_table_info.json',
+                bucket_name=self.GCS_BUCKET,
+                object_name=f'{self.DATABASE_NAME}_table_info.json',
                 mime_type='application/json',
                 filename=file.name
             )
@@ -136,9 +136,9 @@ class ETL:
         today = date.today()
         today = today.strftime("%Y-%m-%d")
         if today != ds:
-            return 'postgres_status'
+            return f'{self.DATABASE_NAME}_etl.postgres_status'
         else:
-            return 'no_check'
+            return f'{self.DATABASE_NAME}_etl.no_check'
 
 
     def fetch_postgres_rowcount(self, ds, **kwargs):
