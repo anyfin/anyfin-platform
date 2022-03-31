@@ -1,17 +1,9 @@
 import os
 from datetime import datetime, timedelta
-import psycopg2
 
 from airflow import DAG
 from airflow.models import Variable
-from airflow.operators.python_operator import PythonOperator
-from airflow.utils.trigger_rule import TriggerRule
-from airflow.contrib.operators.bigquery_operator import BigQueryOperator
 from DataFlowPython3Operator import DataFlowPython3Operator
-from airflow.contrib.operators.gcp_compute_operator import GceInstanceStartOperator, GceInstanceStopOperator
-from airflow.contrib.operators.gcs_delete_operator import GoogleCloudStorageDeleteOperator
-from airflow.contrib.operators.gcs_to_bq import GoogleCloudStorageToBigQueryOperator
-from airflow.operators.bash_operator import BashOperator
 
 from cloudsql_to_bigquery.utils.backfill_utils import BACKFILL
 

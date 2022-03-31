@@ -1,5 +1,4 @@
 import os
-import psycopg2
 from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.models import Variable
