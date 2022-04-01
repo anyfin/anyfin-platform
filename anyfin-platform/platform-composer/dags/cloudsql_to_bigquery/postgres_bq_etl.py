@@ -12,6 +12,7 @@ from airflow.providers.google.cloud.operators.dataflow import DataflowConfigurat
 
 # Magic
 from airflow.utils.task_group import TaskGroup
+from airflow.utils.weight_rule import WeightRule
 
 from cloudsql_to_bigquery.utils.etl_utils import ETL
 from cloudsql_to_bigquery.utils.db_info_utils import DATABASES_INFO
@@ -52,6 +53,12 @@ with DAG(
         INSTANCE_NAME = DB['INSTANCE_NAME']
         DATABASE = DB['DATABASE']
 
+        # MAKES SURE MAIN RUNS BEFORE THE OTHER DAGS
+        if DATABASE_NAME == 'main':
+            PRIORITY=2
+        else:
+            PRIORITY=1
+        
         # Skipping assess db as Babis has a fancy new ETL for that one :)
         if DATABASE_NAME == 'assess':
             continue
@@ -64,21 +71,27 @@ with DAG(
                 task_id='extract_tables',
                 python_callable=etl.extract_tables,
                 do_xcom_push=True,
-                trigger_rule=TriggerRule.ALL_DONE
+                trigger_rule=TriggerRule.ALL_DONE,
+                priority_weight=PRIORITY,
+                weight_rule=WeightRule.ABSOLUTE
             )
 
             task_no_missing_columns = PythonOperator(
                 task_id='no_missing_columns',
                 python_callable=etl.no_missing_columns,
                 provide_context=True,
-                retries=0
+                retries=0,
+                priority_weight=PRIORITY,
+                weight_rule=WeightRule.ABSOLUTE
             )
 
             task_upload_result_to_gcs = PythonOperator(
                 task_id='upload_result_to_gcs',
                 python_callable=etl.upload_table_names,
                 provide_context=True,
-                retries=2
+                retries=2,
+                priority_weight=PRIORITY,
+                weight_rule=WeightRule.ABSOLUTE
             )
 
             run_dataflow_pipeline = BeamRunPythonPipelineOperator(
@@ -109,26 +122,34 @@ with DAG(
                     project_id=PROJECT_NAME, 
                     location="europe-west1",
                     gcp_conn_id="dataflow-etl-connection"
-                )
+                ),
+                priority_weight=PRIORITY,
+                weight_rule=WeightRule.ABSOLUTE
             )
 
             first_daily_run = BranchPythonOperator(
                 task_id='first_daily_run',
                 provide_context=True,
-                python_callable=etl.check_if_first_daily_run
+                python_callable=etl.check_if_first_daily_run,
+                priority_weight=PRIORITY,
+                weight_rule=WeightRule.ABSOLUTE
             )
 
             postgres_status = PythonOperator(
                 task_id='postgres_status',
                 provide_context=True,
-                python_callable=etl.fetch_postgres_rowcount
+                python_callable=etl.fetch_postgres_rowcount,
+                priority_weight=PRIORITY,
+                weight_rule=WeightRule.ABSOLUTE
             )
 
 
             bq_status = PythonOperator(
                 task_id='bq_status',
                 provide_context=True,
-                python_callable=etl.fetch_bigquery_rowcount
+                python_callable=etl.fetch_bigquery_rowcount,
+                priority_weight=PRIORITY,
+                weight_rule=WeightRule.ABSOLUTE
             )
 
 
@@ -136,11 +157,15 @@ with DAG(
                 task_id='check_postgres_against_bq',
                 provide_context=True,
                 python_callable=etl.bq_pg_comparison,
-                email_on_failure=True
+                email_on_failure=True,
+                priority_weight=PRIORITY,
+                weight_rule=WeightRule.ABSOLUTE
             )
 
             no_check = DummyOperator(
-                task_id='no_check'
+                task_id='no_check',
+                priority_weight=PRIORITY,
+                weight_rule=WeightRule.ABSOLUTE
             )
 
             dedup_tasks = []
@@ -224,7 +249,9 @@ with DAG(
                             gcp_conn_id='bigquery-composer-connection',
                             create_disposition='CREATE_IF_NEEDED',
                             retries= 3,
-                            retry_delay=timedelta(seconds=30)
+                            retry_delay=timedelta(seconds=30),
+                            priority_weight=PRIORITY,
+                            weight_rule=WeightRule.ABSOLUTE
                         )
                         dedup_tasks.append(dedup)
 
@@ -251,7 +278,9 @@ with DAG(
                         gcp_conn_id='bigquery-composer-connection',
                         create_disposition='CREATE_IF_NEEDED',
                         retries= 3,
-                        retry_delay=timedelta(seconds=30)
+                        retry_delay=timedelta(seconds=30),
+                        priority_weight=PRIORITY,
+                        weight_rule=WeightRule.ABSOLUTE
                         )
                         dedup_tasks.append(dedup)
 
@@ -262,7 +291,9 @@ with DAG(
                     python_callable=etl.deduplication_success,
                     provide_context=True,
                     email_on_failure=True,
-                    trigger_rule=TriggerRule.ALL_SUCCESS
+                    trigger_rule=TriggerRule.ALL_SUCCESS,
+                    priority_weight=PRIORITY,
+                    weight_rule=WeightRule.ABSOLUTE
                 )
             dedup_subgroups[DATABASE_NAME] = dedup_tg
 
@@ -281,4 +312,4 @@ with DAG(
             dedup_tasks >> deduplication_success_confirmation
         etl_groups[g_id] = tg
 
-    etl_groups['main_etl'] >> [etl_tg for tg_name, etl_tg in etl_groups.items() if tg_name != 'main_etl']
+    #etl_groups['main_etl'] >> [etl_tg for tg_name, etl_tg in etl_groups.items() if tg_name != 'main_etl']
