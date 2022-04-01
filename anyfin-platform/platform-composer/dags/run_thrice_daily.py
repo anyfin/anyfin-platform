@@ -9,7 +9,7 @@ default_args = {
     'owner': 'ds-anyfin',
     'depends_on_past': False,
     'start_date': datetime(2022, 4, 1),
-    'retries': 2,
+    'retries': 0,  # Do not retry as this will rerun all dbt models and ETLs again
     'retry_delay': timedelta(minutes=10),
     #'email_on_failure': True,
     #'email_on_retry': False,
