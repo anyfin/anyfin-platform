@@ -97,11 +97,10 @@ class ETL(object):
         return all_tables
 
 
-    def no_missing_columns(self, **context):
-
+    def no_missing_columns(self, task_name, **context):
         # Fetches task instance from context and pulls the variable from xcom
         missing_columns = context['ti'].xcom_pull(
-            task_ids=f'{self.DATABASE_NAME}_etl.extract_tables')['missing_columns']
+            task_ids=f'{task_name}.extract_tables')['missing_columns']
             
         return True
         # Check if dictionary is empty - Temporarily deactivating
@@ -112,9 +111,9 @@ class ETL(object):
         #         'These columns are either missing or they have changed type: ', str(missing_columns))
 
 
-    def upload_table_names(self, **context):
+    def upload_table_names(self, task_name, **context):
         # Fetches task instance from context and pulls the variable from xcom
-        dict_tables = context['ti'].xcom_pull(task_ids='extract_tables')
+        dict_tables = context['ti'].xcom_pull(task_ids=f'{task_name}.extract_tables')
         json_tables = json.dumps(dict_tables)
 
         # Connect to GCS
@@ -184,9 +183,9 @@ class ETL(object):
         return abs((val1 - val2) * 100 / val1)
 
 
-    def bq_pg_comparison(self, **kwargs):
-        postgres_results = kwargs['ti'].xcom_pull(task_ids='postgres_status')
-        bq_results = kwargs['ti'].xcom_pull(task_ids='bq_status')
+    def bq_pg_comparison(self, task_name, **kwargs):
+        postgres_results = kwargs['ti'].xcom_pull(task_ids=f'{task_name}.postgres_status')
+        bq_results = kwargs['ti'].xcom_pull(task_ids=f'{task_name}.bq_status')
 
         discrepancies = {}
 

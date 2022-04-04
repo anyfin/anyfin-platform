@@ -43,7 +43,7 @@ with DAG(
     catchup=False,
     schedule_interval=None,
     max_active_runs=1,
-    concurrency=6
+    concurrency=12
 ) as dag:
 
     etl_groups = {}
@@ -80,6 +80,7 @@ with DAG(
                 task_id='no_missing_columns',
                 python_callable=etl.no_missing_columns,
                 provide_context=True,
+                op_kwargs={'task_name': g_id},
                 retries=0,
                 priority_weight=PRIORITY,
                 weight_rule=WeightRule.ABSOLUTE
@@ -89,6 +90,7 @@ with DAG(
                 task_id='upload_result_to_gcs',
                 python_callable=etl.upload_table_names,
                 provide_context=True,
+                op_kwargs={'task_name': g_id},
                 retries=2,
                 priority_weight=PRIORITY,
                 weight_rule=WeightRule.ABSOLUTE
@@ -148,6 +150,7 @@ with DAG(
                 task_id='bq_status',
                 provide_context=True,
                 python_callable=etl.fetch_bigquery_rowcount,
+                op_kwargs={'task_name': g_id},
                 priority_weight=PRIORITY,
                 weight_rule=WeightRule.ABSOLUTE
             )
