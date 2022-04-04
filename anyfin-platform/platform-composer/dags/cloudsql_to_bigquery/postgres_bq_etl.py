@@ -150,7 +150,6 @@ with DAG(
                 task_id='bq_status',
                 provide_context=True,
                 python_callable=etl.fetch_bigquery_rowcount,
-                op_kwargs={'task_name': g_id},
                 priority_weight=PRIORITY,
                 weight_rule=WeightRule.ABSOLUTE
             )
@@ -160,6 +159,7 @@ with DAG(
                 task_id='check_postgres_against_bq',
                 provide_context=True,
                 python_callable=etl.bq_pg_comparison,
+                op_kwargs={'task_name': g_id},
                 email_on_failure=True,
                 priority_weight=PRIORITY,
                 weight_rule=WeightRule.ABSOLUTE
