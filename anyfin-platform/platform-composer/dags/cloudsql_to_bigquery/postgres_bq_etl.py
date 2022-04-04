@@ -116,7 +116,7 @@ with DAG(
                     "temp_location": f'gs://{DATAFLOW_BUCKET}/Temp/',
                     "database_name": f"{DATABASE_NAME}",
                     "setup_file": SETUP_FILE,
-                    "poll_sleep": 10,
+                    "poll_sleep": 30,
                 },
                 email_on_failure=True,
                 dataflow_config=DataflowConfiguration(
