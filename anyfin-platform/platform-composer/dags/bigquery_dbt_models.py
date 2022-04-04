@@ -27,7 +27,7 @@ with DAG(
     schedule_interval=None,  
     max_active_runs=1,
     catchup=False,
-    concurrency=6
+    concurrency=12
 ) as dag:
 
 
