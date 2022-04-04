@@ -6,7 +6,7 @@ from airflow.utils.state import State
 
 
 default_args = {
-    'owner': 'ds-anyfin',
+    'owner': 'de-anyfin',
     'depends_on_past': False,
     'start_date': datetime(2022, 4, 1),
     'retries': 0,  # Do not retry as this will rerun all dbt models and ETLs again
