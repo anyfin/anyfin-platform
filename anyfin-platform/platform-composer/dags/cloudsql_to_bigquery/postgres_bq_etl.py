@@ -27,7 +27,7 @@ SETUP_FILE = os.path.dirname(os.path.realpath(__file__)) + '/beam_utils/setup.py
 
 
 default_args = {
-    'owner': 'ds-anyfin',
+    'owner': 'de-anyfin',
     'depends_on_past': False,
     'start_date': datetime(2020, 9, 8),
     'retries': 2,
