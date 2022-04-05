@@ -3,31 +3,21 @@ from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.models import Variable
 from airflow.operators.python_operator import PythonOperator
-from airflow.utils.trigger_rule import TriggerRule
 from airflow.contrib.operators.bigquery_check_operator import BigQueryCheckOperator
-from airflow.contrib.operators.bigquery_to_bigquery import BigQueryToBigQueryOperator
+from airflow.providers.google.cloud.transfers.bigquery_to_bigquery import BigQueryToBigQueryOperator
 # from airflow.contrib.operators.gcp_compute_operator import GceInstanceStartOperator, GceInstanceStopOperator
-from airflow.contrib.operators.gcs_delete_operator import GoogleCloudStorageDeleteOperator
-from airflow.contrib.operators.gcs_to_bq import GoogleCloudStorageToBigQueryOperator
+from airflow.providers.google.cloud.operators.gcs import GCSDeleteObjectsOperator
+from airflow.providers.google.cloud.transfers.gcs_to_bigquery import GCSToBigQueryOperator
 from airflow.operators.bash_operator import BashOperator
-from airflow.contrib.operators.dataflow_operator import DataflowTemplateOperator
+from airflow.providers.google.cloud.operators.dataflow import DataflowTemplatedJobStartOperator
 
 from cloudsql_to_bigquery.utils.backfill_utils import BACKFILL
+from cloudsql_to_bigquery.utils.db_info_utils import DATABASES_INFO
 
 
 PROJECT_NAME = 'anyfin'
 GCS_BUCKET = 'sql-to-bq-etl'
 
-DATABASES_INFO = [
-					{'DATABASE_NAME': 'main', 'INSTANCE_NAME': 'anyfin-main-replica', 'DATABASE':'main'},
-					{'DATABASE_NAME': 'dolph', 'INSTANCE_NAME': 'anyfin-dolph-read-replica', 'DATABASE':'postgres'},
-					{'DATABASE_NAME': 'pfm', 'INSTANCE_NAME': 'pfm-replica', 'DATABASE':'postgres'},
-					{'DATABASE_NAME': 'psd2', 'INSTANCE_NAME': 'psd2-replica', 'DATABASE':'postgres'},
-					{'DATABASE_NAME': 'sendout', 'INSTANCE_NAME': 'sendout-replica', 'DATABASE':'postgres'},
-					{'DATABASE_NAME': 'savings', 'INSTANCE_NAME': 'savings-replica', 'DATABASE':'postgres'},
-					{'DATABASE_NAME': 'assess', 'INSTANCE_NAME': 'assess-replica', 'DATABASE':'assess'},
-					{'DATABASE_NAME': 'ddi', 'INSTANCE_NAME': 'ddi-service-replica', 'DATABASE':'postgres'}
-				 ]
 
 DAG_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -110,7 +100,7 @@ for DB in DATABASES_INFO:
 	for table_name, content in backfill.get_beam_export_tables():
 		raw = '_raw'
 		backup = '_backup' if DATABASE_NAME != "assess" else ''
-		beam_backfill_job = DataflowTemplateOperator(
+		beam_backfill_job = DataflowTemplatedJobStartOperator(
 			task_id=f"postgres-beam-backfill-{DATABASE_NAME}-{table_name}",
 			template=f"gs://sql-to-bq-etl/beam_templates/postgres-backfill-{DATABASE_NAME}-{table_name}",
 			dataflow_default_options= {
@@ -130,18 +120,6 @@ for DB in DATABASES_INFO:
 		)
 
 		if DATABASE_NAME != "assess":
-			check_against_prod = BigQueryCheckOperator(
-				task_id=f'check_{DATABASE_NAME}_{table_name}_against_prod',
-				sql=f'''
-				with
-				backup as (SELECT DATE(created_at) dt, count( *) cnt FROM `anyfin.{DATABASE_NAME}_staging.{table_name}{raw}{backup}` group by 1),
-				prod as (SELECT DATE(created_at) dt, count(*) cnt FROM `anyfin.{DATABASE_NAME}.{table_name}` group by 1),
-				final_check as (select  p.dt, p.cnt - b.cnt diff from prod p left join backup b on p.dt=b.dt)
-				select count(*)=0 from final_check where (diff<>0 or diff is null) and dt < CURRENT_DATE()
-				''',
-				use_legacy_sql=False,
-				dag=dag
-			)
 
 			load_from_backup = BigQueryToBigQueryOperator(
 				task_id=f'load_{DATABASE_NAME}_{table_name}_from_backup',
@@ -153,7 +131,7 @@ for DB in DATABASES_INFO:
 				dag=dag
 			)
 
-			beam_backfill_job >> check_against_prod >> load_from_backup
+			beam_backfill_job >> load_from_backup
 
 
 	# Iterate over all tables to backfill and create tasks
@@ -161,7 +139,7 @@ for DB in DATABASES_INFO:
 		nested = True if content['backfill_method'] == 'nested_export' else False
 
 		# Delete old exported table (in the future change to DELETE IF EXISTS)
-		task_delete_old_export = GoogleCloudStorageDeleteOperator(
+		task_delete_old_export = GCSDeleteObjectsOperator(
 			task_id=f'delete_old_{DATABASE_NAME}_{table_name}_export',
 			bucket_name=GCS_BUCKET,
 			objects=[f'pg_dumps/{DATABASE_NAME}_{table_name}_export.csv'],
@@ -170,7 +148,7 @@ for DB in DATABASES_INFO:
 		)
 
 		if nested:
-			task_delete_old_json_extract = GoogleCloudStorageDeleteOperator(
+			task_delete_old_json_extract = GCSDeleteObjectsOperator(
 				task_id=f'delete_old_json_{DATABASE_NAME}_{table_name}_extract',
 				bucket_name=GCS_BUCKET,
 				prefix=f'json_extracts/{DATABASE_NAME}/{table_name}/export-',
@@ -241,7 +219,7 @@ for DB in DATABASES_INFO:
 		DESTINATION_TABLE = f'{DATABASE_NAME}{staging}.{table_name}{raw}{backup}'
 
 		# Load export CSV/JSON into BQ
-		bq_load_backup = GoogleCloudStorageToBigQueryOperator(
+		bq_load_backup = GCSToBigQueryOperator(
 			task_id=f'backup_load_{DATABASE_NAME}_{table_name}_into_bq',
 			bucket=GCS_BUCKET,
 			schema_object=SCHEMA_OBJECT,
