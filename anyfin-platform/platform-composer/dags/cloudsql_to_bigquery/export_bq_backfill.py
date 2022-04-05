@@ -22,7 +22,7 @@ GCS_BUCKET = 'sql-to-bq-etl'
 DAG_PATH = os.path.dirname(os.path.realpath(__file__))
 
 default_args = {
-	'owner': 'ds-anyfin',
+	'owner': 'data-engineering',
 	'depends_on_past': False,
 	'start_date': datetime(2020, 9, 8),
 	'retries': 2,
@@ -38,7 +38,7 @@ dag = DAG(
 	catchup=False,
 	schedule_interval='0 13 * * SUN',
 	max_active_runs=1,
-	concurrency=2
+	concurrency=3
 )
 
 
@@ -115,7 +115,6 @@ for DB in DATABASES_INFO:
 				"currentDate": datetime.today().strftime('%Y-%m-%d')
 			},
 			gcp_conn_id='postgres-bq-etl-con',
-			region='europe-west1',
 			dag=dag,
 		)
 
@@ -181,7 +180,6 @@ for DB in DATABASES_INFO:
 			task_id=f'generate_schema_object_{DATABASE_NAME}_{table_name}',
 			python_callable=backfill.generate_schema,
 			op_kwargs={"name": table_name, "content": content},
-			xcom_push=False,
 			dag=dag
 		)
 
