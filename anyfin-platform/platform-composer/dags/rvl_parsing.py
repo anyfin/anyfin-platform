@@ -95,4 +95,22 @@ asiakastieto_delta_parser = DataflowStartFlexTemplateOperator(
     dag=dag
 )
 
+crif_buergel_parser = DataflowStartFlexTemplateOperator(
+    body={
+        "launchParameter": {
+            "containerSpecGcsPath": f"gs://{GCS_BUCKET}/{FLEX_TEMPLATES_DIR}/flex_template_crif_buergel_parser",
+            "jobName": "crifbuergelparser",
+            "environment": {
+                "enableStreamingEngine": "false"
+            },
+        }
+    },
+    task_id="crif_buergel_parser",
+    location="europe-west1",
+    project_id="anyfin",
+    gcp_conn_id="postgres-bq-etl-con",
+    wait_until_finished=True,
+    dag=dag
+)
+
 schufa_parser >> schufa_features
