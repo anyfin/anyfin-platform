@@ -4,7 +4,7 @@ from airflow.operators.bash import BashOperator
 from airflow.utils.task_group import TaskGroup
 
 
-class TasksFactory:
+class DbtTaskFactory:
     def __init__(self, dbt_dir: str, dag: DAG, tag=None):
         """
         Args:
@@ -40,7 +40,7 @@ class TasksFactory:
 
         Returns
         -------
-        list of tasks with dependencies
+        dict of tasks with dependencies {"task_id": task_object}
         """
         data = self.load_manifest()
 
@@ -79,7 +79,7 @@ class TasksFactory:
                     dependencies = list(set(dependencies))
                 else:
                     dbt_tasks[upstream_node] >> dbt_tasks[node]
-        return self.dag.tasks
+        return self.dag.task_dict
 
     def generate_task_group_from_manifest(self, task_group_id: str):
         """Generate task group with tasks from manifest file with provided tag
