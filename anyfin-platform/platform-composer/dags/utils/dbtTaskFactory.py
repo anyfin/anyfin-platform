@@ -40,7 +40,7 @@ class DbtTaskFactory:
 
         Returns
         -------
-        dict of tasks with dependencies {"task_id": TaskObject}
+        dict of tasks with dependencies {"task_id": task_object}
         """
         data = self.load_manifest()
 
