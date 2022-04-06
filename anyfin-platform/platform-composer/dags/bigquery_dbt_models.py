@@ -42,7 +42,7 @@ task_export_intercom_diff = BigQueryToGCSOperator(
 )
 
 task_save_intercom_previous_sync = BigQueryToBigQueryOperator(
-    task_id=f'save_intercom_previous_sync',
+    task_id='save_intercom_previous_sync',
     create_disposition='CREATE_IF_NEEDED',
     write_disposition='WRITE_TRUNCATE',
     source_project_dataset_tables='anyfin.product.intercom_sync',
