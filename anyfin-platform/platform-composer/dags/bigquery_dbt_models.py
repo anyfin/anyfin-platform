@@ -3,7 +3,6 @@ from airflow import DAG
 from airflow.models import Variable
 from airflow.providers.google.cloud.transfers.bigquery_to_gcs import BigQueryToGCSOperator
 from airflow.providers.google.cloud.transfers.bigquery_to_bigquery import BigQueryToBigQueryOperator
-from airflow.operators.bash_operator import BashOperator
 import json
 import logging
 from utils.DbtTaskFactory import DbtTaskFactory
