@@ -31,8 +31,7 @@ with DAG(
     default_args=default_args, 
     catchup=False,
     description='This DAG is used to orcehstrate all of our DAGs that run thrice-daily',
-    #schedule_interval='0 2,9,11 * * *',
-    schedule_interval=None,
+    schedule_interval='0 2,6,11 * * *',
     max_active_runs=1
 ) as dag:
 
