@@ -1,20 +1,19 @@
-from datetime import datetime, timedelta
-from airflow.contrib.kubernetes import secret
+from datetime import datetime
 from airflow import DAG
 from airflow.models import Variable
-from airflow.contrib.operators.kubernetes_pod_operator import KubernetesPodOperator
-from airflow.contrib.operators.bigquery_to_gcs import BigQueryToCloudStorageOperator
-from airflow.operators.sensors import ExternalTaskSensor
 
-DBT_IMAGE = "eu.gcr.io/anyfin-platform/dbt-image:latest"
+from utils.DbtTaskFactory import DbtTaskFactory
+
+DBT_DIR = '/home/airflow/gcs/dags/anyfin-data-model'
+MODEL_TAG = 'daily'
 
 default_args = {
-    'owner': 'ds-anyfin',
+    'owner': 'de-anyfin',
     'depends_on_past': False, 
     'retries': 0,
-    'email_on_failure': True,
-    'email': Variable.get('de_email', 'data-engineering@anyfin.com'),
-    'start_date': datetime(2020, 12, 14),
+    #'email_on_failure': True,
+    #'email': Variable.get('de_email', 'data-engineering@anyfin.com'),
+    'start_date': datetime(2022, 4, 1),
 }
 
 dag = DAG(
@@ -25,24 +24,6 @@ dag = DAG(
     catchup=False
 )
 
-secret_volume = secret.Secret(
-    'volume',
-    '/dbt/dbt/credentials/',  
-    'dbt-service-account', 
-    'service-account.json'
-)
+factory = DbtTaskFactory(DBT_DIR, dag, MODEL_TAG)
 
-
-run_dbt = KubernetesPodOperator(
-    image=DBT_IMAGE,
-    namespace='default',
-    task_id="run-models",
-    name="run-models",
-    cmds=["/bin/bash", "-c"],
-    arguments=["gsutil -m rsync -r gs://anyfin-data-model/ /dbt/ && dbt run --models tag:daily"],
-    image_pull_policy='Always',
-    is_delete_operator_pod=True,
-    get_logs=True,
-    dag=dag,
-    secrets=[secret_volume]
-)
+dbt_tasks = factory.generate_tasks_from_manifest()
