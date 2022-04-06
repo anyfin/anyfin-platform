@@ -6,7 +6,7 @@ from airflow.providers.google.cloud.transfers.bigquery_to_bigquery import BigQue
 from airflow.operators.bash_operator import BashOperator
 import json
 import logging
-from utils.dbtTaskFactory import dbtTaskFactory
+from utils.DbtTaskFactory import DbtTaskFactory
 
 
 DBT_DIR = '/home/airflow/gcs/dags/anyfin-data-model'
@@ -51,7 +51,7 @@ task_save_intercom_previous_sync = BigQueryToBigQueryOperator(
     dag=dag
 )
 
-factory = dbtTaskFactory(DBT_DIR, dag, MODEL_TAG)
+factory = DbtTaskFactory(DBT_DIR, dag, MODEL_TAG)
 
 dbt_tasks = factory.generate_tasks_from_manifest()
 

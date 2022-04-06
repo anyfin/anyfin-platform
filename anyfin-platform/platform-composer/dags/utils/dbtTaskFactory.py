@@ -4,7 +4,7 @@ from airflow.operators.bash import BashOperator
 from airflow.utils.task_group import TaskGroup
 
 
-class dbtTaskFactory:
+class DbtTaskFactory:
     def __init__(self, dbt_dir: str, dag: DAG, tag=None):
         """
         Args:
