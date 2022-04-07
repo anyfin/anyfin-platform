@@ -4,7 +4,7 @@ import logging
 from google.cloud import bigquery
 
 from airflow.hooks.postgres_hook import PostgresHook
-from airflow.contrib.hooks.gcs_hook import GoogleCloudStorageHook
+from airflow.providers.google.cloud.hooks.gcs import GCSHook
 from airflow import AirflowException
 
 
@@ -89,7 +89,7 @@ class BACKFILL:
         schema.append( {"mode": "NULLABLE", "name": "_ingested_ts", "type": "TIMESTAMP"} )
 
         # Connect to GCS
-        gcs_hook = GoogleCloudStorageHook(
+        gcs_hook = GCSHook(
             google_cloud_storage_conn_id='postgres-bq-etl-con')
 
         filename = f'pg_dumps/{self.DATABASE_NAME}_' + kwargs['name'] + '_schema.json'		
@@ -99,8 +99,8 @@ class BACKFILL:
             json.dump(schema, file)
             file.flush()
             gcs_hook.upload(
-                bucket=self.GCS_BUCKET,
-                object=filename,
+                bucket_name=self.GCS_BUCKET,
+                object_name=filename,
                 mime_type='application/json',
                 filename=file.name
             )

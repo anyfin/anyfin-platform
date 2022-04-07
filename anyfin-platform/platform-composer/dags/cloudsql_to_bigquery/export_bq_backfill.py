@@ -38,7 +38,7 @@ dag = DAG(
 	catchup=False,
 	schedule_interval='0 13 * * SUN',
 	max_active_runs=1,
-	concurrency=3
+	concurrency=4
 )
 
 
