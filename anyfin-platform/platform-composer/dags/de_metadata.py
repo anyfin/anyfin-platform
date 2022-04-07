@@ -1,16 +1,16 @@
 from datetime import datetime
 from airflow import DAG
 from airflow.models import Variable
-from airflow.contrib.operators.mysql_to_gcs import MySqlToGoogleCloudStorageOperator
-from airflow.contrib.operators.gcs_to_bq import GoogleCloudStorageToBigQueryOperator
+from airflow.providers.google.cloud.transfers.postgres_to_gcs import PostgresToGCSOperator
+from airflow.providers.google.cloud.transfers.gcs_to_bigquery import GCSToBigQueryOperator
 
 QUERY = '''
-select 
-    dag_id, 
-    task_id, 
-    convert(timestamp(execution_date), char) as execution_date, 
-    convert(timestamp(start_date), char) as start_date, 
-    convert(timestamp(end_date), char) as end_date, 
+select
+    task_id,
+    dag_id,
+    run_id,
+    start_date::timestamp with time zone::text as start_date,
+    end_date::timestamp with time zone::text as end_date,
     duration,
     state,
     try_number,
@@ -24,13 +24,16 @@ select
     queued_dttm,
     pid,
     max_tries,
-    pool_slots
+    queued_by_job_id,
+    external_executor_id,
+    trigger_id,
+    trigger_timeout
 from task_instance 
 where dag_id <> 'airflow_monitoring';
 '''
 
 default_args = {
-    'owner': 'ds-anyfin',
+    'owner': 'de-anyfin',
     'depends_on_past': False, 
     'retries': 0,
     'email_on_failure': True,
@@ -46,23 +49,24 @@ dag = DAG(
     catchup=False
 )
 
-extract_airflow_db = MySqlToGoogleCloudStorageOperator(
+extract_airflow_db = PostgresToGCSOperator(
     task_id='extract_airflow_db',
     sql=QUERY,
+    use_server_side_cursor=True,
+    cursor_itersize=10000,
     bucket='sql-to-bq-etl',
-    filename='metadata/airflow_db_extract.json',
-    mysql_conn_id='airflow_db',
-    provide_context=True,
+    filename='metadata/airflow2_db_extract.json',
+    postgres_conn_id='airflow_db',
     google_cloud_storage_conn_id='postgres-bq-etl-con',
     dag=dag
 )
 
-load_airflow_data_to_gcs = GoogleCloudStorageToBigQueryOperator(
+load_airflow_data_to_gcs = GCSToBigQueryOperator(
     task_id='load_airflow_data_to_gcs',
     bucket='sql-to-bq-etl',
-    source_objects=['metadata/airflow_db_extract.json', ],
-    destination_project_dataset_table='anyfin:metadata.airflow_db_metadata',
-    time_partitioning={'type': 'DAY', 'field': 'execution_date'},
+    source_objects=['metadata/airflow2_db_extract.json', ],
+    destination_project_dataset_table='anyfin:metadata.airflow2_db_metadata',
+    time_partitioning={'type': 'DAY', 'field': 'start_date'},
     source_format='NEWLINE_DELIMITED_JSON',
     create_disposition='CREATE_IF_NEEDED',
     write_disposition='WRITE_TRUNCATE',
