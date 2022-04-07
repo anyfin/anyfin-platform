@@ -22,7 +22,7 @@ GCS_BUCKET = 'sql-to-bq-etl'
 DAG_PATH = os.path.dirname(os.path.realpath(__file__))
 
 default_args = {
-	'owner': 'data-engineering',
+	'owner': 'de-anyfin',
 	'depends_on_past': False,
 	'start_date': datetime(2020, 9, 8),
 	'retries': 2,
@@ -38,7 +38,7 @@ dag = DAG(
 	catchup=False,
 	schedule_interval='0 13 * * SUN',
 	max_active_runs=1,
-	concurrency=3
+	concurrency=4
 )
 
 
@@ -105,7 +105,6 @@ for DB in DATABASES_INFO:
 			template=f"gs://sql-to-bq-etl/beam_templates/postgres-backfill-{DATABASE_NAME}-{table_name}",
 			dataflow_default_options= {
 				'project': 'anyfin',
-				'region': 'europe-west1',
 				'numWorkers': '4',
 				'maxWorkers': '4',
 				'machineType': 'n1-standard-2'
@@ -114,6 +113,7 @@ for DB in DATABASES_INFO:
 				"destinationTable": f"anyfin:{DATABASE_NAME}_staging.{table_name}{raw}{backup}",
 				"currentDate": datetime.today().strftime('%Y-%m-%d')
 			},
+			location='europe-west1',
 			gcp_conn_id='postgres-bq-etl-con',
 			dag=dag,
 		)
