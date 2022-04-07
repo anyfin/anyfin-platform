@@ -1,35 +1,31 @@
 import tempfile
-import logging
 import requests
 import time
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta
 
 from airflow import DAG
 from airflow.models import Variable
-from airflow.operators.python_operator import PythonOperator, BranchPythonOperator
+from airflow.operators.python_operator import PythonOperator
 
-from google.cloud import bigquery
-from airflow import AirflowException
-from airflow.hooks.postgres_hook import PostgresHook
-from airflow.contrib.hooks.gcs_hook import GoogleCloudStorageHook
-from airflow.contrib.operators.gcs_to_bq import GoogleCloudStorageToBigQueryOperator
+from airflow.providers.google.cloud.hooks.gcs import GCSHook
+from airflow.providers.google.cloud.transfers.gcs_to_bigquery import GCSToBigQueryOperator
 
 
 BUCKET = 'intercom-to-bq-etl'
 FILE_NAME = 'intercom_messages.csv'
 SCHEMA_OBJECT = 'intercom_messages_schema.json'
 
-API_KEY = Variable.get('intercom_api_export_messages')
+API_KEY = Variable.get('intercom_api_export_messages_secret')
 
 default_args = {
-	'owner': 'ds-anyfin',
+	'owner': 'de-anyfin',
 	'depends_on_past': False,
 	'start_date': datetime(2020, 9, 8),
 	'retries': 2,
 	'retry_delay': timedelta(minutes=10),
-	'email_on_failure': True,
-	'email_on_retry': False,
-	'email': Variable.get('de_email', 'data-engineering@anyfin.com')
+	#'email_on_failure': True,
+	#'email_on_retry': False,
+	#'email': Variable.get('de_email', 'data-engineering@anyfin.com')
 }
 
 dag = DAG(
@@ -125,7 +121,7 @@ def download(**context):
 	response = requests.get(download_url, headers=headers, stream=True)
 	
 	# Connect to GCS
-	gcs_hook = GoogleCloudStorageHook(google_cloud_storage_conn_id='google_cloud_storage_default')
+	gcs_hook = GCSHook(gcp_conn_id='bigquery-composer-connection')
 
 	# Write file response to temp file and upload it to GCS
 	with tempfile.NamedTemporaryFile(mode="wb", suffix='.csv') as f:
@@ -134,8 +130,8 @@ def download(**context):
 				f.write(chunk)
 		f.flush()
 		gcs_hook.upload(
-				bucket=BUCKET,
-				object=FILE_NAME,
+				bucket_name=BUCKET,
+				object_name=FILE_NAME,
 				mime_type='application/csv',
 				filename=f.name
 			)
@@ -145,7 +141,7 @@ task_request_download_id = PythonOperator(
 	task_id='request_download_id',
 	python_callable=request_download_id,
 	op_kwargs={'start_date': '2021-09-01'}, # Should be 2021-09-01 for all data
-	xcom_push=True,
+	do_xcom_push=True,
 	dag=dag
 )
 
@@ -153,7 +149,7 @@ task_get_download_url = PythonOperator(
 	task_id='get_download_url',
 	python_callable=get_dowload_link,
 	provide_context=True,
-	xcom_push=True,
+	do_xcom_push=True,
 	dag=dag
 )
 
@@ -161,19 +157,11 @@ task_download_and_upload_to_gcs = PythonOperator(
 	task_id='download_and_upload_to_gcs',
 	python_callable=download,
 	provide_context=True,
-	xcom_push=False,
+	do_xcom_push=True,
 	dag=dag
 )
 
-task_upload_from_gcs_to_bigquery = PythonOperator(
-	task_id='download_and_upload_to_gcs',
-	python_callable=download,
-	provide_context=True,
-	xcom_push=False,
-	dag=dag
-)
-
-task_upload_from_gcs_to_bigquery = GoogleCloudStorageToBigQueryOperator(
+task_upload_from_gcs_to_bigquery = GCSToBigQueryOperator(
 			task_id='upload_from_gcs_to_bigquery',
 			bucket=BUCKET,
 			schema_object='intercom_messages_schema.json',
@@ -187,8 +175,8 @@ task_upload_from_gcs_to_bigquery = GoogleCloudStorageToBigQueryOperator(
 			ignore_unknown_values=True,
 			max_bad_records=5,
 			destination_project_dataset_table='anyfin.product.intercom_message_export',
-			bigquery_conn_id='bigquery_default',
-			google_cloud_storage_conn_id='google_cloud_storage_default',
+			bigquery_conn_id='bigquery-composer-connection',
+			google_cloud_storage_conn_id='bigquery-composer-connection',
 			dag=dag
 		)
 
