@@ -45,4 +45,9 @@ if path.exists(f'{dbt_home_dir}coverage-test.json'):
         data_to_insert.columns = ['execution_date', 'dataset_name', 'table_name', 'tests_covered', 'docs_covered',
                                   'columns_total']
 
+        total_row = [datetime.today().strftime('%Y-%m-%d'), 'all', 'all', data_to_insert['tests_covered'].sum(),
+                     data_to_insert['docs_covered'].sum(), data_to_insert['columns_total'].sum()]
+        idx = data_to_insert.index.max() + 1
+        data_to_insert.loc[idx] = total_row
+
         data_to_insert.to_csv(f'{data_dir}dbt-coverage-report.csv', index=False)
