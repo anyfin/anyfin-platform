@@ -14,9 +14,9 @@ DATABASE_NAME = 'assess'
 ETL = ETL(GCS_BUCKET=GCS_BUCKET, DATABASE_NAME=DATABASE_NAME)
 
 default_args = {
-    'owner': 'ds-anyfin',
+    'owner': 'de-anyfin',
     'depends_on_past': False,
-    'start_date': datetime(2020, 9, 8),
+    'start_date': datetime(2022, 4, 7),
     'retries': 2,
     'retry_delay': timedelta(minutes=10),
     'email_on_failure': True,
