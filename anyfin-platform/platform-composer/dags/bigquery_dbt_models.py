@@ -1,10 +1,7 @@
 from datetime import datetime
 from airflow import DAG
-from airflow.models import Variable
 from airflow.providers.google.cloud.transfers.bigquery_to_gcs import BigQueryToGCSOperator
 from airflow.providers.google.cloud.transfers.bigquery_to_bigquery import BigQueryToBigQueryOperator
-import json
-import logging
 from utils.DbtTaskFactory import DbtTaskFactory
 from utils import slack_notification
 from functools import partial

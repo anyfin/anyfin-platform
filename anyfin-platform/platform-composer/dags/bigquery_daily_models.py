@@ -1,6 +1,5 @@
 from datetime import datetime
 from airflow import DAG
-from airflow.models import Variable
 
 from utils.DbtTaskFactory import DbtTaskFactory
 from utils import slack_notification

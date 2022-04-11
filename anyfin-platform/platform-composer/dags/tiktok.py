@@ -6,8 +6,8 @@ from six import string_types
 from six.moves.urllib.parse import urlencode, urlunparse
 from airflow import DAG, models
 from datetime import datetime, timedelta
-from airflow.operators.python_operator import PythonOperator
-from airflow.contrib.hooks.bigquery_hook import BigQueryHook
+from airflow.operators.python import PythonOperator
+from airflow.providers.google.cloud.hooks.bigquery import BigQueryHook
 from airflow.exceptions import AirflowFailException
 
 from utils import slack_notification
