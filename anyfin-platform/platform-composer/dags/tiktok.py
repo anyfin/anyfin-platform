@@ -10,11 +10,15 @@ from airflow.operators.python_operator import PythonOperator
 from airflow.contrib.hooks.bigquery_hook import BigQueryHook
 from airflow.exceptions import AirflowFailException
 
+from utils import slack_notification
+from functools import partial
+
 SE_FI_ADVERTISER_ID = 6955479302334906369
 DE_ADVERTISER_ID = 7068632801515520002 
 ACCESS_TOKEN = models.Variable.get('tiktok_api_secret')
 ALLOWED_COUNTRIES = ['SE', 'DE', 'FI']
 DEFAULT_COUNTRY = 'SE'
+SLACK_CONNECTION = 'slack_data_engineering'
 
 schema = [
     bigquery.SchemaField("date", "TIMESTAMP", mode="NULLABLE"),
@@ -51,9 +55,7 @@ default_args = {
     'start_date': datetime(2022,3,27),
     'retries': 3,
     'retry_delay': timedelta(minutes=4),
-    'email_on_failure': True,
-    'email': models.Variable.get('de_email'),
-    'email_on_retry': False
+    'on_failure_callback': partial(slack_notification.task_fail_slack_alert, SLACK_CONNECTION),
 }
 
 dag = DAG('marketing_cost_tiktok_ads', 

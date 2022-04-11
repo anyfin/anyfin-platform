@@ -8,6 +8,8 @@ from airflow.contrib.operators.gcs_to_bq import GoogleCloudStorageToBigQueryOper
 from airflow.contrib.operators.postgres_to_gcs_operator import PostgresToGoogleCloudStorageOperator
 from airflow.models import BaseOperator
 
+from utils import slack_notification
+from functools import partial
 
 class GoogleCloudStorageDeleteOperator(BaseOperator):
 
@@ -50,20 +52,19 @@ class GoogleCloudStorageDeleteOperator(BaseOperator):
                         object=object_name)
 
 
-default_args = {
-    'owner': 'ds-anyfin',
-    'email_on_failure': True,
-    'email_on_retry': False,
-    'retries': 1,
-    'email': Variable.get('ds_email'),
-    'start_date': datetime(2020, 8, 28),
-    'depends_on_past': False
-}
-
 BUCKET = 'prices-fluctuation'
 DAILY_EXTRACTED_FILENAME = 'items_prices/{{ ds_nodash }}_daily_export.json'
 DESTINATION_TABLE = 'purchase_history.items_prices${{ ds_nodash }}'
 SCHEMA_OBJECT = 'items_prices/schema/items_prices_schema.json'
+SLACK_CONNECTION = 'slack_data_engineering'
+
+default_args = {
+    'owner': 'ds-anyfin',
+    'retries': 1,
+    'on_failure_callback': partial(slack_notification.task_fail_slack_alert, SLACK_CONNECTION),
+    'start_date': datetime(2020, 8, 28),
+    'depends_on_past': False
+}
 
 EXTRACT_SQL = '''
 with temp as(

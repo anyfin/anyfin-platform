@@ -10,6 +10,10 @@ from airflow.operators.python_operator import PythonOperator
 from airflow.contrib.hooks.bigquery_hook import BigQueryHook
 from airflow.exceptions import AirflowFailException
 
+from utils import slack_notification
+from functools import partial
+
+SLACK_CONNECTION = 'slack_data_engineering'
 ad_account_id = '62e180ea-884d-4383-815f-9d7624d5f31f'
 bq_schema = [
     bigquery.SchemaField("date", "DATE", mode="NULLABLE"),
@@ -39,9 +43,7 @@ default_args = {
     'start_date': datetime(2022,3,27),
     'retries': 3,
     'retry_delay': timedelta(minutes=4),
-    'email_on_failure': True,
-    'email': models.Variable.get('de_email'),
-    'email_on_retry': False
+    'on_failure_callback': partial(slack_notification.task_fail_slack_alert, SLACK_CONNECTION),
 }
 
 dag = DAG('marketing_cost_snapchat', 

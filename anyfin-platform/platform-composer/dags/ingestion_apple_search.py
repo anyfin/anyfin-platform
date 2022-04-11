@@ -10,7 +10,11 @@ from airflow.operators.python_operator import PythonOperator
 from airflow.contrib.hooks.bigquery_hook import BigQueryHook
 from airflow.contrib.hooks.gcs_hook import GoogleCloudStorageHook
 
+from utils import slack_notification
+from functools import partial
+
 ORG_ID = '1555680'
+SLACK_CONNECTION = 'slack_data_engineering'
 
 default_args = {
     'owner': 'growth',
@@ -18,9 +22,7 @@ default_args = {
     'start_date': datetime(2020,8,28),
     'retries': 3,
     'retry_delay': timedelta(minutes=4),
-    'email_on_failure': True,
-    'email': models.Variable.get('growth_email'),
-    'email_on_retry': False
+    'on_failure_callback': partial(slack_notification.task_fail_slack_alert, SLACK_CONNECTION),
 }
 
 dag = DAG('marketing_apple_ads', 

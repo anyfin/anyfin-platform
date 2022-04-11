@@ -3,15 +3,18 @@ from airflow import DAG
 from airflow.models import Variable
 from airflow.providers.google.cloud.operators.dataflow import DataflowStartFlexTemplateOperator
 
+from utils import slack_notification
+from functools import partial
+
 GCS_BUCKET = "anyfin-rvl"
 FLEX_TEMPLATES_DIR = "flex_templates"
+SLACK_CONNECTION = 'slack_data_engineering'
 
 default_args = {
     'owner': 'ds-anyfin',
     'depends_on_past': False, 
     'retries': 0,
-    'email_on_failure': True,
-    # 'email': Variable.get('de_email', 'data-engineering@anyfin.com'),
+    'on_failure_callback': partial(slack_notification.task_fail_slack_alert, SLACK_CONNECTION),
     'start_date': datetime(2022, 3, 21),
 }
 

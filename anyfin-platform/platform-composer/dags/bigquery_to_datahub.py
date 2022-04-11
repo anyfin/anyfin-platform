@@ -3,20 +3,22 @@ from airflow import DAG
 from airflow.models import Variable
 from airflow.operators.python_operator import PythonVirtualenvOperator
 
+from utils import slack_notification
+from functools import partial
+
 METADATA_RECIPES = {
         "bigquery_anyfin": "bigquery_anyfin_recipe.yaml", 
         "bigquery_segment": "bigquery_segment_recipe.yaml"
 }
 
 USAGE_RECIPE = "bigquery_usage_recipe.yaml"
+SLACK_CONNECTION = 'slack_data_engineering'
 
 default_args = {
     "owner": "ds-anyfin",
     "depends_on_past": False,
-    "email_on_failure": True,
-    "email_on_retry": False,
+    'on_failure_callback': partial(slack_notification.task_fail_slack_alert, SLACK_CONNECTION),
     "retries": 1,
-    'email': Variable.get('de_email', 'data-engineering@anyfin.com'),
 }
 
 dag = DAG(

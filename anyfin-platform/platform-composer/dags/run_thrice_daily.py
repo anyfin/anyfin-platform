@@ -6,12 +6,16 @@ from airflow.operators.bash import BashOperator
 from airflow.utils.state import State
 from airflow.providers.google.cloud.transfers.gcs_to_bigquery import GCSToBigQueryOperator
 
+from utils import slack_notification
+from functools import partial
+
 slack_connection = 'slack_data_engineering'
 
 UTILS_DIR = '/home/airflow/gcs/dags/utils/'
 DBT_HOME_DIR = '/home/airflow/gcs/dags/anyfin-data-model/'
 DBT_COVERAGE_TABLE = 'metadata.dbt_coverage_metadata'
 PROJECT_NAME = 'anyfin'
+SLACK_CONNECTION = 'slack_data_engineering'
 
 today_partition = date.today().strftime('%Y%m%d')
 
@@ -21,9 +25,7 @@ default_args = {
     'start_date': datetime(2022, 4, 1),
     'retries': 0,  # Do not retry as this will rerun all dbt models and ETLs again
     'retry_delay': timedelta(minutes=10),
-    #'email_on_failure': True,
-    #'email_on_retry': False,
-    #'email': Variable.get('de_email', 'data-engineering@anyfin.com')
+    'on_failure_callback': partial(slack_notification.task_fail_slack_alert, SLACK_CONNECTION),
 }
 
 with DAG(
