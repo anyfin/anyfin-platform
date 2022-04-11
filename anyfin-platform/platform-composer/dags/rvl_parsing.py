@@ -113,4 +113,22 @@ crif_buergel_parser = DataflowStartFlexTemplateOperator(
     dag=dag
 )
 
+uc_features = DataflowStartFlexTemplateOperator(
+    body={
+        "launchParameter": {
+            "containerSpecGcsPath": f"gs://{GCS_BUCKET}/{FLEX_TEMPLATES_DIR}/flex_template_uc_features",
+            "jobName": "ucFeatures",
+            "environment": {
+                "enableStreamingEngine": "false"
+            },
+        }
+    },
+    task_id="uc_features",
+    location="europe-west1",
+    project_id="anyfin",
+    gcp_conn_id="postgres-bq-etl-con",
+    wait_until_finished=True,
+    dag=dag
+)
+
 schufa_parser >> schufa_features
