@@ -1,6 +1,5 @@
 from datetime import datetime
 from airflow import DAG
-from airflow.models import Variable
 from airflow.providers.google.cloud.transfers.postgres_to_gcs import PostgresToGCSOperator
 from airflow.providers.google.cloud.transfers.gcs_to_bigquery import GCSToBigQueryOperator
 

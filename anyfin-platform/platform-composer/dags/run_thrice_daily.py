@@ -1,5 +1,4 @@
 from airflow import DAG
-from airflow.models import Variable
 from datetime import datetime, timedelta, date
 from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 from airflow.operators.bash import BashOperator

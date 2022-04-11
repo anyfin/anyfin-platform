@@ -1,11 +1,9 @@
 from datetime import datetime
 from airflow import DAG
-from airflow.models import Variable
-from airflow.utils.decorators import apply_defaults
-from airflow.contrib.hooks.gcs_hook import GoogleCloudStorageHook
-from airflow.contrib.operators.bigquery_operator import BigQueryOperator
-from airflow.contrib.operators.gcs_to_bq import GoogleCloudStorageToBigQueryOperator
-from airflow.contrib.operators.postgres_to_gcs_operator import PostgresToGoogleCloudStorageOperator
+from airflow.providers.google.cloud.hooks.gcs import GCSHook
+from airflow.providers.google.cloud.operators.bigquery import BigQueryExecuteQueryOperator
+from airflow.providers.google.cloud.transfers.gcs_to_bigquery import GCSToBigQueryOperator
+from airflow.providers.google.cloud.transfers.postgres_to_gcs import PostgresToGCSOperator
 from airflow.models import BaseOperator
 
 from utils import slack_notification
@@ -15,7 +13,6 @@ class GoogleCloudStorageDeleteOperator(BaseOperator):
 
     template_fields = ('bucket_name', 'prefix', 'objects')
 
-    @apply_defaults
     def __init__(self,
                  bucket_name,
                  objects=None,
@@ -34,7 +31,7 @@ class GoogleCloudStorageDeleteOperator(BaseOperator):
         super(GoogleCloudStorageDeleteOperator, self).__init__(*args, **kwargs)
 
     def execute(self, context):
-        hook = GoogleCloudStorageHook(
+        hook = GCSHook(
             google_cloud_storage_conn_id=self.google_cloud_storage_conn_id,
             delegate_to=self.delegate_to
         )
@@ -157,7 +154,7 @@ with DAG('purchase_history',
          schedule_interval='@daily',
          max_active_runs=1) as dag:
 
-    extract_daily_gcs = PostgresToGoogleCloudStorageOperator(
+    extract_daily_gcs = PostgresToGCSOperator(
         task_id='extract_daily_gcs',
         sql=EXTRACT_SQL.format('{{ ds }}'),
         bucket=BUCKET,
@@ -166,7 +163,7 @@ with DAG('purchase_history',
         filename=DAILY_EXTRACTED_FILENAME
     )
 
-    load_daily_bq = GoogleCloudStorageToBigQueryOperator(
+    load_daily_bq = GCSToBigQueryOperator(
         task_id='load_daily_bq',
         bucket=BUCKET,
         source_objects=[DAILY_EXTRACTED_FILENAME, ],
@@ -181,7 +178,7 @@ with DAG('purchase_history',
         dag=dag
     )
 
-    customer_summary = BigQueryOperator(
+    customer_summary = BigQueryExecuteQueryOperator(
         task_id='customer_summary',
         sql=SUMMARY_SQL,
         destination_dataset_table="anyfin.purchase_history.customer_purchase_overview",

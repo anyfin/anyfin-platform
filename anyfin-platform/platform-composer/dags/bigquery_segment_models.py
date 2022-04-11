@@ -1,8 +1,7 @@
 from datetime import datetime, timedelta
 from airflow import DAG
-from airflow.models import Variable
 from airflow.providers.google.cloud.operators.bigquery import BigQueryDeleteTableOperator
-from airflow.operators.bash_operator import BashOperator
+from airflow.operators.bash import BashOperator
 
 from utils.DbtTaskFactory import DbtTaskFactory
 from utils import slack_notification

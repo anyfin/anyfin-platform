@@ -1,6 +1,5 @@
 from datetime import datetime
 from airflow import DAG
-from airflow.models import Variable
 from airflow.providers.google.cloud.operators.dataflow import DataflowStartFlexTemplateOperator
 
 from utils import slack_notification

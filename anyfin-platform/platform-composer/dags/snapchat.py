@@ -2,12 +2,11 @@ import requests
 import pytz
 import logging
 import json
-import time
 from google.cloud import bigquery
-from datetime import datetime, timedelta, timezone
-from airflow import DAG, macros, models
-from airflow.operators.python_operator import PythonOperator
-from airflow.contrib.hooks.bigquery_hook import BigQueryHook
+from datetime import datetime, timedelta
+from airflow import DAG, models
+from airflow.operators.python import PythonOperator
+from airflow.providers.google.cloud.hooks.bigquery import BigQueryHook
 from airflow.exceptions import AirflowFailException
 
 from utils import slack_notification
