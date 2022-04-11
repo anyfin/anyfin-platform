@@ -14,7 +14,7 @@ from utils import slack_notification
 from functools import partial
 
 SE_FI_ADVERTISER_ID = 6955479302334906369
-DE_ADVERTISER_ID = 7068632801515520002 
+DE_ADVERTISER_ID = 7068632801515520002
 ACCESS_TOKEN = models.Variable.get('tiktok_api_secret')
 ALLOWED_COUNTRIES = ['SE', 'DE', 'FI']
 DEFAULT_COUNTRY = 'SE'
@@ -52,17 +52,18 @@ schema = [
 default_args = {
     'owner': 'de-anyfin',
     'depends_on_past': False,
-    'start_date': datetime(2022,3,27),
+    'start_date': datetime(2022, 3, 27),
     'retries': 3,
     'retry_delay': timedelta(minutes=4),
     'on_failure_callback': partial(slack_notification.task_fail_slack_alert, SLACK_CONNECTION),
 }
 
-dag = DAG('marketing_cost_tiktok_ads', 
-    default_args = default_args, 
-    catchup = True,
-    schedule_interval='0 03 * * *',
-    max_active_runs = 1)
+dag = DAG('marketing_cost_tiktok_ads',
+          default_args=default_args,
+          catchup=True,
+          schedule_interval='0 03 * * *',
+          max_active_runs=1)
+
 
 def build_url(path, query=""):
     """
@@ -74,24 +75,30 @@ def build_url(path, query=""):
     scheme, netloc = "https", "ads.tiktok.com"
     return urlunparse((scheme, netloc, path, "", query, ""))
 
-def get_ad_report(advertiser_id, countries,  ds, **kwargs):
+
+def get_ad_report(advertiser_id, countries, ds, **kwargs):
     PATH = "/open_api/v1.2/reports/integrated/get/"
 
-    #metric description in docs https://ads.tiktok.com/marketing_api/docs?id=1685764234508290
-    metrics_list = ["ad_name","adgroup_id","adgroup_name","campaign_id","campaign_name","spend","reach","impressions","clicks","video_play_actions","video_watched_2s","video_watched_6s","average_video_play","video_views_p25","video_views_p50","video_views_p75","video_views_p100","profile_visits","likes","comments","shares","follows"] 
+    # metric description in docs https://ads.tiktok.com/marketing_api/docs?id=1685764234508290
+    metrics_list = ["ad_name", "adgroup_id", "adgroup_name", "campaign_id", "campaign_name", "spend", "reach",
+                    "impressions", "clicks", "video_play_actions", "video_watched_2s", "video_watched_6s",
+                    "average_video_play", "video_views_p25", "video_views_p50", "video_views_p75", "video_views_p100",
+                    "profile_visits", "likes", "comments", "shares", "follows"]
     metrics = json.dumps(metrics_list)
-    dimensions_list = ["stat_time_day","ad_id"]
+    dimensions_list = ["stat_time_day", "ad_id"]
     dimensions = json.dumps(dimensions_list)
-    data_level = 'AUCTION_AD' #eventually RESERVATION_ADs also?
+    data_level = 'AUCTION_AD'  # eventually RESERVATION_ADs also?
     start_date = ds
     end_date = ds
     page_size = 100
     service_type = "AUCTION"
-    lifetime = False #set to true for backfills
+    lifetime = False  # set to true for backfills
     report_type = "BASIC"
     page = 1
 
-    my_args = "{\"metrics\": %s, \"data_level\": \"%s\", \"end_date\": \"%s\", \"page_size\": \"%s\", \"start_date\": \"%s\", \"advertiser_id\": \"%s\", \"service_type\": \"%s\", \"lifetime\": \"%s\", \"report_type\": \"%s\", \"page\": \"%s\", \"dimensions\": %s}" % (metrics, data_level, end_date, page_size, start_date, advertiser_id, service_type, lifetime, report_type, page, dimensions)
+    my_args = "{\"metrics\": %s, \"data_level\": \"%s\", \"end_date\": \"%s\", \"page_size\": \"%s\", \"start_date\": \"%s\", \"advertiser_id\": \"%s\", \"service_type\": \"%s\", \"lifetime\": \"%s\", \"report_type\": \"%s\", \"page\": \"%s\", \"dimensions\": %s}" % (
+    metrics, data_level, end_date, page_size, start_date, advertiser_id, service_type, lifetime, report_type, page,
+    dimensions)
     args = json.loads(my_args)
     logging.info("Sending request with the following args: ", my_args)
 
@@ -105,34 +112,34 @@ def get_ad_report(advertiser_id, countries,  ds, **kwargs):
 
     if response['message'] == 'OK':
         ads = response['data']['list']
-        rows = [] 
+        rows = []
         columns = ['date', 'ad_id', 'country_code', 'currency_code'] + metrics_list
         for ad in ads:
             if float(ad["metrics"].get("spend")) > 0.0:
-                ad["metrics"]["spend"] = float(ad["metrics"]["spend"]) * 1.25 #adding VAT to spend
+                ad["metrics"]["spend"] = float(ad["metrics"]["spend"]) * 1.25  # adding VAT to spend
                 dims = [ad["dimensions"].get(dim) for dim in dimensions_list]
                 metr = [ad["metrics"].get(met) for met in metrics_list]
-                #TODO: see if country_code can be fetched from api, but it doesn't look like it 
+                # TODO: see if country_code can be fetched from api, but it doesn't look like it
                 country_code = ad["metrics"].get('campaign_name', DEFAULT_COUNTRY)[0:2].upper()
 
-                #before we had a naming convention we didn't prefix campaigns with country. Hence setting the default country to SE
+                # before we had a naming convention we didn't prefix campaigns with country. Hence setting the default country to SE
                 if country_code not in ALLOWED_COUNTRIES:
                     country_code = DEFAULT_COUNTRY
                 vals = dims + [country_code, 'SEK'] + metr
-                record = dict(zip(columns,vals))
+                record = dict(zip(columns, vals))
                 rows.append(record)
-                
-        #Streaming insert to Bigquery since the volume is very low. Might consider bulk loads later on if volume increases
+
+        # Streaming insert to Bigquery since the volume is very low. Might consider bulk loads later on if volume increases
         if len(rows) > 0:
             table = 'anyfin.marketing.daily_tiktok_ads'
             hook = BigQueryHook('postgres-bq-etl-con')
             countries = "','".join(countries)
-            client = bigquery.Client(project = 'anyfin', credentials = hook._get_credentials())
+            client = bigquery.Client(project='anyfin', credentials=hook._get_credentials())
             client.query(f"DELETE FROM `{table}` WHERE date = '{ds}' and country_code in ('{countries}')")
             ins = client.insert_rows(table=table, rows=rows, selected_fields=schema)
-            if ins == []:
+            if not ins:
                 logging.info(f"New rows for date {ds} inserted to table - {table}")
-            else: 
+            else:
                 raise AirflowFailException("No rows were inserted due to these errors: ", ins)
 
         else:
@@ -142,17 +149,17 @@ def get_ad_report(advertiser_id, countries,  ds, **kwargs):
 
 
 ingest_nordic_ad_report = PythonOperator(
-    task_id = 'ingest_daily_ad_report_se_fi',
-    python_callable = get_ad_report,
-    provide_context = True,
-    op_args = [SE_FI_ADVERTISER_ID, ['SE', 'FI']],
-    dag = dag
+    task_id='ingest_daily_ad_report_se_fi',
+    python_callable=get_ad_report,
+    provide_context=True,
+    op_args=[SE_FI_ADVERTISER_ID, ['SE', 'FI']],
+    dag=dag
 )
 
 ingest_german_ad_report = PythonOperator(
-    task_id = 'ingest_daily_ad_report_de',
-    python_callable = get_ad_report,
-    provide_context = True,
-    op_args = [DE_ADVERTISER_ID, ['DE']],
-    dag = dag
+    task_id='ingest_daily_ad_report_de',
+    python_callable=get_ad_report,
+    provide_context=True,
+    op_args=[DE_ADVERTISER_ID, ['DE']],
+    dag=dag
 )

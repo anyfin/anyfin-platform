@@ -39,20 +39,21 @@ bq_schema = [
 default_args = {
     'owner': 'de-anyfin',
     'depends_on_past': True,
-    'start_date': datetime(2022,3,27),
+    'start_date': datetime(2022, 3, 27),
     'retries': 3,
     'retry_delay': timedelta(minutes=4),
     'on_failure_callback': partial(slack_notification.task_fail_slack_alert, SLACK_CONNECTION),
 }
 
-dag = DAG('marketing_cost_snapchat', 
-    default_args = default_args, 
-    catchup = True,
-    schedule_interval='0 03 * * *',
-    max_active_runs = 1)
+dag = DAG('marketing_cost_snapchat',
+          default_args=default_args,
+          catchup=True,
+          schedule_interval='0 03 * * *',
+          max_active_runs=1)
+
 
 def get_access_token(secrets):
-    url = 'https://accounts.snapchat.com/login/oauth2/access_token' 
+    url = 'https://accounts.snapchat.com/login/oauth2/access_token'
     try:
         r = requests.post(url, data=secrets)
         r.raise_for_status()
@@ -61,21 +62,24 @@ def get_access_token(secrets):
     except requests.exceptions.RequestException as e:
         raise AirflowFailException(e)
 
-def fetch_data(url, headers, payload={'limit' : 100}):
+
+def fetch_data(url, headers, payload=None):
+    payload = payload or {'limit': 100}
     try:
         r = requests.get(url, headers=headers, params=payload)
         r.raise_for_status()
-        return r.json()    
+        return r.json()
     except requests.exceptions.RequestException as e:
         raise AirflowFailException(e)
+
 
 def parse_request(ds, **kwargs):
     secrets = json.loads(models.Variable.get('snapchat_secrets'))
     access_token = get_access_token(secrets)
-    headers = {'content-type': 'application/json','Authorization': 'Bearer ' + access_token}
+    headers = {'content-type': 'application/json', 'Authorization': 'Bearer ' + access_token}
     campaigns_url = f'https://adsapi.snapchat.com/v1/adaccounts/{ad_account_id}/campaigns'
     c_data = fetch_data(campaigns_url, headers)
-    
+
     rows = []
     for c in c_data['campaigns']:
         campaign = c.get('campaign', {})
@@ -86,12 +90,13 @@ def parse_request(ds, **kwargs):
         a_data = fetch_data(ads_url, headers)
 
         for a in a_data['ads']:
-            ad = a.get('ad', {}) 
+            ad = a.get('ad', {})
             ad_id = ad.get('id')
-            #Get midnight in Europe/Stockholm timezone to use in api call                
+            # Get midnight in Europe/Stockholm timezone to use in api call
             start_time = kwargs['execution_date'].astimezone(pytz.timezone("Europe/Stockholm")).replace(hour=0)
-            end_time = (kwargs['execution_date'] + timedelta(days=1)).astimezone(pytz.timezone("Europe/Stockholm")).replace(hour=0)
-            
+            end_time = (kwargs['execution_date'] + timedelta(days=1)).astimezone(
+                pytz.timezone("Europe/Stockholm")).replace(hour=0)
+
             payload = {
                 'granularity': 'DAY',
                 'fields': 'impressions,swipes,view_time_millis,screen_time_millis,spend,video_views,android_installs,ios_installs,swipe_up_percent,uniques',
@@ -104,22 +109,25 @@ def parse_request(ds, **kwargs):
             }
             stats_url = f'https://adsapi.snapchat.com/v1/ads/{ad_id}/stats'
             stats_data = fetch_data(stats_url, headers=headers, payload=payload)
-            all_stats = stats_data['timeseries_stats'][0]['timeseries_stat'] #contains list of stats for 1 or multiple days + common ids and ts for all days
-            stats_data = all_stats['timeseries'] 
-            if len(stats_data) > 0: 
+            all_stats = stats_data['timeseries_stats'][0][
+                'timeseries_stat']  # contains list of stats for 1 or multiple days + common ids and ts for all days
+            stats_data = all_stats['timeseries']
+            if len(stats_data) > 0:
                 for s in stats_data:
                     if s['stats'].get('spend', 0.00) > 0:
                         date = start_time.strftime('%Y-%m-%d')
                         row = [
                             date,
-                            ad_id, 
-                            ad.get('name'), 
+                            ad_id,
+                            ad.get('name'),
                             ad.get('ad_squad_id', None),
-                            ad.get('creative_id', None),                            
+                            ad.get('creative_id', None),
                             campaign_id,
-                            campaign_name, 
-                            campaign_name.split('_')[0].upper(), #assuming that campaigns follow country_* naming convention
-                            s['stats'].get('spend', 0.00)/1000000.00*1.25, # converting microcurrency and adding VAT
+                            campaign_name,
+                            campaign_name.split('_')[0].upper(),
+                            # assuming that campaigns follow country_* naming convention
+                            s['stats'].get('spend', 0.00) / 1000000.00 * 1.25,
+                            # converting microcurrency and adding VAT
                             'EUR',
                             s['stats'].get('impressions', 0),
                             s['stats'].get('swipes', 0),
@@ -136,19 +144,20 @@ def parse_request(ds, **kwargs):
     if len(rows) > 0:
         table = 'anyfin.marketing.daily_snapchat_ads'
         hook = BigQueryHook('postgres-bq-etl-con')
-        client = bigquery.Client(project = 'anyfin', credentials = hook._get_credentials())
-        client.query(f"DELETE FROM `{table}` WHERE date = '{ds}'") 
+        client = bigquery.Client(project='anyfin', credentials=hook._get_credentials())
+        client.query(f"DELETE FROM `{table}` WHERE date = '{ds}'")
         ins = client.insert_rows(table=table, rows=rows, selected_fields=bq_schema)
-        if ins == []:
+        if not ins:
             logging.info(f"New rows for date {ds} inserted to table - {table}")
-        else: 
+        else:
             raise AirflowFailException("No rows were inserted due to these errors: ", ins)
     else:
         logging.info(f"Looks like there was no spend on snapchat for date {ds}")
 
+
 ingest_ad_report = PythonOperator(
-    task_id = 'ingest_daily_ad_report',
-    python_callable = parse_request,
-    provide_context = True,
-    dag = dag
+    task_id='ingest_daily_ad_report',
+    python_callable=parse_request,
+    provide_context=True,
+    dag=dag
 )

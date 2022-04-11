@@ -28,15 +28,13 @@ default_args = {
 }
 
 with DAG(
-    dag_id='run_thrice_daily', 
-    default_args=default_args, 
-    catchup=False,
-    description='This DAG is used to orcehstrate all of our DAGs that run thrice-daily',
-    schedule_interval='0 2,6,11 * * *',
-    max_active_runs=1
+        dag_id='run_thrice_daily',
+        default_args=default_args,
+        catchup=False,
+        description='This DAG is used to orcehstrate all of our DAGs that run thrice-daily',
+        schedule_interval='0 2,6,11 * * *',
+        max_active_runs=1
 ) as dag:
-
-
     run_ETL = TriggerDagRunOperator(
         task_id='run-postgres_bq_etl',
         trigger_dag_id='postgres_bq_etl',
