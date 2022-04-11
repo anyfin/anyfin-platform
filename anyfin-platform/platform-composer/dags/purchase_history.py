@@ -59,7 +59,7 @@ SCHEMA_OBJECT = 'items_prices/schema/items_prices_schema.json'
 SLACK_CONNECTION = 'slack_data_engineering'
 
 default_args = {
-    'owner': 'ds-anyfin',
+    'owner': 'de-anyfin',
     'retries': 1,
     'on_failure_callback': partial(slack_notification.task_fail_slack_alert, SLACK_CONNECTION),
     'start_date': datetime(2020, 8, 28),

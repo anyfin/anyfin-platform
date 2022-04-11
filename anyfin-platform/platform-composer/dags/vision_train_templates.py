@@ -85,7 +85,7 @@ def branch(country_code, **kwargs):
 
 
 default_args = {
-    'owner': 'ds-anyfin',
+    'owner': 'de-anyfin',
     'email_on_failure': True,
     'email_on_retry': False,
     'retries': 3,

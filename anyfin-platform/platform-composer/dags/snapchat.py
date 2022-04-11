@@ -38,7 +38,7 @@ bq_schema = [
 ]
 
 default_args = {
-    'owner': 'ds-anyfin',
+    'owner': 'de-anyfin',
     'depends_on_past': True,
     'start_date': datetime(2022,3,27),
     'retries': 3,

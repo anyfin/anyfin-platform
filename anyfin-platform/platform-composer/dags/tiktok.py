@@ -50,7 +50,7 @@ schema = [
 ]
 
 default_args = {
-    'owner': 'ds-anyfin',
+    'owner': 'de-anyfin',
     'depends_on_past': False,
     'start_date': datetime(2022,3,27),
     'retries': 3,

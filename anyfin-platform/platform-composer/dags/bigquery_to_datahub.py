@@ -15,7 +15,7 @@ USAGE_RECIPE = "bigquery_usage_recipe.yaml"
 SLACK_CONNECTION = 'slack_data_engineering'
 
 default_args = {
-    "owner": "ds-anyfin",
+    "owner": "de-anyfin",
     "depends_on_past": False,
     'on_failure_callback': partial(slack_notification.task_fail_slack_alert, SLACK_CONNECTION),
     "retries": 1,

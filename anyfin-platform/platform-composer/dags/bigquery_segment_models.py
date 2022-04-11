@@ -13,7 +13,7 @@ MODEL_TAG = 'segment'
 SLACK_CONNECTION = 'slack_data_engineering'
 
 default_args = {
-    'owner': 'ds-anyfin',
+    'owner': 'de-anyfin',
     'depends_on_past': False, 
     'retries': 1,
     'retry_delay': timedelta(minutes=30),

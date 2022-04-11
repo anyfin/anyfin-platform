@@ -11,7 +11,7 @@ FLEX_TEMPLATES_DIR = "flex_templates"
 SLACK_CONNECTION = 'slack_data_engineering'
 
 default_args = {
-    'owner': 'ds-anyfin',
+    'owner': 'de-anyfin',
     'depends_on_past': False, 
     'retries': 0,
     'on_failure_callback': partial(slack_notification.task_fail_slack_alert, SLACK_CONNECTION),
