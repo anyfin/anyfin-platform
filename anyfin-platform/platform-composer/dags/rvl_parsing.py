@@ -117,7 +117,7 @@ uc_features = DataflowStartFlexTemplateOperator(
     body={
         "launchParameter": {
             "containerSpecGcsPath": f"gs://{GCS_BUCKET}/{FLEX_TEMPLATES_DIR}/flex_template_uc_features",
-            "jobName": "ucFeatures",
+            "jobName": "ucfeatures",
             "environment": {
                 "enableStreamingEngine": "false"
             },
