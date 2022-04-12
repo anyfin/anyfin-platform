@@ -1,22 +1,21 @@
 from datetime import datetime
 from airflow import DAG
-from airflow.models import Variable
 from airflow.providers.google.cloud.transfers.bigquery_to_gcs import BigQueryToGCSOperator
 from airflow.providers.google.cloud.transfers.bigquery_to_bigquery import BigQueryToBigQueryOperator
-import json
-import logging
 from utils.DbtTaskFactory import DbtTaskFactory
+from utils import slack_notification
+from functools import partial
 
 
 DBT_DIR = '/home/airflow/gcs/dags/anyfin-data-model'
 MODEL_TAG = 'thrice-daily'
+SLACK_CONNECTION = 'slack_data_engineering'
 
 default_args = {
     'owner': 'de-anyfin',
     'depends_on_past': False, 
     'retries': 0,
-    #'email_on_failure': True,
-    #'email': Variable.get('de_email', 'data-engineering@anyfin.com'),
+    'on_failure_callback': partial(slack_notification.task_fail_slack_alert, SLACK_CONNECTION),
     'start_date': datetime(2022, 4, 1),
 }
 
