@@ -10,10 +10,13 @@ from airflow.operators.python_operator import PythonOperator
 from airflow.providers.google.cloud.hooks.gcs import GCSHook
 from airflow.providers.google.cloud.transfers.gcs_to_bigquery import GCSToBigQueryOperator
 
+from utils import slack_notification
+from functools import partial
 
 BUCKET = 'intercom-to-bq-etl'
 FILE_NAME = 'intercom_messages.csv'
 SCHEMA_OBJECT = 'intercom_messages_schema.json'
+SLACK_CONNECTION = 'slack_data_engineering'
 
 API_KEY = Variable.get('intercom_api_export_messages_secret')
 
@@ -23,9 +26,7 @@ default_args = {
 	'start_date': datetime(2020, 9, 8),
 	'retries': 2,
 	'retry_delay': timedelta(minutes=10),
-	#'email_on_failure': True,
-	#'email_on_retry': False,
-	#'email': Variable.get('de_email', 'data-engineering@anyfin.com')
+	'on_failure_callback': partial(slack_notification.task_fail_slack_alert, SLACK_CONNECTION),
 }
 
 dag = DAG(
