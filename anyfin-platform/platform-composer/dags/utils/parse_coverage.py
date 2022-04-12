@@ -3,8 +3,7 @@ import pandas as pd
 from datetime import datetime
 from os import path
 
-datasets_to_exclude = ['audit', 'mobile_app_prod', 'ios_production', 'javascript_prod', 'facebook_ads', 'google_ads',
-                       'main_staging', '']
+datasets_to_include = ['core', 'dim', 'metrics', 'marketing', 'finance']
 
 load_date = datetime.today().strftime('%Y-%m-%d')
 
@@ -24,7 +23,7 @@ if path.exists(f'{dbt_home_dir}coverage-test.json'):
 
         for node in json_data_tests['tables']:
             dataset_name, table_name = node['name'].split('.')
-            if dataset_name in datasets_to_exclude:
+            if dataset_name not in datasets_to_include:
                 continue
             test_data.append([load_date, dataset_name, table_name, node['covered']])
             # in case if we want to store column-based data instead of table-based
@@ -33,7 +32,7 @@ if path.exists(f'{dbt_home_dir}coverage-test.json'):
 
         for node in json_data_docs['tables']:
             dataset_name, table_name = node['name'].split('.')
-            if dataset_name in datasets_to_exclude:
+            if dataset_name not in datasets_to_include:
                 continue
             docs_data.append([dataset_name, table_name, node['covered'], node['total']])
 
