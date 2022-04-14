@@ -323,7 +323,7 @@ with DAG(
                                 '{{ ds }}'
                             ),
                             # This is changed temporarily
-                            destination_dataset_table=f"anyfin-platform.babis.{table}_raw",
+                            destination_dataset_table=f"anyfin.{DATABASE_NAME}_staging.{table}_raw",
                             use_legacy_sql=False,
                             gcp_conn_id='postgres-bq-etl-con',
                             write_disposition='WRITE_APPEND',
