@@ -7,7 +7,7 @@ DATABASES_INFO = [
 	{'DATABASE_NAME': 'dolph', 'INSTANCE_NAME': 'anyfin-dolph-read-replica', 'DATABASE':'postgres'},
 	{'DATABASE_NAME': 'pfm', 'INSTANCE_NAME': 'pfm-replica', 'DATABASE':'postgres'},
 	{'DATABASE_NAME': 'psd2', 'INSTANCE_NAME': 'psd2-replica', 'DATABASE':'postgres'},
-	{'DATABASE_NAME': 'sendout', 'INSTANCE_NAME': 'sendout-replica', 'DATABASE':'postgres'},
+	{'DATABASE_NAME': 'sendout', 'INSTANCE_NAME': 'sendout-replica', 'DATABASE':'postgres', 'EXTERNAL_BQ_CONN':'anyfin.eu.sendout-replica'},
 	{'DATABASE_NAME': 'savings', 'INSTANCE_NAME': 'savings-replica', 'DATABASE':'postgres'},
 	{'DATABASE_NAME': 'assess', 'INSTANCE_NAME': 'assess-replica', 'DATABASE':'assess'},
 	{'DATABASE_NAME': 'ddi', 'INSTANCE_NAME': 'ddi-service-replica', 'DATABASE':'main'}

@@ -305,7 +305,7 @@ with DAG(
 
             load_tasks = []
             load_g_id = 'load'
-            if DATABASE_NAME == 'sendout':
+            if DATABASE_NAME in ['sendout']:
                 with TaskGroup(group_id=load_g_id) as load_tg:
                     for i, table in enumerate(etl.get_tables()):
                         load = BigQueryExecuteQueryOperator(
@@ -314,10 +314,11 @@ with DAG(
                             SELECT
                                 {}
                             FROM
-                            EXTERNAL_QUERY("anyfin.eu.sendout-replica",
+                            EXTERNAL_QUERY("{}",
                                 "SELECT {} FROM {} WHERE updated_at::date='{}';");
                             """.format(
                                 etl.get_bq_columns(table),
+                                DB['EXTERNAL_BQ_CONN'],
                                 etl.get_pg_columns(table),
                                 table,
                                 '{{ ds }}'
