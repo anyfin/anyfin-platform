@@ -50,6 +50,7 @@ with DAG(
 
     etl_groups = {}
     dedup_subgroups = {}
+    load_subgroups = {}
     for DB in DATABASES_INFO:
         DATABASE_NAME = DB['DATABASE_NAME']
         INSTANCE_NAME = DB['INSTANCE_NAME']
@@ -98,38 +99,39 @@ with DAG(
                 weight_rule=WeightRule.ABSOLUTE
             )
 
-            run_dataflow_pipeline = BeamRunPythonPipelineOperator(
-                task_id=f"run_{DATABASE_NAME}_dataflow_pipeline",
-                runner="DataflowRunner",
-                py_file=TEMPLATE_FILE,
-                py_options=[],
-                py_requirements=[],
-                py_interpreter='python3',
-                py_system_site_packages=True,
-                pipeline_options={
-                    "project": PROJECT_NAME,
-                    "worker_zone": 'europe-west1-b',
-                    "region": "europe-west1",
-                    "staging_location": f'gs://{DATAFLOW_BUCKET}/Staging/',
-                    "experiment": "use_beam_bq_sink",
-                    "date": '{{ds}}',
-                    "machine_type": "n1-standard-4",
-                    "num-workers": '1',
-                    "temp_location": f'gs://{DATAFLOW_BUCKET}/Temp/',
-                    "database_name": f"{DATABASE_NAME}",
-                    "setup_file": SETUP_FILE,
-                    "poll_sleep": 30,
-                },
-                email_on_failure=True,
-                dataflow_config=DataflowConfiguration(
-                    job_name=f'{DATABASE_NAME}-etl', 
-                    project_id=PROJECT_NAME, 
-                    location="europe-west1",
-                    gcp_conn_id="dataflow-etl-connection"
-                ),
-                priority_weight=PRIORITY,
-                weight_rule=WeightRule.ABSOLUTE
-            )
+            if DATABASE_NAME != 'sendout':
+                run_dataflow_pipeline = BeamRunPythonPipelineOperator(
+                    task_id=f"run_{DATABASE_NAME}_dataflow_pipeline",
+                    runner="DataflowRunner",
+                    py_file=TEMPLATE_FILE,
+                    py_options=[],
+                    py_requirements=[],
+                    py_interpreter='python3',
+                    py_system_site_packages=True,
+                    pipeline_options={
+                        "project": PROJECT_NAME,
+                        "worker_zone": 'europe-west1-b',
+                        "region": "europe-west1",
+                        "staging_location": f'gs://{DATAFLOW_BUCKET}/Staging/',
+                        "experiment": "use_beam_bq_sink",
+                        "date": '{{ds}}',
+                        "machine_type": "n1-standard-4",
+                        "num-workers": '1',
+                        "temp_location": f'gs://{DATAFLOW_BUCKET}/Temp/',
+                        "database_name": f"{DATABASE_NAME}",
+                        "setup_file": SETUP_FILE,
+                        "poll_sleep": 30,
+                    },
+                    email_on_failure=True,
+                    dataflow_config=DataflowConfiguration(
+                        job_name=f'{DATABASE_NAME}-etl', 
+                        project_id=PROJECT_NAME, 
+                        location="europe-west1",
+                        gcp_conn_id="dataflow-etl-connection"
+                    ),
+                    priority_weight=PRIORITY,
+                    weight_rule=WeightRule.ABSOLUTE
+                )
 
             first_daily_run = BranchPythonOperator(
                 task_id='first_daily_run',
@@ -172,6 +174,7 @@ with DAG(
                 priority_weight=PRIORITY,
                 weight_rule=WeightRule.ABSOLUTE
             )
+
 
             dedup_tasks = []
             dedup_g_id = 'deduplicate'
@@ -289,8 +292,6 @@ with DAG(
                         )
                         dedup_tasks.append(dedup)
 
-
-
                 deduplication_success_confirmation = PythonOperator(
                     task_id='success_confirmation',
                     python_callable=etl.deduplication_success,
@@ -300,21 +301,60 @@ with DAG(
                     priority_weight=PRIORITY,
                     weight_rule=WeightRule.ABSOLUTE
                 )
+
+
+            load_tasks = []
+            load_g_id = 'load'
+            if DATABASE_NAME == 'sendout':
+                with TaskGroup(group_id=load_g_id) as load_tg:
+                    for i, table in enumerate(etl.get_tables()):
+                        load = BigQueryExecuteQueryOperator(
+                            task_id=f"{table}",
+                            sql="""
+                            SELECT
+                                {}
+                            FROM
+                            EXTERNAL_QUERY("anyfin.eu.sendout-replica",
+                                "SELECT {} FROM {} WHERE updated_at::date='{}';");
+                            """.format(
+                                etl.get_bq_columns(table),
+                                etl.get_pg_columns(table),
+                                table,
+                                '{{ ds }}'
+                            ),
+                            # This is changed temporarily
+                            destination_dataset_table=f"anyfin-platform.babis.{table}_raw",
+                            use_legacy_sql=False,
+                            gcp_conn_id='postgres-bq-etl-con',
+                            write_disposition='WRITE_APPEND',
+                            create_disposition='CREATE_NEVER',
+                            dag=dag)
+                        load >> dedup_tasks[i]
+                        load_tasks.append(load)
+                    
+
+
             dedup_subgroups[DATABASE_NAME] = dedup_tg
+            if DATABASE_NAME == 'sendout':
+                load_subgroups[DATABASE_NAME] = load_tg
 
 
             task_extract_tables >> task_no_missing_columns
 
             task_extract_tables >> task_upload_result_to_gcs
 
-            run_dataflow_pipeline >> first_daily_run
+            if DATABASE_NAME != 'sendout':
+                run_dataflow_pipeline >> first_daily_run
+                task_upload_result_to_gcs >> run_dataflow_pipeline >> dedup_tasks
+            else:
+                task_upload_result_to_gcs >> load_tasks >> first_daily_run
 
             first_daily_run >> postgres_status >> bq_status >> check_postgres_against_bq
             first_daily_run >> no_check
 
-            task_upload_result_to_gcs >> run_dataflow_pipeline >> dedup_tasks
+            # task_upload_result_to_gcs >> run_dataflow_pipeline >> dedup_tasks
 
             dedup_tasks >> deduplication_success_confirmation
         etl_groups[g_id] = tg
 
-    #etl_groups['main_etl'] >> [etl_tg for tg_name, etl_tg in etl_groups.items() if tg_name != 'main_etl']
+    #etl_groups['main_etl'] >> [etl_tg for tg_name, etl_tg in etl_groups.items() if tg_name != 'main_etl']``
