@@ -28,7 +28,14 @@ class ETL(object):
 
     def get_pg_columns(self, table):
         schema = self.TABLES.get(table).get('schema')
-        columns = [f"{k}::timestamp as {k}" if 'timestamp' in schema.get(k) else f"{k} as {k}" for k in list(schema.keys())]
+        columns = []
+        for k in list(schema.keys()):
+            if 'timestamp' in schema.get(k):
+                columns.append(f"{k}::timestamp as {k}")
+            elif 'uuid' in schema.get(k):
+                columns.append(f"{k}::text as {k}")
+            else:
+                columns.append(f"{k} as {k}")
         columns.append('now()::timestamp as _ingested_ts')
         return ', '.join(list(columns))
 
