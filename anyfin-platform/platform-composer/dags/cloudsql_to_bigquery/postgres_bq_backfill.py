@@ -8,7 +8,8 @@ from airflow.providers.google.cloud.operators.dataflow import DataflowConfigurat
 
 from cloudsql_to_bigquery.utils.backfill_utils import BACKFILL
 from cloudsql_to_bigquery.utils.db_info_utils import DATABASES_INFO
-
+from utils import slack_notification
+from functools import partial
 
 PROJECT_NAME = 'anyfin'
 GCS_BUCKET = 'sql-to-bq-etl'
@@ -16,6 +17,7 @@ DATAFLOW_BUCKET = 'etl-dataflow-bucket'
 TEMPLATE_FILE = os.path.dirname(os.path.realpath(__file__)) + '/beam_utils/pg_bq_etl.py'
 SETUP_FILE = os.path.dirname(os.path.realpath(__file__)) + '/beam_utils/setup.py'
 DAG_PATH = os.path.dirname(os.path.realpath(__file__))
+SLACK_CONNECTION = 'slack_data_engineering'
 
 default_args = {
 	'owner': 'de-anyfin',
@@ -23,9 +25,7 @@ default_args = {
 	'start_date': datetime(2022, 4, 1),
 	'retries': 1,
 	'retry_delay': timedelta(minutes=30),
-	#'email_on_failure': True,
-	#'email_on_retry': False,
-	#'email': Variable.get('de_email', 'data-engineering@anyfin.com')
+	'on_failure_callback': partial(slack_notification.task_fail_slack_alert, SLACK_CONNECTION),
 }
 
 with DAG(

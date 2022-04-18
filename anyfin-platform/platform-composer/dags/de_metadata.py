@@ -1,9 +1,12 @@
 from datetime import datetime
 from airflow import DAG
-from airflow.models import Variable
 from airflow.providers.google.cloud.transfers.postgres_to_gcs import PostgresToGCSOperator
 from airflow.providers.google.cloud.transfers.gcs_to_bigquery import GCSToBigQueryOperator
 
+from utils import slack_notification
+from functools import partial
+
+SLACK_CONNECTION = 'slack_data_engineering'
 QUERY = '''
 select
     task_id,
@@ -36,8 +39,7 @@ default_args = {
     'owner': 'de-anyfin',
     'depends_on_past': False, 
     'retries': 0,
-    'email_on_failure': True,
-    'email': Variable.get('de_email', 'data-engineering@anyfin.com'),
+    'on_failure_callback': partial(slack_notification.task_fail_slack_alert, SLACK_CONNECTION),
     'start_date': datetime(2022, 3, 9),
 }
 

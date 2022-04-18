@@ -4,13 +4,17 @@ import os
 import logging
 from google.cloud import bigquery
 from tempfile import NamedTemporaryFile
-from airflow import DAG, macros, models
-from datetime import datetime, timedelta, timezone
-from airflow.operators.python_operator import PythonOperator
-from airflow.contrib.hooks.bigquery_hook import BigQueryHook
-from airflow.contrib.hooks.gcs_hook import GoogleCloudStorageHook
+from airflow import DAG
+from datetime import datetime, timedelta
+from airflow.operators.python import PythonOperator
+from airflow.providers.google.cloud.hooks.bigquery import BigQueryHook
+from airflow.providers.google.cloud.hooks.gcs import GCSHook
+
+from utils import slack_notification
+from functools import partial
 
 ORG_ID = '1555680'
+SLACK_CONNECTION = 'slack_data_engineering'
 
 default_args = {
     'owner': 'growth',
@@ -18,9 +22,7 @@ default_args = {
     'start_date': datetime(2020,8,28),
     'retries': 3,
     'retry_delay': timedelta(minutes=4),
-    'email_on_failure': True,
-    'email': models.Variable.get('growth_email'),
-    'email_on_retry': False
+    'on_failure_callback': partial(slack_notification.task_fail_slack_alert, SLACK_CONNECTION),
 }
 
 dag = DAG('marketing_apple_ads', 
@@ -34,7 +36,7 @@ def download_campaigns_report(ds, **kwargs):
     Function to fetch metrics for all campaigns within an organization. 
     """
     #authenticating by downloading key and pem files from gcs
-    gs = GoogleCloudStorageHook(google_cloud_storage_conn_id='google_cloud_default')
+    gs = GCSHook(google_cloud_storage_conn_id='google_cloud_default')
     apple_pem = NamedTemporaryFile(suffix='.pem')
     apple_pem.write(gs.download('metrics-pipeline', 'apple_search_ads/anyfin.pem'))
     apple_pem.seek(os.SEEK_SET)

@@ -5,11 +5,14 @@ from airflow.models import Variable
 from airflow.contrib.operators.bigquery_operator import BigQueryOperator
 
 from cloudsql_to_bigquery.utils.etl_utils import ETL
+from utils import slack_notification
+from functools import partial
 
 PROJECT_NAME = 'anyfin'
 GCS_BUCKET = 'sql-to-bq-etl'
 DATAFLOW_BUCKET = 'etl-dataflow-bucket'
 DATABASE_NAME = 'assess'
+SLACK_CONNECTION = 'slack_data_engineering'
 
 ETL = ETL(GCS_BUCKET=GCS_BUCKET, DATABASE_NAME=DATABASE_NAME)
 
@@ -19,9 +22,7 @@ default_args = {
     'start_date': datetime(2022, 4, 7),
     'retries': 2,
     'retry_delay': timedelta(minutes=10),
-    'email_on_failure': True,
-    'email_on_retry': False,
-    'email': Variable.get('de_email', 'data-engineering@anyfin.com')
+    'on_failure_callback': partial(slack_notification.task_fail_slack_alert, SLACK_CONNECTION),
 }
 
 dag = DAG(

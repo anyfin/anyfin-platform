@@ -1,0 +1,25 @@
+name: Sync repo
+on:
+  push:
+    branches:
+      - master
+env:
+  PROJECT_ID: anyfin-platform
+  FOLDER: gs://europe-west1-platform-b746cda0-bucket
+jobs:
+  sync-datahub:
+    name: Sync with GCS
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Google auth
+        uses: google-github-actions/auth@v0
+        with:
+          credentials_json: ${{ secrets.GCP_KEY }}
+      - name: Sync repo to dags folder of 'platform' composer
+        uses: google-github-actions/setup-gcloud@v0
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+      - run: |-
+          gsutil -m rsync -r -c -x '\.git.*|gha-creds-.*.json|composer-cloudsql' anyfin-platform/platform-composer/ ${{ env.FOLDER }}

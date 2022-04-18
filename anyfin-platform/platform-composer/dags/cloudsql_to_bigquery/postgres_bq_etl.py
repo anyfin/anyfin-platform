@@ -17,10 +17,14 @@ from airflow.utils.weight_rule import WeightRule
 from cloudsql_to_bigquery.utils.etl_utils import ETL
 from cloudsql_to_bigquery.utils.db_info_utils import DATABASES_INFO
 
+from utils import slack_notification
+from functools import partial
+
 
 PROJECT_NAME = 'anyfin'
 GCS_BUCKET = 'sql-to-bq-etl'
 DATAFLOW_BUCKET = 'etl-dataflow-bucket'
+SLACK_CONNECTION = 'slack_data_engineering'
 
 TEMPLATE_FILE = os.path.dirname(os.path.realpath(__file__)) + '/beam_utils/pg_bq_etl.py'
 SETUP_FILE = os.path.dirname(os.path.realpath(__file__)) + '/beam_utils/setup.py'
@@ -32,9 +36,7 @@ default_args = {
     'start_date': datetime(2020, 9, 8),
     'retries': 2,
     'retry_delay': timedelta(minutes=10),
-    #'email_on_failure': True,
-    #'email_on_retry': False,
-    #'email': Variable.get('de_email', 'data-engineering@anyfin.com')
+    'on_failure_callback': partial(slack_notification.task_fail_slack_alert, SLACK_CONNECTION),
 }
 
 with DAG(
