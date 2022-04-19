@@ -1467,6 +1467,11 @@ resource "google_bigquery_table" "external_statements_raw" {
 	},
 	{
 		"mode": "NULLABLE",
+		"name": "is_collection",
+		"type": "BOOLEAN"
+	},
+	{
+		"mode": "NULLABLE",
 		"name": "_ingested_ts",
 		"type": "TIMESTAMP"
 	}
