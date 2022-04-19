@@ -52,7 +52,7 @@ create_materialized_view = BashOperator(
     dag=dag
 )
 
-factory = DbtTaskFactory(DBT_DIR, dag, MODEL_TAG)
+factory = DbtTaskFactory(DBT_DIR, dag, MODEL_TAG, run_options=['--full-refresh'])
 
 dbt_tasks = factory.generate_tasks_from_manifest()
 

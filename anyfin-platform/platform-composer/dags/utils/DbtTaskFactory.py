@@ -5,16 +5,18 @@ from airflow.utils.task_group import TaskGroup
 
 
 class DbtTaskFactory:
-    def __init__(self, dbt_dir: str, dag: DAG, tag=None):
+    def __init__(self, dbt_dir: str, dag: DAG, tag=None, run_options=[]):
         """
         Args:
             dbt_dir: home dir for dbt
             dag: DAG object where we want to add new tasks
             tag: if provided, only models with this tag will be added to tasks list
+            run_options: These list items will be appended as space separate strings on every tasks dbt run command (ex: --full-refresh)
         """
         self.dbt_dir = dbt_dir
         self.tag = tag
         self.dag = dag
+        self.run_options = ' '.join(run_options)
 
     def load_manifest(self):
         local_filepath = f"{self.dbt_dir}/target/manifest.json"
@@ -30,7 +32,7 @@ class DbtTaskFactory:
         if dbt_verb == "run":
             dbt_task = BashOperator(
                 task_id=node,
-                bash_command=f"dbt {global_cli_flags} {dbt_verb} --project-dir {self.dbt_dir} --profiles-dir {self.dbt_dir} --target prod --select {model}",
+                bash_command=f"dbt {global_cli_flags} {dbt_verb} --project-dir {self.dbt_dir} --profiles-dir {self.dbt_dir} --target prod --select {model} {self.run_options}",
                 dag=self.dag,
             )
             return dbt_task
