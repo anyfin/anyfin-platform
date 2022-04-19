@@ -316,7 +316,8 @@
       "customer_id":"integer",
       "creditor_id":"uuid",
       "loan_credit_limit":"numeric",
-      "amortization_rate":"numeric"
+      "amortization_rate":"numeric",
+      "is_collection":"boolean"
     },
     "ts_column" : "updated_at",
     "bq_partition_column": "created_at",
