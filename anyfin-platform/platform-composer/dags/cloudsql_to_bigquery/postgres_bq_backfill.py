@@ -63,6 +63,7 @@ with DAG(
 					"database_name": f"{DATABASE_NAME}",
 					"setup_file": SETUP_FILE,
 					"poll_sleep": 30,
+					"backfill": "true"
 				},
 				email_on_failure=True,
 				dataflow_config=DataflowConfiguration(
