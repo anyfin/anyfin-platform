@@ -13,7 +13,8 @@ from airflow.exceptions import AirflowFailException
 from utils import slack_notification
 from functools import partial
 
-SE_FI_ADVERTISER_ID = 6955479302334906369
+SE_ADVERTISER_ID = 6955479302334906369
+FI_ADVERTISER_ID = 7084235217833066498
 DE_ADVERTISER_ID = 7068632801515520002
 ACCESS_TOKEN = models.Variable.get('tiktok_api_secret')
 ALLOWED_COUNTRIES = ['SE', 'DE', 'FI']
@@ -52,13 +53,13 @@ schema = [
 default_args = {
     'owner': 'de-anyfin',
     'depends_on_past': False,
-    'start_date': datetime(2022, 3, 27),
+    'start_date': datetime(2022, 4, 12),
     'retries': 3,
     'retry_delay': timedelta(minutes=4),
     'on_failure_callback': partial(slack_notification.task_fail_slack_alert, SLACK_CONNECTION),
 }
 
-dag = DAG('marketing_cost_tiktok_ads',
+dag = DAG('marketing_costs_tiktok',
           default_args=default_args,
           catchup=True,
           schedule_interval='0 03 * * *',
@@ -76,7 +77,7 @@ def build_url(path, query=""):
     return urlunparse((scheme, netloc, path, "", query, ""))
 
 
-def get_ad_report(advertiser_id, countries, ds, **kwargs):
+def get_ad_report(advertiser_id, country, ds, **kwargs):
     PATH = "/open_api/v1.2/reports/integrated/get/"
 
     # metric description in docs https://ads.tiktok.com/marketing_api/docs?id=1685764234508290
@@ -119,9 +120,8 @@ def get_ad_report(advertiser_id, countries, ds, **kwargs):
                 ad["metrics"]["spend"] = float(ad["metrics"]["spend"]) * 1.25  # adding VAT to spend
                 dims = [ad["dimensions"].get(dim) for dim in dimensions_list]
                 metr = [ad["metrics"].get(met) for met in metrics_list]
-                # TODO: see if country_code can be fetched from api, but it doesn't look like it
+                # This is so that it works historically, since finish ads was once on the swedish account
                 country_code = ad["metrics"].get('campaign_name', DEFAULT_COUNTRY)[0:2].upper()
-
                 # before we had a naming convention we didn't prefix campaigns with country. Hence setting the default country to SE
                 if country_code not in ALLOWED_COUNTRIES:
                     country_code = DEFAULT_COUNTRY
@@ -133,9 +133,8 @@ def get_ad_report(advertiser_id, countries, ds, **kwargs):
         if len(rows) > 0:
             table = 'anyfin.marketing.daily_tiktok_ads'
             hook = BigQueryHook('postgres-bq-etl-con')
-            countries = "','".join(countries)
             client = bigquery.Client(project='anyfin', credentials=hook._get_credentials())
-            client.query(f"DELETE FROM `{table}` WHERE date = '{ds}' and country_code in ('{countries}')")
+            client.query(f"DELETE FROM `{table}` WHERE date = '{ds}' and country_code = '{country}'")
             ins = client.insert_rows(table=table, rows=rows, selected_fields=schema)
             if not ins:
                 logging.info(f"New rows for date {ds} inserted to table - {table}")
@@ -143,16 +142,24 @@ def get_ad_report(advertiser_id, countries, ds, **kwargs):
                 raise AirflowFailException("No rows were inserted due to these errors: ", ins)
 
         else:
-            logging.info(f"Looks like there was no spend on tiktok for date {ds} in countries {countries}")
+            logging.info(f"Looks like there was no spend on tiktok for date {ds} in country {country}")
     else:
         raise AirflowFailException(f"The http request was not successful: {response['message']}")
 
 
-ingest_nordic_ad_report = PythonOperator(
-    task_id='ingest_daily_ad_report_se_fi',
+ingest_se_ad_report = PythonOperator(
+    task_id='ingest_daily_ad_report_se',
     python_callable=get_ad_report,
     provide_context=True,
-    op_args=[SE_FI_ADVERTISER_ID, ['SE', 'FI']],
+    op_args=[SE_ADVERTISER_ID, 'SE'],
+    dag=dag
+)
+
+ingest_fi_ad_report = PythonOperator(
+    task_id='ingest_daily_ad_report_fi',
+    python_callable=get_ad_report,
+    provide_context=True,
+    op_args=[FI_ADVERTISER_ID, 'FI'],
     dag=dag
 )
 
@@ -160,6 +167,6 @@ ingest_german_ad_report = PythonOperator(
     task_id='ingest_daily_ad_report_de',
     python_callable=get_ad_report,
     provide_context=True,
-    op_args=[DE_ADVERTISER_ID, ['DE']],
+    op_args=[DE_ADVERTISER_ID, 'DE'],
     dag=dag
 )
