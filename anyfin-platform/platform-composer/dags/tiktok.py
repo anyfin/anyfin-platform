@@ -16,6 +16,8 @@ from functools import partial
 SE_ADVERTISER_ID = 6955479302334906369
 FI_ADVERTISER_ID = 7084235217833066498
 DE_ADVERTISER_ID = 7068632801515520002
+NO_ADVERTISER_ID = 7082670413184106497
+
 ACCESS_TOKEN = models.Variable.get('tiktok_api_secret')
 ALLOWED_COUNTRIES = ['SE', 'DE', 'FI']
 DEFAULT_COUNTRY = 'SE'
@@ -53,13 +55,13 @@ schema = [
 default_args = {
     'owner': 'de-anyfin',
     'depends_on_past': False,
-    'start_date': datetime(2022, 4, 12),
+    'start_date': datetime(2022, 4, 11),
     'retries': 3,
     'retry_delay': timedelta(minutes=4),
     'on_failure_callback': partial(slack_notification.task_fail_slack_alert, SLACK_CONNECTION),
 }
 
-dag = DAG('marketing_costs_tiktok',
+dag = DAG('marketing_cost_tiktok',
           default_args=default_args,
           catchup=True,
           schedule_interval='0 03 * * *',
@@ -163,10 +165,18 @@ ingest_fi_ad_report = PythonOperator(
     dag=dag
 )
 
-ingest_german_ad_report = PythonOperator(
+ingest_de_ad_report = PythonOperator(
     task_id='ingest_daily_ad_report_de',
     python_callable=get_ad_report,
     provide_context=True,
     op_args=[DE_ADVERTISER_ID, 'DE'],
+    dag=dag
+)
+
+ingest_no_ad_report = PythonOperator(
+    task_id='ingest_daily_ad_report_no',
+    python_callable=get_ad_report,
+    provide_context=True,
+    op_args=[DE_ADVERTISER_ID, 'NO'],
     dag=dag
 )
