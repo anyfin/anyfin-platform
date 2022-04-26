@@ -25,17 +25,17 @@ dag = DAG(
     catchup=False
 )
 
-schufa_parser = DataflowStartFlexTemplateOperator(
+schufa = DataflowStartFlexTemplateOperator(
     body={
         "launchParameter": {
-            "containerSpecGcsPath": f"gs://{GCS_BUCKET}/{FLEX_TEMPLATES_DIR}/flex_template_schufa_parser",
-            "jobName": "schufaparser",
+            "containerSpecGcsPath": f"gs://{GCS_BUCKET}/{FLEX_TEMPLATES_DIR}/flex_template_schufa",
+            "jobName": "rvlschufa",
             "environment": {
                 "enableStreamingEngine": "false"
             },
         }
     },
-    task_id="schufa_parser",
+    task_id="schufa",
     location="europe-west1",
     project_id="anyfin",
     gcp_conn_id="postgres-bq-etl-con",
@@ -43,17 +43,17 @@ schufa_parser = DataflowStartFlexTemplateOperator(
     dag=dag
 )
 
-schufa_features = DataflowStartFlexTemplateOperator(
+asiakastieto = DataflowStartFlexTemplateOperator(
     body={
         "launchParameter": {
-            "containerSpecGcsPath": f"gs://{GCS_BUCKET}/{FLEX_TEMPLATES_DIR}/flex_template_schufa_features",
-            "jobName": "schufafeatures",
+            "containerSpecGcsPath": f"gs://{GCS_BUCKET}/{FLEX_TEMPLATES_DIR}/flex_template_asiakastieto",
+            "jobName": "rvlasiakastieto",
             "environment": {
                 "enableStreamingEngine": "false"
             },
         }
     },
-    task_id="schufa_features",
+    task_id="asiakastieto",
     location="europe-west1",
     project_id="anyfin",
     gcp_conn_id="postgres-bq-etl-con",
@@ -61,17 +61,17 @@ schufa_features = DataflowStartFlexTemplateOperator(
     dag=dag
 )
 
-asiakastieto_ccis_parser = DataflowStartFlexTemplateOperator(
+crif_buergel = DataflowStartFlexTemplateOperator(
     body={
         "launchParameter": {
-            "containerSpecGcsPath": f"gs://{GCS_BUCKET}/{FLEX_TEMPLATES_DIR}/flex_template_asiakastieto_ccis_parser",
-            "jobName": "asiakastietoccisparser",
+            "containerSpecGcsPath": f"gs://{GCS_BUCKET}/{FLEX_TEMPLATES_DIR}/flex_template_crif_buergel",
+            "jobName": "rvlcrifbuergel",
             "environment": {
                 "enableStreamingEngine": "false"
             },
         }
     },
-    task_id="asiakastieto_ccis_parser",
+    task_id="crif_buergel",
     location="europe-west1",
     project_id="anyfin",
     gcp_conn_id="postgres-bq-etl-con",
@@ -79,58 +79,20 @@ asiakastieto_ccis_parser = DataflowStartFlexTemplateOperator(
     dag=dag
 )
 
-asiakastieto_delta_parser = DataflowStartFlexTemplateOperator(
+uc = DataflowStartFlexTemplateOperator(
     body={
         "launchParameter": {
-            "containerSpecGcsPath": f"gs://{GCS_BUCKET}/{FLEX_TEMPLATES_DIR}/flex_template_asiakastieto_delta_parser",
-            "jobName": "asiakastietodeltaparser",
+            "containerSpecGcsPath": f"gs://{GCS_BUCKET}/{FLEX_TEMPLATES_DIR}/flex_template_uc",
+            "jobName": "rvluc",
             "environment": {
                 "enableStreamingEngine": "false"
             },
         }
     },
-    task_id="asiakastieto_delta_parser",
+    task_id="uc",
     location="europe-west1",
     project_id="anyfin",
     gcp_conn_id="postgres-bq-etl-con",
     wait_until_finished=True,
     dag=dag
 )
-
-crif_buergel_parser = DataflowStartFlexTemplateOperator(
-    body={
-        "launchParameter": {
-            "containerSpecGcsPath": f"gs://{GCS_BUCKET}/{FLEX_TEMPLATES_DIR}/flex_template_crif_buergel_parser",
-            "jobName": "crifbuergelparser",
-            "environment": {
-                "enableStreamingEngine": "false"
-            },
-        }
-    },
-    task_id="crif_buergel_parser",
-    location="europe-west1",
-    project_id="anyfin",
-    gcp_conn_id="postgres-bq-etl-con",
-    wait_until_finished=True,
-    dag=dag
-)
-
-uc_features = DataflowStartFlexTemplateOperator(
-    body={
-        "launchParameter": {
-            "containerSpecGcsPath": f"gs://{GCS_BUCKET}/{FLEX_TEMPLATES_DIR}/flex_template_uc_features",
-            "jobName": "ucfeatures",
-            "environment": {
-                "enableStreamingEngine": "false"
-            },
-        }
-    },
-    task_id="uc_features",
-    location="europe-west1",
-    project_id="anyfin",
-    gcp_conn_id="postgres-bq-etl-con",
-    wait_until_finished=True,
-    dag=dag
-)
-
-schufa_parser >> schufa_features
