@@ -13,13 +13,13 @@ from airflow.exceptions import AirflowFailException
 from utils import slack_notification
 from functools import partial
 
-SE_ADVERTISER_ID = 6955479302334906369
+SE_ADVERTISER_ID = 6955479302334906369 
 FI_ADVERTISER_ID = 7084235217833066498
 DE_ADVERTISER_ID = 7068632801515520002
 NO_ADVERTISER_ID = 7082670413184106497
 
 ACCESS_TOKEN = models.Variable.get('tiktok_api_secret')
-ALLOWED_COUNTRIES = ['SE', 'DE', 'FI']
+ALLOWED_COUNTRIES = ['SE', 'DE', 'FI', 'NO']
 DEFAULT_COUNTRY = 'SE'
 SLACK_CONNECTION = 'slack_data_engineering'
 
