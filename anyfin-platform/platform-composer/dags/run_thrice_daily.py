@@ -4,6 +4,7 @@ from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 from airflow.operators.bash import BashOperator
 from airflow.utils.state import State
 from airflow.providers.google.cloud.transfers.gcs_to_bigquery import GCSToBigQueryOperator
+from airflow.utils.trigger_rule import TriggerRule
 
 from utils import slack_notification
 from functools import partial
@@ -52,6 +53,7 @@ with DAG(
         reset_dag_run=True,
         wait_for_completion=True,
         poke_interval=30,
+        trigger_rule=TriggerRule.ALL_DONE,
         allowed_states=[State.SUCCESS, State.FAILED],
     )
 
