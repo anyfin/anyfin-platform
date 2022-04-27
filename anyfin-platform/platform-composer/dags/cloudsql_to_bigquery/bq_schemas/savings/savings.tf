@@ -426,7 +426,7 @@ resource "google_bigquery_table" "promo_codes_raw" {
 
 	time_partitioning { 
     	type = "DAY" 
-		field = "updated_at" 
+		field = "created_at" 
 	}
 
 	schema = <<EOF
@@ -502,7 +502,7 @@ resource "google_bigquery_table" "user_stats_raw" {
 
 	time_partitioning { 
     	type = "DAY" 
-		field = "updated_at" 
+		field = "created_at" 
 	}
 
 	schema = <<EOF
@@ -588,7 +588,7 @@ resource "google_bigquery_table" "customer_external_facts_raw" {
 
 	time_partitioning { 
     	type = "DAY" 
-		field = "updated_at" 
+		field = "created_at" 
 	}
 
 	schema = <<EOF
@@ -674,7 +674,7 @@ resource "google_bigquery_table" "savings_referrals_raw" {
 
 	time_partitioning { 
     	type = "DAY" 
-		field = "updated_at" 
+		field = "created_at" 
 	}
 
 	schema = <<EOF
@@ -745,7 +745,7 @@ resource "google_bigquery_table" "promo_code_usages_raw" {
 
 	time_partitioning { 
     	type = "DAY" 
-		field = "updated_at" 
+		field = "created_at" 
 	}
 
 	schema = <<EOF
@@ -801,7 +801,7 @@ resource "google_bigquery_table" "savings_bonuses_raw" {
 
 	time_partitioning { 
     	type = "DAY" 
-		field = "updated_at" 
+		field = "created_at" 
 	}
 
 	schema = <<EOF
@@ -845,6 +845,87 @@ resource "google_bigquery_table" "savings_bonuses_raw" {
 		"mode": "NULLABLE",
 		"name": "payout_id",
 		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "_ingested_ts",
+		"type": "TIMESTAMP"
+	}
+]
+EOF
+}
+
+
+resource "google_bigquery_table" "savings_pots_raw" {
+	dataset_id = "savings_staging"
+	table_id   = "savings_pots_raw"
+	project    = "anyfin"
+
+	labels = {
+		env = "default"
+	}
+
+	time_partitioning { 
+    	type = "DAY" 
+		field = "created_at" 
+	}
+
+	schema = <<EOF
+[
+	{
+		"mode": "NULLABLE",
+		"name": "id",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "created_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "updated_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "is_default",
+		"type": "BOOLEAN"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "is_active",
+		"type": "BOOLEAN"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "name",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "color",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "balance",
+		"type": "NUMERIC"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "target_balance",
+		"type": "NUMERIC"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "target_date",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "customer_id",
+		"type": "INTEGER"
 	},
 	{
 		"mode": "NULLABLE",
