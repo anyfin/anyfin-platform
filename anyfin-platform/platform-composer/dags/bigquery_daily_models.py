@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from airflow import DAG
 
 from utils.DbtTaskFactory import DbtTaskFactory
@@ -15,6 +15,7 @@ default_args = {
     'retries': 0,
     'on_failure_callback': partial(slack_notification.task_fail_slack_alert, SLACK_CONNECTION),
     'start_date': datetime(2022, 4, 1),
+    'dagrun_timeout': timedelta(minutes=120)
 }
 
 dag = DAG(

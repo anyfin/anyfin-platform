@@ -25,6 +25,7 @@ default_args = {
     'start_date': datetime(2022, 4, 1),
     'retries': 0,  # Do not retry as this will rerun all dbt models and ETLs again
     'retry_delay': timedelta(minutes=10),
+    'dagrun_timeout': timedelta(minutes=120),
     'on_failure_callback': partial(slack_notification.task_fail_slack_alert, SLACK_CONNECTION),
 }
 

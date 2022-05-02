@@ -24,7 +24,7 @@ dag = DAG(
     dag_id="bigquery_dbt_models", 
     default_args=default_args, 
     schedule_interval=None,  
-    max_active_runs=1,
+    max_active_runs=3,
     catchup=False,
     concurrency=12
 )
