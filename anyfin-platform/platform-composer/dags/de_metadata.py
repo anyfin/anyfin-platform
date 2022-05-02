@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.providers.google.cloud.transfers.postgres_to_gcs import PostgresToGCSOperator
 from airflow.providers.google.cloud.transfers.gcs_to_bigquery import GCSToBigQueryOperator
@@ -39,6 +39,7 @@ default_args = {
     'owner': 'de-anyfin',
     'depends_on_past': False, 
     'retries': 0,
+    'dagrun_timeout': timedelta(minutes=20),
     'on_failure_callback': partial(slack_notification.task_fail_slack_alert, SLACK_CONNECTION),
     'start_date': datetime(2022, 3, 9),
 }
@@ -46,7 +47,7 @@ default_args = {
 dag = DAG(
     dag_id="de_metadata", 
     default_args=default_args, 
-    schedule_interval="0 1 * * *",  # Run this DAG once per day
+    schedule_interval="0 1-17/2 * * *",  # Run this DAG every day every two hours between 1 and 17 
     max_active_runs=1,
     catchup=False
 )
