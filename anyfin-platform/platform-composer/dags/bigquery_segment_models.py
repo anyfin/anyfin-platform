@@ -18,6 +18,7 @@ default_args = {
     'retry_delay': timedelta(minutes=30),
     'on_failure_callback': partial(slack_notification.task_fail_slack_alert, SLACK_CONNECTION),
     'start_date': datetime(2021, 6, 23),
+    'dagrun_timeout': timedelta(minutes=120)
 }
 
 dag = DAG(

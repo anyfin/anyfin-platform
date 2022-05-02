@@ -37,6 +37,7 @@ default_args = {
     'retries': 2,
     'retry_delay': timedelta(minutes=10),
     'on_failure_callback': partial(slack_notification.task_fail_slack_alert, SLACK_CONNECTION),
+    'orientation': "TB"
 }
 
 with DAG(
@@ -44,7 +45,7 @@ with DAG(
     default_args=default_args,
     catchup=False,
     schedule_interval=None,
-    max_active_runs=1,
+    max_active_runs=3,
     concurrency=12
 ) as dag:
 
