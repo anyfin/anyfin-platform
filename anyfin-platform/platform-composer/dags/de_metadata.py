@@ -47,7 +47,7 @@ default_args = {
 dag = DAG(
     dag_id="de_metadata", 
     default_args=default_args, 
-    schedule_interval="0 1-17/2 * * *",  # Run this DAG every day every two hours between 1 and 17 
+    schedule_interval="0 0/2 * * *",  # Run this DAG every day every two hourss 
     max_active_runs=1,
     catchup=False
 )
