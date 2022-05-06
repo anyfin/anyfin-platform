@@ -50,10 +50,14 @@ for table in ETL.get_tables():
             ETL.get_pg_columns(table),
             '{{ ds }}'
         ),
-        destination_dataset_table=f"anyfin.{DATABASE_NAME}_staging.{table}_raw",
+        destination_dataset_table="""anyfin.{}_staging.{}_raw${}""".format(
+            DATABASE_NAME, 
+            table, 
+            '{{ ds_nodash }}'
+        ),
         use_legacy_sql=False,
         bigquery_conn_id='postgres-bq-etl-con',
-        write_disposition='WRITE_APPEND',
+        write_disposition='WRITE_TRUNCATE',
         create_disposition='CREATE_NEVER',
         dag=dag
     )
