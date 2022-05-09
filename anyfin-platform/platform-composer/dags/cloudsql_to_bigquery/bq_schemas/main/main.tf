@@ -3797,3 +3797,64 @@ EOF
 }
 
 
+resource "google_bigquery_table" "customer_alarm_reviews_raw" {
+	dataset_id = "main_staging"
+	table_id   = "customer_alarm_reviews_raw"
+	project    = "anyfin"
+
+	labels = {
+		env = "default"
+	}
+
+	time_partitioning { 
+    	type = "DAY" 
+		field = "created_at" 
+	}
+
+	schema = <<EOF
+[
+	{
+		"mode": "NULLABLE",
+		"name": "id",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "created_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "customer_alarm_id",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "comment",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "reviewed_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "reviewed_by_id",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "status",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "_ingested_ts",
+		"type": "TIMESTAMP"
+	}
+]
+EOF
+}
+
+
