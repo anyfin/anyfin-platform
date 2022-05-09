@@ -10,7 +10,7 @@ from functools import partial
 
 #  list of all returning currencies is here https://www.riksbank.se/en-gb/statistics/search-interest--exchange-rates/web-services/series-for-web-services/
 
-fetch_date = datetime.today() - timedelta(days=30)
+fetch_date = datetime.today() - timedelta(days=1)
 SLACK_CONNECTION = 'slack_data_engineering'
 
 default_args = {
