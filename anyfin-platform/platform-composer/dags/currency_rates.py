@@ -4,13 +4,13 @@ from airflow import DAG
 from lxml import etree
 from airflow.providers.google.cloud.operators.bigquery import BigQueryExecuteQueryOperator
 from airflow.operators.python import PythonOperator
+from airflow.exceptions import AirflowSkipException
 
 from utils import slack_notification
 from functools import partial
 
 #  list of all returning currencies is here https://www.riksbank.se/en-gb/statistics/search-interest--exchange-rates/web-services/series-for-web-services/
 
-fetch_date = datetime.today() - timedelta(days=1)
 SLACK_CONNECTION = 'slack_data_engineering'
 
 default_args = {
@@ -24,7 +24,7 @@ default_args = {
 }
 
 
-def modify_xml():
+def modify_xml(fetch_date):
     if fetch_date.month < 1 or fetch_date.month > 12:
         raise ValueError(f'Incorrect month number {fetch_date.month}')
     tree = etree.parse('/home/airflow/gcs/dags/utils/message.xml')
@@ -39,7 +39,7 @@ def modify_xml():
     tree.write('/home/airflow/gcs/dags/utils/message.xml')
 
 
-def get_insert_query(response):
+def get_insert_query(response, fetch_date):
     tree = etree.fromstring(bytes(response.text, encoding='utf8'))
 
     error_namespace = {'SOAP-ENV': 'http://www.w3.org/2003/05/soap-envelope'}
@@ -58,26 +58,39 @@ def get_insert_query(response):
         value = float(item.find('.//ultimo').text)
         one_unit_value = value / unit
         output.append((date, currency, one_unit_value))
-    values = ', '.join(map(str, output))
-    query = f'INSERT INTO dim.currency_rates_dim(exchange_month, currency_code, value) VALUES { values }'
-    return query
+    if output:
+        values = ', '.join(map(str, output))
+        query = f'CREATE TEMP TABLE cr_temp(exchange_month DATE, currency_code STRING, value NUMERIC); ' \
+                f'INSERT INTO cr_temp VALUES { values };' \
+                f'MERGE dim.currency_rates_dim T \
+                    USING cr_temp S \
+                    ON T.exchange_month = S.exchange_month AND T.currency_code = S.currency_code \
+                    WHEN MATCHED THEN \
+                      UPDATE SET value = S.value \
+                    WHEN NOT MATCHED THEN \
+                      INSERT (exchange_month, currency_code, value) VALUES(exchange_month, currency_code, value);'
+        return query
+    else:
+        print('No data from API. Skipping all tasks')
+        raise AirflowSkipException
 
 
-def fetch_rates_and_prepare_query():
-    modify_xml()
+def fetch_rates_and_prepare_query(ds):
+    fetch_date = datetime.strptime(ds, '%Y-%m-%d')
+    modify_xml(fetch_date)
     url = 'http://swea.riksbank.se/sweaWS/services/SweaWebServiceHttpSoap12Endpoint'
     headers = {'Content-Type': 'application/soap+xml;charset=utf-8;action=urn:getMonthlyAverageExchangeRates'}
     with open('/home/airflow/gcs/dags/utils/message.xml', 'rb') as f:
         data = f.read()
 
     response = requests.post(url, headers=headers, data=data)
-    query = get_insert_query(response)
+    query = get_insert_query(response, fetch_date)
     return query
 
 
 dag = DAG('currency_rates',
           default_args=default_args,
-          catchup=True,
+          catchup=False,
           max_active_runs=1,
           )
 
