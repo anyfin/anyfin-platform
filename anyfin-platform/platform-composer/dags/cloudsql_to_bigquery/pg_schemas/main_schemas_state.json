@@ -849,5 +849,19 @@
     "ts_column": "updated_at",
     "bq_partition_column": "created_at",
     "backfill_method": "beam_backfill"
+  },
+  "customer_alarm_reviews": {
+    "schema": {
+      "id":"integer",
+      "created_at":"timestamp with time zone",
+      "customer_alarm_id":"integer",
+      "comment":"text",
+      "reviewed_at":"timestamp with time zone",
+      "reviewed_by_id":"uuid",
+      "status":"text"
+    },
+    "ts_column": "created_at",
+    "bq_partition_column": "created_at",
+    "backfill_method": "beam_backfill"
   }
 }
