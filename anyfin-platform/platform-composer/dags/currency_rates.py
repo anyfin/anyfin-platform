@@ -19,7 +19,6 @@ default_args = {
     'start_date': datetime(2022, 5, 1),
     'retries': 1,
     'retry_delay': timedelta(minutes=2),
-    'schedule_interval': '0 0 1 * *',
     'on_failure_callback': partial(slack_notification.task_fail_slack_alert, SLACK_CONNECTION),
 }
 
@@ -61,7 +60,7 @@ def get_insert_query(response, fetch_date):
     if output:
         values = ', '.join(map(str, output))
         query = f'CREATE TEMP TABLE cr_temp(exchange_month DATE, currency_code STRING, value NUMERIC); ' \
-                f'INSERT INTO cr_temp VALUES { values };' \
+                f'INSERT INTO cr_temp VALUES {values};' \
                 f'MERGE dim.currency_rates_dim T \
                     USING cr_temp S \
                     ON T.exchange_month = S.exchange_month AND T.currency_code = S.currency_code \
@@ -92,6 +91,7 @@ dag = DAG('currency_rates',
           default_args=default_args,
           catchup=False,
           max_active_runs=1,
+          schedule_interval='0 0 1 * *',
           )
 
 fetch_rates_and_prepare_query = PythonOperator(
