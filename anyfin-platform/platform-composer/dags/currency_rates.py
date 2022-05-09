@@ -78,7 +78,6 @@ def fetch_rates_and_prepare_query():
 dag = DAG('currency_rates',
           default_args=default_args,
           catchup=True,
-          schedule_interval=None,
           max_active_runs=1,
           )
 
