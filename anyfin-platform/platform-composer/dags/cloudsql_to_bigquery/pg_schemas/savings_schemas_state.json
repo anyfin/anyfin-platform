@@ -207,5 +207,19 @@
       "bq_partition_column": "created_at",
       "ts_column": "updated_at",
       "backfill_method": "beam_backfill"
+    },
+    "demo_customers": {
+      "schema": {
+        "id":"integer", 
+        "created_at":"timestamp with time zone", 
+        "updated_at":"timestamp with time zone", 
+        "customer_id":"integer", 
+        "settings":"jsonb", 
+        "external_customer":"jsonb", 
+        "predefined_accounts":"jsonb", 
+        "external_accounts":"jsonb", 
+        "kyc_answers":"jsonb"
+      },
+      "bq_partition_column": "created_at"
     }
   }
