@@ -937,3 +937,74 @@ EOF
 }
 
 
+resource "google_bigquery_table" "demo_customers_raw" {
+	dataset_id = "savings_staging"
+	table_id   = "demo_customers_raw"
+	project    = "anyfin"
+
+	labels = {
+		env = "default"
+	}
+
+	time_partitioning { 
+    	type = "DAY" 
+		field = "created_at" 
+	}
+
+	schema = <<EOF
+[
+	{
+		"mode": "NULLABLE",
+		"name": "id",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "created_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "updated_at",
+		"type": "TIMESTAMP"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "customer_id",
+		"type": "INTEGER"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "settings",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "external_customer",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "predefined_accounts",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "external_accounts",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "kyc_answers",
+		"type": "STRING"
+	},
+	{
+		"mode": "NULLABLE",
+		"name": "_ingested_ts",
+		"type": "TIMESTAMP"
+	}
+]
+EOF
+}
+
+
