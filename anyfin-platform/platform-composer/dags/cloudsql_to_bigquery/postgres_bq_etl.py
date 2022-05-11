@@ -236,6 +236,8 @@ with DAG(
                                     CAST(json_extract_scalar(main_policy, '$.data.UCLookup.credit_history[0].credit_used_blanco') as int64) as uc_credit_used_blanco,
                                     CAST(json_extract_scalar(main_policy, '$.data.UCLookup.credit_history[0].credit_used_account') as int64) as uc_credit_used_account,
                                     CAST(json_extract_scalar(main_policy, '$.data.UCLookup.credit_history[0].credit_used_instalment') as int64) as uc_credit_used_instalment,
+                                    COALESCE(SAFE.TIMESTAMP(json_extract_scalar(main_policy, '$.data.UCLookup._ts')), 
+                                            SAFE.PARSE_TIMESTAMP("%a, %d %b %Y %X %Z", json_extract_scalar(main_policy, '$.data.UCLookup._ts'), "Europe/London")) as uc_created_at,
                                     json_extract_string_array(main_policy,  '$.data.response.reasons' )  as `response_reasons`,
                                     json_extract(main_policy,'$.data.InternalLookup.customer_provided_income_gross')  as `customer_provided_income_gross`,
                                     json_extract_scalar(json_extract(main_policy,'$.data.Pricing'), '$.new.monthlyPayment')  as `new_monthly_payment`,
