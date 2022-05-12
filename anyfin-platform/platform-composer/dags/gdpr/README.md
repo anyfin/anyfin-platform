@@ -2,7 +2,7 @@
 
 This DAG automates the extraction of data on a specific customer and the construction of a report containing that data.
 
-It is not scheduled on a given interval but is build to be run manually with configuration. This can be done programmaticall, or through the Airflow UI as shown belows. Configuration JSON should look like this:
+It is not scheduled on a given interval but is build to be run manually with configuration. This can be done programmatically, or through the Airflow UI by triggering it with configuration where a JSON Configuration must be provided. The JSON object should look like this:
 
 ```
 {
