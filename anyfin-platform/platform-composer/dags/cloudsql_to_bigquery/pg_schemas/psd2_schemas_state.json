@@ -16,7 +16,8 @@
       },
       "bq_partition_column": "created_at",
       "ts_column": "updated_at",
-      "backfill_method": "beam_backfill"
+      "backfill_method": "beam_backfill",
+      "ignore_sanity_check": true
     },
     "psd2_connections": {
       "schema": {
@@ -38,7 +39,8 @@
       },
       "bq_partition_column": "created_at",
       "ts_column": "updated_at",
-      "backfill_method": "beam_backfill"
+      "backfill_method": "beam_backfill",
+      "ignore_sanity_check": true
     },
     "psd2_log": {
       "schema": {
