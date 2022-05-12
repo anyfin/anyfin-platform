@@ -70,6 +70,27 @@ class PersonalDataReport:
                     " "
                 ),
             },
+            {
+                "name": "dolph/bank_accounts",
+                "sheet": self.wb.add_worksheet("Bank accounts"),
+                "columns": "id provider account_number name type available_credit balance \
+                    currency_code metadata updated_at".split(
+                    " "
+                ),
+            },
+            {
+                "name": "dolph/bank_transactions",
+                "sheet": self.wb.add_worksheet("Bank transactions"),
+                "columns": "account_id user_id date description amount currency_code type \
+                    category_metadata metadata updated_at".split(
+                    " "
+                ),
+            },
+            {
+                "name": "sendout/communications",
+                "sheet": self.wb.add_worksheet("Communications"),
+                "columns": "scheduled_at status type recipient content".split(" "),
+            },
         ]
 
     def generate(self):
