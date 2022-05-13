@@ -27,20 +27,16 @@ class PersonalDataReport:
             },
             {
                 "name": "main/application_details",
-                "sheet": self.wb.add_worksheet("Application details"),
-                "columns": "created_at source customer_name customer_street customer_postal \
-                    lender loan_balance currency_code payment_account payment_reference \
-                    status reject_reason external_status application_status".split(
-                    " "
-                ),
+                # "sheet": self.wb.add_worksheet("Application details"),
+                "columns": "created_at source customer_name customer_street customer_postal "
+                "lender loan_balance currency_code payment_account payment_reference "
+                "status reject_reason external_status application_status".split(" "),
             },
             {
                 "name": "main/general_customer_details",
                 "sheet": self.wb.add_worksheet("General customer information"),
-                "columns": "full_name personal_identifier address_street address_postcode \
-                    address_city birthdate gender".split(
-                    " "
-                ),
+                "columns": "full_name personal_identifier address_street address_postcode "
+                "address_city birthdate gender".split(" "),
             },
             {
                 "name": "main/autogiro",
@@ -52,10 +48,8 @@ class PersonalDataReport:
             {
                 "name": "main/signatures",
                 "sheet": self.wb.add_worksheet("Signatures"),
-                "columns": "created_at signee_name signee_pno signee_ip signed_text platform \
-                    user_ip user_agent".split(
-                    " "
-                ),
+                "columns": "created_at signee_name signee_pno signee_ip signed_text platform "
+                "user_ip user_agent".split(" "),
             },
             {
                 "name": "main/external_lookup_listings",
@@ -65,26 +59,20 @@ class PersonalDataReport:
             {
                 "name": "main/internal_notes",
                 "sheet": self.wb.add_worksheet("Internal notes"),
-                "columns": "id created_at created_by content customer_id application_id files \
-                    type".split(
-                    " "
-                ),
+                "columns": "id created_at created_by content customer_id application_id files "
+                "type".split(" "),
             },
             {
                 "name": "dolph/bank_accounts",
                 "sheet": self.wb.add_worksheet("Bank accounts"),
-                "columns": "id provider account_number name type available_credit balance \
-                    currency_code metadata updated_at".split(
-                    " "
-                ),
+                "columns": "id provider account_number name type available_credit balance "
+                "currency_code metadata updated_at".split(" "),
             },
             {
                 "name": "dolph/bank_transactions",
                 "sheet": self.wb.add_worksheet("Bank transactions"),
-                "columns": "account_id user_id date description amount currency_code type \
-                    category_metadata metadata updated_at".split(
-                    " "
-                ),
+                "columns": "account_id user_id date description amount currency_code type "
+                "category_metadata metadata updated_at".split(" "),
             },
             {
                 "name": "sendout/communications",
