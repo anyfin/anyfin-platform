@@ -1,4 +1,3 @@
-import logging
 import os
 from airflow import DAG
 from airflow.operators.python import PythonOperator
@@ -37,7 +36,6 @@ def generate_report_document(**kwargs):
             )
     report_tmp_file = PersonalDataReport(customer_id, results).generate()
     gcs.upload(GCS_BUCKET, f"{GCS_PATH}/{customer_id}.xlsx", report_tmp_file)
-    logging.info(results)
 
 
 default_args = {

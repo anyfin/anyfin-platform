@@ -27,7 +27,7 @@ class PersonalDataReport:
             },
             {
                 "name": "main/application_details",
-                # "sheet": self.wb.add_worksheet("Application details"),
+                "sheet": self.wb.add_worksheet("Application details"),
                 "columns": "created_at source customer_name customer_street customer_postal "
                 "lender loan_balance currency_code payment_account payment_reference "
                 "status reject_reason external_status application_status".split(" "),
