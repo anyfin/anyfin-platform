@@ -132,14 +132,6 @@ with DAG(
                 weight_rule=WeightRule.ABSOLUTE
             )
 
-            first_daily_run = BranchPythonOperator(
-                task_id='first_daily_run',
-                provide_context=True,
-                python_callable=etl.check_if_first_daily_run,
-                priority_weight=PRIORITY,
-                weight_rule=WeightRule.ABSOLUTE
-            )
-
             dedup_tasks = []
             dedup_g_id = 'deduplicate'
             with TaskGroup(group_id=dedup_g_id) as dedup_tg:
