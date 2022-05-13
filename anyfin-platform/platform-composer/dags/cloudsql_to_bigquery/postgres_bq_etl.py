@@ -132,48 +132,6 @@ with DAG(
                 weight_rule=WeightRule.ABSOLUTE
             )
 
-            first_daily_run = BranchPythonOperator(
-                task_id='first_daily_run',
-                provide_context=True,
-                python_callable=etl.check_if_first_daily_run,
-                priority_weight=PRIORITY,
-                weight_rule=WeightRule.ABSOLUTE
-            )
-
-            postgres_status = PythonOperator(
-                task_id='postgres_status',
-                provide_context=True,
-                python_callable=etl.fetch_postgres_rowcount,
-                priority_weight=PRIORITY,
-                weight_rule=WeightRule.ABSOLUTE
-            )
-
-
-            bq_status = PythonOperator(
-                task_id='bq_status',
-                provide_context=True,
-                python_callable=etl.fetch_bigquery_rowcount,
-                priority_weight=PRIORITY,
-                weight_rule=WeightRule.ABSOLUTE
-            )
-
-
-            check_postgres_against_bq = PythonOperator(
-                task_id='check_postgres_against_bq',
-                provide_context=True,
-                python_callable=etl.bq_pg_comparison,
-                op_kwargs={'task_name': g_id},
-                email_on_failure=True,
-                priority_weight=PRIORITY,
-                weight_rule=WeightRule.ABSOLUTE
-            )
-
-            no_check = DummyOperator(
-                task_id='no_check',
-                priority_weight=PRIORITY,
-                weight_rule=WeightRule.ABSOLUTE
-            )
-
             dedup_tasks = []
             dedup_g_id = 'deduplicate'
             with TaskGroup(group_id=dedup_g_id) as dedup_tg:
@@ -309,11 +267,6 @@ with DAG(
             task_extract_tables >> task_no_missing_columns
 
             task_extract_tables >> task_upload_result_to_gcs
-
-            run_dataflow_pipeline >> first_daily_run
-
-            first_daily_run >> postgres_status >> bq_status >> check_postgres_against_bq
-            first_daily_run >> no_check
 
             task_upload_result_to_gcs >> run_dataflow_pipeline >> dedup_tasks
 
