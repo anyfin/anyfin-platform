@@ -268,11 +268,6 @@ with DAG(
 
             task_extract_tables >> task_upload_result_to_gcs
 
-            run_dataflow_pipeline >> first_daily_run
-
-            first_daily_run >> postgres_status >> bq_status >> check_postgres_against_bq
-            first_daily_run >> no_check
-
             task_upload_result_to_gcs >> run_dataflow_pipeline >> dedup_tasks
 
             dedup_tasks >> deduplication_success_confirmation
