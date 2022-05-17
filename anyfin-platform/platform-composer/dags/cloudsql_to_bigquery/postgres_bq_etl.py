@@ -176,6 +176,7 @@ with DAG(
                                     json_extract(main_policy,  '$.data.NewCustomerPolicy' )  as `new_customer_policy`,
                                     json_extract(main_policy,  '$.data.NewCustomerScoring' )  as `new_customer_scoring`,
                                     json_extract(main_policy,  '$.data.ReturningCustomerScoring' )  as `returning_customer_scoring`,
+                                    json_extract(main_policy,  '$.data.Scoring')  as `scoring`,
                                     json_extract(main_policy,  '$.data.ReturningCustomerPolicy' )  as `returning_customer_policy`,
                                     json_extract(main_policy,  '$.data.PrimaryCreditCriteria' )  as `primary_credit_criteria`,
                                     json_extract(main_policy,  '$.data.labelling_reject_reasons' )  as `labelling_reject_reasons`,
