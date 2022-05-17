@@ -1,0 +1,1 @@
+# airflow connections add '<conn_name>' --conn-uri "<conn-type>://<login>:<password>@<host>:<port>/<schema>"
