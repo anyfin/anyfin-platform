@@ -8,6 +8,7 @@ from functools import partial
 GCS_BUCKET = "anyfin-rvl"
 FLEX_TEMPLATES_DIR = "flex_templates"
 SLACK_CONNECTION = 'slack_data_engineering'
+PARAMS = {"maxWorkers": 8, "machineType": "n1-standard-2"}
 
 default_args = {
     'owner': 'de-anyfin',
@@ -33,6 +34,7 @@ schufa = DataflowStartFlexTemplateOperator(
             "environment": {
                 "enableStreamingEngine": "false"
             },
+            "parameters": PARAMS
         }
     },
     task_id="schufa",
@@ -51,6 +53,7 @@ asiakastieto = DataflowStartFlexTemplateOperator(
             "environment": {
                 "enableStreamingEngine": "false"
             },
+            "parameters": PARAMS
         }
     },
     task_id="asiakastieto",
@@ -70,6 +73,7 @@ asiakastieto = DataflowStartFlexTemplateOperator(
 #             "environment": {
 #                 "enableStreamingEngine": "false"
 #             },
+#             "parameters": PARAMS
 #         }
 #     },
 #     task_id="crif_buergel",
@@ -88,6 +92,7 @@ uc = DataflowStartFlexTemplateOperator(
             "environment": {
                 "enableStreamingEngine": "false"
             },
+            "parameters": PARAMS
         }
     },
     task_id="uc",
