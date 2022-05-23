@@ -8,7 +8,7 @@ from functools import partial
 GCS_BUCKET = "anyfin-rvl"
 FLEX_TEMPLATES_DIR = "flex_templates"
 SLACK_CONNECTION = 'slack_data_engineering'
-PARAMS = {"maxWorkers": 8, "machineType": "n1-standard-2"}
+PARAMS = {"maxWorkers": 8, "machineType": "n1-standard-2", "enableStreamingEngine": "false"}
 
 default_args = {
     'owner': 'de-anyfin',
@@ -31,10 +31,7 @@ schufa = DataflowStartFlexTemplateOperator(
         "launchParameter": {
             "containerSpecGcsPath": f"gs://{GCS_BUCKET}/{FLEX_TEMPLATES_DIR}/flex_template_schufa",
             "jobName": "rvlschufa",
-            "environment": {
-                "enableStreamingEngine": "false"
-            },
-            "containerSpec": PARAMS
+            "environment": PARAMS
         }
     },
     task_id="schufa",
@@ -50,10 +47,7 @@ asiakastieto = DataflowStartFlexTemplateOperator(
         "launchParameter": {
             "containerSpecGcsPath": f"gs://{GCS_BUCKET}/{FLEX_TEMPLATES_DIR}/flex_template_asiakastieto",
             "jobName": "rvlasiakastieto",
-            "environment": {
-                "enableStreamingEngine": "false"
-            },
-            "containerSpec": PARAMS
+            "environment": PARAMS
         }
     },
     task_id="asiakastieto",
@@ -70,10 +64,7 @@ asiakastieto = DataflowStartFlexTemplateOperator(
 #         "launchParameter": {
 #             "containerSpecGcsPath": f"gs://{GCS_BUCKET}/{FLEX_TEMPLATES_DIR}/flex_template_crif_buergel",
 #             "jobName": "rvlcrifbuergel",
-#             "environment": {
-#                 "enableStreamingEngine": "false"
-#             },
-#             "containerSpec": PARAMS
+#             "environment": PARAMS
 #         }
 #     },
 #     task_id="crif_buergel",
@@ -89,10 +80,7 @@ uc = DataflowStartFlexTemplateOperator(
         "launchParameter": {
             "containerSpecGcsPath": f"gs://{GCS_BUCKET}/{FLEX_TEMPLATES_DIR}/flex_template_uc",
             "jobName": "rvluc",
-            "environment": {
-                "enableStreamingEngine": "false"
-            },
-            "containerSpec": PARAMS
+            "environment": PARAMS
         }
     },
     task_id="uc",
