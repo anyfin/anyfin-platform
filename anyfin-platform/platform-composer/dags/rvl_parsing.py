@@ -61,23 +61,24 @@ asiakastieto = DataflowStartFlexTemplateOperator(
     dag=dag
 )
 
-crif_buergel = DataflowStartFlexTemplateOperator(
-    body={
-        "launchParameter": {
-            "containerSpecGcsPath": f"gs://{GCS_BUCKET}/{FLEX_TEMPLATES_DIR}/flex_template_crif_buergel",
-            "jobName": "rvlcrifbuergel",
-            "environment": {
-                "enableStreamingEngine": "false"
-            },
-        }
-    },
-    task_id="crif_buergel",
-    location="europe-west1",
-    project_id="anyfin",
-    gcp_conn_id="postgres-bq-etl-con",
-    wait_until_finished=True,
-    dag=dag
-)
+# # Temporarily commenting out until it's refactored
+# crif_buergel = DataflowStartFlexTemplateOperator(
+#     body={
+#         "launchParameter": {
+#             "containerSpecGcsPath": f"gs://{GCS_BUCKET}/{FLEX_TEMPLATES_DIR}/flex_template_crif_buergel",
+#             "jobName": "rvlcrifbuergel",
+#             "environment": {
+#                 "enableStreamingEngine": "false"
+#             },
+#         }
+#     },
+#     task_id="crif_buergel",
+#     location="europe-west1",
+#     project_id="anyfin",
+#     gcp_conn_id="postgres-bq-etl-con",
+#     wait_until_finished=True,
+#     dag=dag
+# )
 
 uc = DataflowStartFlexTemplateOperator(
     body={
