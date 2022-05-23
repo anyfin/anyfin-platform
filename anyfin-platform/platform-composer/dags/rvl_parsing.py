@@ -8,7 +8,7 @@ from functools import partial
 GCS_BUCKET = "anyfin-rvl"
 FLEX_TEMPLATES_DIR = "flex_templates"
 SLACK_CONNECTION = 'slack_data_engineering'
-PARAMS = {"maxWorkers": 8, "machineType": "n1-standard-2"}
+PARAMS = {"maxWorkers": "8", "machineType": "n1-standard-2"}
 
 default_args = {
     'owner': 'de-anyfin',
