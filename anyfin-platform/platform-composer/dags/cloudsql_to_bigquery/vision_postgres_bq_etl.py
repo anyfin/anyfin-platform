@@ -46,7 +46,7 @@ for table in ETL.get_tables():
         EXTERNAL_QUERY("anyfin.eu.vision",
             "SELECT {} FROM {} WHERE created_at::date='{}';");
         """.format(
-            ETL.get_bq_columns(table), table, ETL.get_pg_columns(table), "{{ ds }}"
+            ETL.get_bq_columns(table), ETL.get_pg_columns(table), table, "{{ ds }}"
         ),
         destination_dataset_table="""anyfin.{}.{}${}""".format(
             DATABASE_NAME, table, "{{ ds_nodash }}"
