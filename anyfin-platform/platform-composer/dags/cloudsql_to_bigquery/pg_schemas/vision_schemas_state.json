@@ -1,0 +1,11 @@
+{
+    "vision_final_responses": {
+        "schema": {
+            "image_url": "text",
+            "country": "text",
+            "final_response": "text",
+            "created_at": "timestamp with time zone",
+            "last_updated": "timestamp with time zone"
+        }
+    }
+}
