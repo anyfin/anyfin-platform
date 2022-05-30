@@ -51,6 +51,7 @@
 
 - Setup Connections and Credentials
     - Setup a port for the DB in the proxy at: `composer-cloudsql/platform_cloudsql_proxy.yaml`
+        - Connect to cluster using `gcloud container clusters get-credentials europe-west1-platform-b746cda0-gke --region europe-west1 --project anyfin-platform`
         - Deploy using: `kubectl apply -f platform_cloudsql_proxy.yaml`
     - Create a connection in Airflow called [database_name]_replica
         - Set host to: `cloudsql-proxy.default.svc.cluster.local` and the port to the one you just set up in the proxy
