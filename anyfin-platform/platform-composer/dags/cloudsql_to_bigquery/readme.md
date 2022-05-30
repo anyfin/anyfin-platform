@@ -63,9 +63,6 @@
             "password": ""
         } 
         ```
-- Additional
-    - If you have added any tables to the beam_backfill you need to add the database details in the postgres_bq_backfill.py file
-    - If you have added any tables to the export_backfill you need to add db details to the export_bq_backfil.py file in the same manner
 - Create a PR, when you merge it everything will be deployed
 
 ### You should now be able to run the pipeline
