@@ -2,10 +2,8 @@
 
 ## How to setup a new ETL
 
-- Create DAG file
-    - Duplicate one of the [database_name]_postgres_bq_etl.py dags and name it accordingly
-    - Edit the global variable **DATABASE_NAME** to the name of the postgres database you want to transfer tables from
-    - Deploy this file in the Platform Composer dags/cloudsql_to_bigquery folder in GCP
+- Add the new database name, with additional info, to the list in the file utils/db_info_utils.py
+
 - Create PG Schema file
     - Follow the format of the other [database_name]_schemas_state.json files
         ```python
@@ -42,7 +40,6 @@
         GROUP BY table_name;
         ```
     - Using the format in step one, create a json object for each table and save the file as [database_name]_schemas_state.json under pg_schemas folder
-    - Deploy in the Platform Composer dags/cloudsql_to_bigquery/pg_schemas in GCP
 
 - Create BQ Schema using Terraform
     - Inside BQ Create a dataset called [database_name]_staging under the appropriate GCP project (Make sure to set data location to EU)
@@ -69,5 +66,6 @@
 - Additional
     - If you have added any tables to the beam_backfill you need to add the database details in the postgres_bq_backfill.py file
     - If you have added any tables to the export_backfill you need to add db details to the export_bq_backfil.py file in the same manner
+- Create a PR, when you merge it everything will be deployed
 
 ### You should now be able to run the pipeline
