@@ -6,7 +6,7 @@ import sys
 
 ### 
 
-DATABASE_NAME = sys.argv[1]
+DATABASE_NAME = str(sys.argv[1])
 
 def convert_type_to_bq(t):
 	if t == 'timestamp with time zone':
@@ -42,11 +42,15 @@ with open(f'./bq_schemas/{DATABASE_NAME}/{DATABASE_NAME}.tf', 'w') as output_f:
 		if DATABASE_NAME == 'dolph' and table == 'transactions': 
 			table_suffix = ''
 			database_suffix = ''
+		if DATABASE_NAME.endswith('-staging'):
+			PROJECT = 'anyfin-staging'
+		else:
+			PROJECT = 'anyfin'
 
 		output_f.write(f'resource "google_bigquery_table" "{table}{table_suffix}" {{\n')
 		output_f.write(f'	dataset_id = "{DATABASE_NAME}{database_suffix}"\n')
 		output_f.write(f'	table_id   = "{table}{table_suffix}"\n')
-		output_f.write('	project    = "anyfin"\n')
+		output_f.write(f'	project    = "{PROJECT}"\n')
 		output_f.write('\n')
 		output_f.write('	labels = {\n')
 		output_f.write('		env = "default"\n')
