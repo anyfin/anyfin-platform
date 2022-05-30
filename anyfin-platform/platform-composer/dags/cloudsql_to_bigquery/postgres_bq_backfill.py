@@ -39,6 +39,7 @@ with DAG(
 
 	for DB in DATABASES_INFO:
 		DATABASE_NAME, INSTANCE_NAME = DB['DATABASE_NAME'], DB['INSTANCE_NAME']
+		DESTINATION_PROJECT = DB['DESTINATION_PROJECT']
 		backfill = BACKFILL(GCS_BUCKET=GCS_BUCKET, DATABASE_NAME=DATABASE_NAME)
 		if backfill.get_beam_tables():
 			# Operator to backfill tables with beam
@@ -61,6 +62,7 @@ with DAG(
 					"num-workers": '1',
 					"temp_location": f'gs://{DATAFLOW_BUCKET}/Temp/',
 					"database_name": f"{DATABASE_NAME}",
+					"destination_project": f"{DESTINATION_PROJECT}",
 					"setup_file": SETUP_FILE,
 					"poll_sleep": 30,
 					"backfill": "true"

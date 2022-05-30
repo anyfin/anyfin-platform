@@ -55,6 +55,7 @@ with DAG(
         DATABASE_NAME = DB['DATABASE_NAME']
         INSTANCE_NAME = DB['INSTANCE_NAME']
         DATABASE = DB['DATABASE']
+        DESTINATION_PROJECT = DB['DESTINATION_PROJECT']
 
         # MAKES SURE MAIN RUNS BEFORE THE OTHER DAGS
         if DATABASE_NAME == 'main':
@@ -118,6 +119,7 @@ with DAG(
                     "num-workers": '1',
                     "temp_location": f'gs://{DATAFLOW_BUCKET}/Temp/',
                     "database_name": f"{DATABASE_NAME}",
+					"destination_project": f"{DESTINATION_PROJECT}",
                     "setup_file": SETUP_FILE,
                     "poll_sleep": 30,
                 },

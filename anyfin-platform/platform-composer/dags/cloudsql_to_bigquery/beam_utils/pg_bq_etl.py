@@ -7,7 +7,7 @@ from airflow.models import Variable
 from apache_beam.options.pipeline_options import PipelineOptions
 
 DATABASE_NAME = ''
-PROJECT_NAME = 'anyfin'
+DESTINATION_PROJECT = ''
 POSTGRES_CREDENTIALS = ''
 TABLES = {}
 
@@ -86,8 +86,8 @@ def update_pipeline(table, pipeline, start_date, backfill):
                                                                          dataset=f'{DATABASE_NAME}_staging',
                                                                          additional_bq_parameters=partitioning,
                                                                          method=beam.io.WriteToBigQuery.Method.FILE_LOADS,
-                                                                         project=PROJECT_NAME,
-                                                                         create_disposition=beam.io.BigQueryDisposition.CREATE_NEVER,
+                                                                         project=DESTINATION_PROJECT,
+                                                                         create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED,
                                                                          write_disposition=write_disposition)
     )
 
@@ -124,6 +124,10 @@ if __name__ == "__main__":
         "--date",
         default='1970-01-01',
     )
+    parser.add_argument(
+        "--destination_project",
+        default='anyfin',
+    )
     known_args, pipeline_args = parser.parse_known_args()
 
     beginning_date = datetime.strptime(known_args.date, '%Y-%m-%d')
@@ -131,6 +135,7 @@ if __name__ == "__main__":
 
     # Initialize global variables
     DATABASE_NAME = known_args.database_name
+    DESTINATION_PROJECT = known_args.destination_project
     POSTGRES_CREDENTIALS = Variable.get(f"{DATABASE_NAME}_postgres_bq_secret", deserialize_json=True)
     with open(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', f'pg_schemas/{DATABASE_NAME}_schemas_state.json'))) as f:
         TABLES = json.loads(f.read())
