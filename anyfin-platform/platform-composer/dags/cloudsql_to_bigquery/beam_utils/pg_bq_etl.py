@@ -8,6 +8,7 @@ from apache_beam.options.pipeline_options import PipelineOptions
 
 DATABASE_NAME = ''
 DESTINATION_PROJECT = ''
+DESTINATION_DATASET = ''
 POSTGRES_CREDENTIALS = ''
 TABLES = {}
 
@@ -83,7 +84,7 @@ def update_pipeline(table, pipeline, start_date, backfill):
                                                                         password=POSTGRES_CREDENTIALS.get('password')))
         | f'Parsing columns - {table}' >> beam.ParDo(ParseColumnsFn(schema))
         | f'Write to BQ {table}' >> beam.io.gcp.bigquery.WriteToBigQuery(table=table + "_raw",
-                                                                         dataset=f'{DATABASE_NAME}_staging',
+                                                                         dataset=f'{DESTINATION_DATASET}',
                                                                          additional_bq_parameters=partitioning,
                                                                          method=beam.io.WriteToBigQuery.Method.FILE_LOADS,
                                                                          project=DESTINATION_PROJECT,
@@ -128,6 +129,10 @@ if __name__ == "__main__":
         "--destination_project",
         default='anyfin',
     )
+    parser.add_argument(
+        "--destination_dataset",
+        default=None,
+    )
     known_args, pipeline_args = parser.parse_known_args()
 
     beginning_date = datetime.strptime(known_args.date, '%Y-%m-%d')
@@ -136,6 +141,7 @@ if __name__ == "__main__":
     # Initialize global variables
     DATABASE_NAME = known_args.database_name
     DESTINATION_PROJECT = known_args.destination_project
+    DESTINATION_DATASET = known_args.destination_dataset
     POSTGRES_CREDENTIALS = Variable.get(f"{DATABASE_NAME}_postgres_bq_secret", deserialize_json=True)
     with open(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', f'pg_schemas/{DATABASE_NAME}_schemas_state.json'))) as f:
         TABLES = json.loads(f.read())
