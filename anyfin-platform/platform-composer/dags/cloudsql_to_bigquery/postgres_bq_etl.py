@@ -147,6 +147,8 @@ with DAG(
                     # If ignore daily is true we dont want to deduplicate
                     if etl.get_tables().get(table).get('ignore_daily'):
                         continue
+
+                    DEDUP_DESTINATION_DATASET = DESTINATION_DATASET.split('_')[0] # Removes _staging
                     
                     if DATABASE_NAME == 'main' and table == 'assessments':
                         dedup = BigQueryExecuteQueryOperator(
@@ -156,7 +158,7 @@ with DAG(
                                     SELECT 
                                         id, 
                                         max(_ingested_ts) as max_ingested_ts 
-                                    FROM {DESTINATION_PROJECT}.{DESTINATION_DATASET}_staging.assessments_raw group by 1
+                                    FROM {DESTINATION_PROJECT}.{DESTINATION_DATASET}.assessments_raw group by 1
                                 )
                                 SELECT 
                                     t.*,
@@ -213,9 +215,9 @@ with DAG(
                                     COALESCE(json_extract(main_policy, '$.data.Limit.limit'), json_extract(main_policy, '$.data.Limit.suggested_limit')) as suggested_limit,
                                     COALESCE(json_extract_scalar(main_policy, '$.data.Limit.limit_source'),  json_extract_scalar(main_policy, '$.data.Limit.customer_type')) as customer_type,
                                     from temp join 
-                                    {DESTINATION_PROJECT}.{DESTINATION_DATASET}_staging.{table}_raw t on temp.id= t.id and temp.max_ingested_ts=t._ingested_ts
+                                    {DESTINATION_PROJECT}.{DESTINATION_DATASET}.{table}_raw t on temp.id= t.id and temp.max_ingested_ts=t._ingested_ts
                             """,
-                            destination_dataset_table=f"{DESTINATION_PROJECT}.{DESTINATION_DATASET}.{table}",
+                            destination_dataset_table=f"{DESTINATION_PROJECT}.{DEDUP_DESTINATION_DATASET}.{table}",
                             cluster_fields=['id'],
                             time_partitioning={'field': 'created_at'},
                             use_legacy_sql=False,
@@ -238,13 +240,13 @@ with DAG(
                                 select 
                                     id, 
                                     max(_ingested_ts) as max_ingested_ts 
-                                from {DESTINATION_PROJECT}.{DESTINATION_DATASET}_staging.{table}_raw group by 1
+                                from {DESTINATION_PROJECT}.{DESTINATION_DATASET}.{table}_raw group by 1
                             )
                             select 
                                 t.* 
                             from temp join 
-                                {DESTINATION_PROJECT}.{DESTINATION_DATASET}_staging.{table}_raw t on temp.id= t.id and temp.max_ingested_ts=t._ingested_ts""",
-                        destination_dataset_table=f"{DESTINATION_PROJECT}.{DESTINATION_DATASET}.{table}",
+                                {DESTINATION_PROJECT}.{DESTINATION_DATASET}.{table}_raw t on temp.id= t.id and temp.max_ingested_ts=t._ingested_ts""",
+                        destination_dataset_table=f"{DESTINATION_PROJECT}.{DEDUP_DESTINATION_DATASET}.{table}",
                         cluster_fields=['id'],
                         time_partitioning={'field': 'created_at'},
                         use_legacy_sql=False,
