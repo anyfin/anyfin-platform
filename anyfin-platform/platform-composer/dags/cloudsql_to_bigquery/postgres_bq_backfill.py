@@ -40,6 +40,12 @@ with DAG(
 	for DB in DATABASES_INFO:
 		DATABASE_NAME, INSTANCE_NAME = DB['DATABASE_NAME'], DB['INSTANCE_NAME']
 		DESTINATION_PROJECT = DB['DESTINATION_PROJECT']
+		
+		if DESTINATION_PROJECT == 'anyfin-staging':
+			DESTINATION_DATASET = DATABASE_NAME.split('-')[0] + '_staging'  # Removes -staging from db name
+		else:
+			DESTINATION_DATASET = f'{DATABASE_NAME}_staging'
+		
 		backfill = BACKFILL(GCS_BUCKET=GCS_BUCKET, DATABASE_NAME=DATABASE_NAME)
 		if backfill.get_beam_tables():
 			# Operator to backfill tables with beam
@@ -63,6 +69,7 @@ with DAG(
 					"temp_location": f'gs://{DATAFLOW_BUCKET}/Temp/',
 					"database_name": f"{DATABASE_NAME}",
 					"destination_project": f"{DESTINATION_PROJECT}",
+					"destination_dataset": f'{DESTINATION_DATASET}',
 					"setup_file": SETUP_FILE,
 					"poll_sleep": 30,
 					"backfill": "true"

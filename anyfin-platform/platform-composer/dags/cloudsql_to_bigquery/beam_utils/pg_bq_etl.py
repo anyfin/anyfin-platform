@@ -129,6 +129,10 @@ if __name__ == "__main__":
         "--destination_project",
         default='anyfin',
     )
+    parser.add_argument(
+        "--destination_dataset",
+        default=None,
+    )
     known_args, pipeline_args = parser.parse_known_args()
 
     beginning_date = datetime.strptime(known_args.date, '%Y-%m-%d')
@@ -137,10 +141,7 @@ if __name__ == "__main__":
     # Initialize global variables
     DATABASE_NAME = known_args.database_name
     DESTINATION_PROJECT = known_args.destination_project
-    if DESTINATION_PROJECT == 'anyfin-staging':
-        DESTINATION_DATASET = DATABASE_NAME.split('-')[0] + '_staging'  # Removes -staging from db name
-    else:
-        DESTINATION_DATASET = f'{DATABASE_NAME}_staging'
+    DESTINATION_DATASET = known_args.destination_dataset
     POSTGRES_CREDENTIALS = Variable.get(f"{DATABASE_NAME}_postgres_bq_secret", deserialize_json=True)
     with open(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', f'pg_schemas/{DATABASE_NAME}_schemas_state.json'))) as f:
         TABLES = json.loads(f.read())
