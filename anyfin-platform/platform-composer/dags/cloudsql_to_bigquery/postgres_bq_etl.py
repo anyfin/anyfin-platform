@@ -151,7 +151,7 @@ with DAG(
                                     SELECT 
                                         id, 
                                         max(_ingested_ts) as max_ingested_ts 
-                                    FROM anyfin.{DATABASE_NAME}_staging.assessments_raw group by 1
+                                    FROM {DESTINATION_PROJECT}.{DATABASE_NAME}_staging.assessments_raw group by 1
                                 )
                                 SELECT 
                                     t.*,
@@ -208,9 +208,9 @@ with DAG(
                                     COALESCE(json_extract(main_policy, '$.data.Limit.limit'), json_extract(main_policy, '$.data.Limit.suggested_limit')) as suggested_limit,
                                     COALESCE(json_extract_scalar(main_policy, '$.data.Limit.limit_source'),  json_extract_scalar(main_policy, '$.data.Limit.customer_type')) as customer_type,
                                     from temp join 
-                                    anyfin.{DATABASE_NAME}_staging.{table}_raw t on temp.id= t.id and temp.max_ingested_ts=t._ingested_ts
+                                    {DESTINATION_PROJECT}.{DATABASE_NAME}_staging.{table}_raw t on temp.id= t.id and temp.max_ingested_ts=t._ingested_ts
                             """,
-                            destination_dataset_table=f"anyfin.{DATABASE_NAME}.{table}",
+                            destination_dataset_table=f"{DESTINATION_PROJECT}.{DATABASE_NAME}.{table}",
                             cluster_fields=['id'],
                             time_partitioning={'field': 'created_at'},
                             use_legacy_sql=False,
@@ -233,13 +233,13 @@ with DAG(
                                 select 
                                     id, 
                                     max(_ingested_ts) as max_ingested_ts 
-                                from anyfin.{DATABASE_NAME}_staging.{table}_raw group by 1
+                                from {DESTINATION_PROJECT}.{DATABASE_NAME}_staging.{table}_raw group by 1
                             )
                             select 
                                 t.* 
                             from temp join 
-                                anyfin.{DATABASE_NAME}_staging.{table}_raw t on temp.id= t.id and temp.max_ingested_ts=t._ingested_ts""",
-                        destination_dataset_table=f"anyfin.{DATABASE_NAME}.{table}",
+                                {DESTINATION_PROJECT}.{DATABASE_NAME}_staging.{table}_raw t on temp.id= t.id and temp.max_ingested_ts=t._ingested_ts""",
+                        destination_dataset_table=f"{DESTINATION_PROJECT}.{DATABASE_NAME}.{table}",
                         cluster_fields=['id'],
                         time_partitioning={'field': 'created_at'},
                         use_legacy_sql=False,
