@@ -18,7 +18,10 @@ def convert_type_to_bq(t):
 
 	elif t == 'real':
 		return 'FLOAT'  
-
+	
+	elif t == 'bigint':
+		return 'INTEGER'
+	
 	else: 
 		return 'STRING'
 
