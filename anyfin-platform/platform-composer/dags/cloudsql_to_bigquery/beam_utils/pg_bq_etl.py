@@ -5,6 +5,7 @@ import os
 import apache_beam as beam
 from airflow.models import Variable
 from apache_beam.options.pipeline_options import PipelineOptions
+from cloudsql_to_bigquery.utils.create_bigquery_tableschema import create_bigquery_schema
 
 DATABASE_NAME = ''
 DESTINATION_PROJECT = ''
@@ -61,6 +62,7 @@ class ParseColumnsFn(beam.DoFn):
 # Automatically update the beam pipeline with more tables
 def update_pipeline(table, pipeline, start_date, backfill):
     schema = [dict(s.get('schema')) for t, s in TABLES.items() if t == table][0]
+    bigquery_schema = create_bigquery_schema(schema)
     ts_column = [s.get('ts_column') for t, s in TABLES.items() if t == table][0]
     bq_partition_column = [s.get('bq_partition_column') for t, s in TABLES.items() if t == table][0]
     where_clause = ""
@@ -89,7 +91,8 @@ def update_pipeline(table, pipeline, start_date, backfill):
                                                                          method=beam.io.WriteToBigQuery.Method.FILE_LOADS,
                                                                          project=DESTINATION_PROJECT,
                                                                          create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED,
-                                                                         write_disposition=write_disposition)
+                                                                         write_disposition=write_disposition,
+                                                                         schema=bigquery_schema)
     )
 
 
