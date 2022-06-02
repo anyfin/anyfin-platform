@@ -227,7 +227,8 @@ with DAG(
                             retries= 3,
                             retry_delay=timedelta(seconds=30),
                             priority_weight=PRIORITY,
-                            weight_rule=WeightRule.ABSOLUTE
+                            weight_rule=WeightRule.ABSOLUTE,
+                            trigger_rule=TriggerRule.ALL_DONE
                         )
                         dedup_tasks.append(dedup)
 
@@ -256,7 +257,8 @@ with DAG(
                         retries= 3,
                         retry_delay=timedelta(seconds=30),
                         priority_weight=PRIORITY,
-                        weight_rule=WeightRule.ABSOLUTE
+                        weight_rule=WeightRule.ABSOLUTE,
+                        trigger_rule=TriggerRule.ALL_DONE
                         )
                         dedup_tasks.append(dedup)
 
