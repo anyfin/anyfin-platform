@@ -41,14 +41,6 @@
         ```
     - Using the format in step one, create a json object for each table and save the file as [database_name]_schemas_state.json under pg_schemas folder
 
-- Create BQ Schema using Terraform
-    - Inside BQ Create a dataset called [database_name]_staging under the appropriate GCP project (Make sure to set data location to EU)
-    - Navigate to your local platform-composer/dags/cloudsql_to_bigquery folder
-    - Run `mkdir bq_schemas/[database_name]` 
-    - Run `python3 pg_schemas/json-schema-to-terraform.py [database_name]` This creates a terraform based on the PG schema and puts it in the bq_schema folder
-    - Navigate to bq_schemas/[database_name] and run `terraform init` and then `terraform apply`
-
-
 - Setup Connections and Credentials
     - Setup a port for the DB in the proxy at: `composer-cloudsql/platform_cloudsql_proxy.yaml`
         - Connect to cluster using `gcloud container clusters get-credentials europe-west1-platform-b746cda0-gke --region europe-west1 --project anyfin-platform`
