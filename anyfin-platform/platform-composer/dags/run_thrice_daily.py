@@ -62,7 +62,6 @@ with DAG(
         task_id='dbt_test',
         bash_command=f'cd {DBT_HOME_DIR} && dbt test',
         retries=0,
-        on_failure_callback=None,
     )
 
     compute_coverage = BashOperator(
