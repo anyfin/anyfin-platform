@@ -90,3 +90,38 @@ uc = DataflowStartFlexTemplateOperator(
     wait_until_finished=True,
     dag=dag
 )
+
+de_capacity = DataflowStartFlexTemplateOperator(
+    body={
+        "launchParameter": {
+            "containerSpecGcsPath": f"gs://{GCS_BUCKET}/{FLEX_TEMPLATES_DIR}/flex_template_de_capacity",
+            "jobName": "rvldecapacity",
+            "environment": PARAMS
+        }
+    },
+    task_id="de_capacity",
+    location="europe-west1",
+    project_id="anyfin",
+    gcp_conn_id="postgres-bq-etl-con",
+    wait_until_finished=True,
+    dag=dag
+)
+
+fi_capacity = DataflowStartFlexTemplateOperator(
+    body={
+        "launchParameter": {
+            "containerSpecGcsPath": f"gs://{GCS_BUCKET}/{FLEX_TEMPLATES_DIR}/flex_template_fi_capacity",
+            "jobName": "rvlficapacity",
+            "environment": PARAMS
+        }
+    },
+    task_id="fi_capacity",
+    location="europe-west1",
+    project_id="anyfin",
+    gcp_conn_id="postgres-bq-etl-con",
+    wait_until_finished=True,
+    dag=dag
+)
+
+schufa >> de_capacity
+asiakastieto >> fi_capacity
