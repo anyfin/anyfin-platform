@@ -214,6 +214,10 @@ with DAG(
                                     CAST(json_extract_scalar(main_policy,  '$.data.InternalLookup._id' ) as INT64) as `internal_lookup_id`,
                                     COALESCE(json_extract(main_policy, '$.data.Limit.limit'), json_extract(main_policy, '$.data.Limit.suggested_limit')) as suggested_limit,
                                     COALESCE(json_extract_scalar(main_policy, '$.data.Limit.limit_source'),  json_extract_scalar(main_policy, '$.data.Limit.customer_type')) as customer_type,
+                                    json_extract(main_policy,  '$.data.AsiakastietoLookup._id' )  as `asiakastieto_lookup_id`,
+                                    json_extract(main_policy,  '$.data.AsiakastietoCcisLookup._id' )  as `asiakastieto_ccis_lookup_id`,
+                                    json_extract(main_policy,  '$.data.SCLookup._id' )  as `schufa_lookup_id`,
+                                    json_extract(main_policy,  '$.data.CRIFBuergelLookup._id' )  as `crif_buergel_lookup_id`
                                     from temp join 
                                     {DESTINATION_PROJECT}.{DESTINATION_DATASET}.{table}_raw t on temp.id= t.id and temp.max_ingested_ts=t._ingested_ts
                             """,
