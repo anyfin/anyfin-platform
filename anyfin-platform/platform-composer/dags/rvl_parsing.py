@@ -91,6 +91,22 @@ uc = DataflowStartFlexTemplateOperator(
     dag=dag
 )
 
+internal_lookup = DataflowStartFlexTemplateOperator(
+    body={
+        "launchParameter": {
+            "containerSpecGcsPath": f"gs://{GCS_BUCKET}/{FLEX_TEMPLATES_DIR}/flex_template_internal_lookup",
+            "jobName": "rvlinternallookup",
+            "environment": PARAMS
+        }
+    },
+    task_id="internal_lookup",
+    location="europe-west1",
+    project_id="anyfin",
+    gcp_conn_id="postgres-bq-etl-con",
+    wait_until_finished=True,
+    dag=dag
+)
+
 de_capacity = DataflowStartFlexTemplateOperator(
     body={
         "launchParameter": {
