@@ -123,5 +123,22 @@ fi_capacity = DataflowStartFlexTemplateOperator(
     dag=dag
 )
 
+se_capacity = DataflowStartFlexTemplateOperator(
+    body={
+        "launchParameter": {
+            "containerSpecGcsPath": f"gs://{GCS_BUCKET}/{FLEX_TEMPLATES_DIR}/flex_template_se_capacity",
+            "jobName": "rvlsecapacity",
+            "environment": PARAMS
+        }
+    },
+    task_id="se_capacity",
+    location="europe-west1",
+    project_id="anyfin",
+    gcp_conn_id="postgres-bq-etl-con",
+    wait_until_finished=True,
+    dag=dag
+)
+
 schufa >> de_capacity
 asiakastieto >> fi_capacity
+uc >> se_capacity
