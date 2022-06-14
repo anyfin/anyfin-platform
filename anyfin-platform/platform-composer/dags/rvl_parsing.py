@@ -155,6 +155,8 @@ se_capacity = DataflowStartFlexTemplateOperator(
     dag=dag
 )
 
+
+internal_lookup >> [de_capacity, fi_capacity, se_capacity]
 schufa >> de_capacity
 asiakastieto >> fi_capacity
 uc >> se_capacity
