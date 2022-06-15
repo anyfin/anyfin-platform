@@ -57,5 +57,6 @@
         } 
         ```
 - Create a PR, when you merge it everything will be deployed
+- Before running the pipeline, make sure to create the two datasets in BigQuery - called [database_name]_staging [database_name]. **Set the data location to EU**
 
 ### You should now be able to run the pipeline
