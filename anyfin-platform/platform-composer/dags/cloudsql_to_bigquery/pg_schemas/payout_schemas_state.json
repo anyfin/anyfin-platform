@@ -1,5 +1,5 @@
 {
-    "events": {
+    "payout.events": {
         "schema": {
           "id":"integer",
           "public_id":"uuid",
