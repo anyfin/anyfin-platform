@@ -31,11 +31,12 @@ spec:
             - containerPort: 5438
             - containerPort: 5439
             - containerPort: 5440
+            - containerPort: 5441
           image: gcr.io/cloudsql-docker/gce-proxy:latest
           command:
             [
               "/cloud_sql_proxy",
-              "-instances=anyfin:europe-west1:anyfin-assess-replica=tcp:0.0.0.0:5430,anyfin:europe-west1:anyfin-ddi-service-replica=tcp:0.0.0.0:5431,anyfin:europe-west1:anyfin-main-replica=tcp:0.0.0.0:5432,anyfin:europe-west1:pfm-replica=tcp:0.0.0.0:5433,anyfin-staging:europe-west1:main-staging-replica=tcp:0.0.0.0:5435,anyfin:europe-west1:anyfin-dolph-read-replica=tcp:0.0.0.0:5436,anyfin:europe-west1:psd2-replica=tcp:0.0.0.0:5437,anyfin:europe-west1:sendout-replica=tcp:0.0.0.0:5438,anyfin:europe-west1:savings-replica=tcp:0.0.0.0:5439,anyfin:europe-west1:paypull-replica=tcp:0.0.0.0:5440",
+              "-instances=anyfin:europe-west1:anyfin-assess-replica=tcp:0.0.0.0:5430,anyfin:europe-west1:anyfin-ddi-service-replica=tcp:0.0.0.0:5431,anyfin:europe-west1:anyfin-main-replica=tcp:0.0.0.0:5432,anyfin:europe-west1:pfm-replica=tcp:0.0.0.0:5433,anyfin-staging:europe-west1:main-staging-replica=tcp:0.0.0.0:5435,anyfin:europe-west1:anyfin-dolph-read-replica=tcp:0.0.0.0:5436,anyfin:europe-west1:psd2-replica=tcp:0.0.0.0:5437,anyfin:europe-west1:sendout-replica=tcp:0.0.0.0:5438,anyfin:europe-west1:savings-replica=tcp:0.0.0.0:5439,anyfin:europe-west1:paypull-replica=tcp:0.0.0.0:5440,anyfin:europe-west1:payout-replica=tcp:0.0.0.0:5441",
               "-credential_file=/secrets/cloudsql/credentials.json",
             ]
             # Developer: Update the Cloud sql instances you want to connect to as comma separated values (also update containerPort and service ports to reflect the instance list). 
@@ -109,4 +110,7 @@ spec:
       protocol: TCP
       port: 5440
       targetPort: 5440
-
+    - name: payout-replica
+      protocol: TCP
+      port: 5441
+      targetPort: 5441

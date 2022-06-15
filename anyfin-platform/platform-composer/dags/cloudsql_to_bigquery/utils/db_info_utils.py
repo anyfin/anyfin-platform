@@ -12,5 +12,6 @@ DATABASES_INFO = [
 	{'DATABASE_NAME': 'assess', 'INSTANCE_NAME': 'assess-replica', 'DATABASE':'assess', 'DESTINATION_PROJECT': 'anyfin'},
 	{'DATABASE_NAME': 'ddi', 'INSTANCE_NAME': 'ddi-service-replica', 'DATABASE':'main', 'DESTINATION_PROJECT': 'anyfin'},
 	{'DATABASE_NAME': 'main-staging', 'INSTANCE_NAME': 'main-staging-replica', 'DATABASE':'main', 'DESTINATION_PROJECT': 'anyfin-staging'},
-	{'DATABASE_NAME': 'paypull', 'INSTANCE_NAME': 'paypull-replica', 'DATABASE':'postgres', 'DESTINATION_PROJECT': 'anyfin'}
+	{'DATABASE_NAME': 'paypull', 'INSTANCE_NAME': 'paypull-replica', 'DATABASE':'postgres', 'DESTINATION_PROJECT': 'anyfin'},
+	{'DATABASE_NAME': 'payout', 'INSTANCE_NAME': 'payout-replica', 'DATABASE': 'payout', 'DESTINATION_PROJECT': 'anyfin'}
 ]
