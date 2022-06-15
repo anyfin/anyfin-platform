@@ -149,6 +149,7 @@ with DAG(
                         continue
 
                     DEDUP_DESTINATION_DATASET = DESTINATION_DATASET.split('_')[0] # Removes _staging
+                    destination_table = table if '.' not in table else table.split('.')[1]
                     
                     if DATABASE_NAME == 'main' and table == 'assessments':
                         dedup = BigQueryExecuteQueryOperator(
@@ -239,19 +240,19 @@ with DAG(
                     else:   # If ignore daily is true we dont want to deduplicate
                         cluster_field = ['id'] if 'id' in etl.get_tables().get(table).get('schema').keys() else []
                         dedup = BigQueryExecuteQueryOperator(    
-                        task_id=table,
+                        task_id=destination_table,
                         sql=f"""
                             with temp as (
                                 select 
                                     id, 
                                     max(_ingested_ts) as max_ingested_ts 
-                                from {DESTINATION_PROJECT}.{DESTINATION_DATASET}.{table}_raw group by 1
+                                from {DESTINATION_PROJECT}.{DESTINATION_DATASET}.{destination_table}_raw group by 1
                             )
                             select 
                                 t.* 
                             from temp join 
-                                {DESTINATION_PROJECT}.{DESTINATION_DATASET}.{table}_raw t on temp.id= t.id and temp.max_ingested_ts=t._ingested_ts""",
-                        destination_dataset_table=f"{DESTINATION_PROJECT}.{DEDUP_DESTINATION_DATASET}.{table}",
+                                {DESTINATION_PROJECT}.{DESTINATION_DATASET}.{destination_table}_raw t on temp.id= t.id and temp.max_ingested_ts=t._ingested_ts""",
+                        destination_dataset_table=f"{DESTINATION_PROJECT}.{DEDUP_DESTINATION_DATASET}.{destination_table}",
                         cluster_fields=['id'],
                         time_partitioning={'field': 'created_at'},
                         use_legacy_sql=False,
