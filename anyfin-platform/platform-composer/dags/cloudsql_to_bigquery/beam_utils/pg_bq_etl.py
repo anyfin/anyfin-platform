@@ -77,7 +77,7 @@ def update_pipeline(table, pipeline, start_date, backfill):
 
     print(f'select {", ".join(schema)} from {table}{where_clause}')
 
-    table = table if '.' not in table else table.split('.')[1]
+    destination_table = table if '.' not in table else table.split('.')[1]
 
     return (
         pipeline
@@ -87,7 +87,7 @@ def update_pipeline(table, pipeline, start_date, backfill):
                                                                         dbname=POSTGRES_CREDENTIALS.get('dbname'),
                                                                         password=POSTGRES_CREDENTIALS.get('password')))
         | f'Parsing columns - {table}' >> beam.ParDo(ParseColumnsFn(schema))
-        | f'Write to BQ {table}' >> beam.io.gcp.bigquery.WriteToBigQuery(table=table + "_raw",
+        | f'Write to BQ {table}' >> beam.io.gcp.bigquery.WriteToBigQuery(table=destination_table + "_raw",
                                                                          dataset=f'{DESTINATION_DATASET}',
                                                                          additional_bq_parameters=partitioning,
                                                                          method=beam.io.WriteToBigQuery.Method.FILE_LOADS,
