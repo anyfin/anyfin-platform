@@ -77,6 +77,8 @@ def update_pipeline(table, pipeline, start_date, backfill):
 
     print(f'select {", ".join(schema)} from {table}{where_clause}')
 
+    table = table if '.' not in table else table.split('.')[1]
+
     return (
         pipeline
         | f'Create query {table}' >> beam.Create([f'select {", ".join(schema)} from {table}{where_clause}'])
