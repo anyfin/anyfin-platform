@@ -44,6 +44,7 @@ with DAG(
     parse_freshness = BashOperator(
         task_id='parse_freshness',
         bash_command=f'python3 {UTILS_DIR}parse_freshness.py',
+        trigger_rule='all_done',
     )
 
     load_freshness_data = GCSToBigQueryOperator(
