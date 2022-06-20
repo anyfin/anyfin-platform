@@ -1,6 +1,7 @@
 from datetime import datetime
 from airflow import DAG
 from airflow.providers.google.cloud.operators.dataflow import DataflowStartFlexTemplateOperator
+from airflow.contrib.operators.bigquery_operator import BigQueryOperator
 
 from utils import slack_notification
 from functools import partial
