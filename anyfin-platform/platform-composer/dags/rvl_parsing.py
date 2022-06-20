@@ -155,8 +155,40 @@ se_capacity = DataflowStartFlexTemplateOperator(
     dag=dag
 )
 
+materialize_rdm_se = BigQueryOperator(
+    task_id="materialize_rdm_se",
+    sql="SELECT * FROM `anyfin.assess_staging.rdm_se`",
+    destination_dataset_table="anyfin.assess_staging.rdm_se_materialised",
+    use_legacy_sql=False,
+    bigquery_conn_id="postgres-bq-etl-con",
+    write_disposition="WRITE_TRUNCATE",
+    create_disposition="CREATE_IF_NEEDED",
+    dag=dag
+)
+
+materialize_rdm_de = BigQueryOperator(
+    task_id="materialize_rdm_de",
+    sql="SELECT * FROM `anyfin.assess_staging.rdm_de`",
+    destination_dataset_table="anyfin.assess_staging.rdm_de_materialised",
+    use_legacy_sql=False,
+    bigquery_conn_id="postgres-bq-etl-con",
+    write_disposition="WRITE_TRUNCATE",
+    create_disposition="CREATE_IF_NEEDED",
+    dag=dag
+)
+
+materialize_rdm_fi = BigQueryOperator(
+    task_id="materialize_rdm_fi",
+    sql="SELECT * FROM `anyfin.assess_staging.rdm_fi`",
+    destination_dataset_table="anyfin.assess_staging.rdm_fi_materialised",
+    use_legacy_sql=False,
+    bigquery_conn_id="postgres-bq-etl-con",
+    write_disposition="WRITE_TRUNCATE",
+    create_disposition="CREATE_IF_NEEDED",
+    dag=dag
+)
 
 internal_lookup >> [de_capacity, fi_capacity, se_capacity]
-schufa >> de_capacity
-asiakastieto >> fi_capacity
-uc >> se_capacity
+schufa >> de_capacity >> materialize_rdm_de
+asiakastieto >> fi_capacity >> materialize_rdm_fi
+uc >> se_capacity >> materialize_rdm_se
