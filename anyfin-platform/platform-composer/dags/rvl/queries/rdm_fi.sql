@@ -29,6 +29,5 @@ FROM
   anyfin.assess_staging.fi_lookups l
 LEFT JOIN `anyfin.credit.dpoint_facts_aggr` dfa ON l.submission_id = dfa.submission_id AND l.customer_id = dfa.customer_id
 WHERE ARRAY_LENGTH(loan_ids) > 0
-AND internal_lookup_id is not null
 AND ccis_features.lookup_id is not null
 AND delta_features.lookup_id is not null
