@@ -12,7 +12,6 @@ SELECT
     timestamp,
     lookup_id,
     pit),
-  CAPACITY.* EXCEPT(lookup_id,
   capacity.* EXCEPT(lookup_id,
     timestamp,
     external_lookup_id,
