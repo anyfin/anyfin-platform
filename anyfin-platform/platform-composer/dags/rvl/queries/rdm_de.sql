@@ -3,7 +3,7 @@ SELECT
   l.customer_id,
   l.submission_id,
   schufa_features.error_message AS schufa_error_message,
-  CAPACITY.error_message AS capacity_error_message,
+  capacity.error_message AS capacity_error_message,
   -- features
   internal_lookup_features.* EXCEPT(timestamp,
     lookup_id,
@@ -13,6 +13,7 @@ SELECT
     lookup_id,
     pit),
   CAPACITY.* EXCEPT(lookup_id,
+  capacity.* EXCEPT(lookup_id,
     timestamp,
     external_lookup_id,
     submission_id,
