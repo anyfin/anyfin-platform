@@ -31,7 +31,7 @@ with DAG(
         default_args=default_args,
         catchup=False,
         description='This DAG is used to check freshness of sources in sources.yml',
-        schedule_interval='0 12 * * *',
+        schedule_interval='0 12 * * 1-6',
         max_active_runs=1
 ) as dag:
 
