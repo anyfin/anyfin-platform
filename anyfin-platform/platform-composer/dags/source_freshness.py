@@ -8,13 +8,10 @@ from functools import partial
 
 slack_connection = 'slack_data_engineering'
 
-UTILS_DIR = '/home/airflow/gcs/dags/utils/'
+DATA_DIR = '/home/airflow/gcs/data/'
 DBT_HOME_DIR = '/home/airflow/gcs/dags/anyfin-data-model/'
-DBT_SOURCE_FRESHNESS_TABLE = 'metadata.source_freshness_metadata'
-PROJECT_NAME = 'anyfin'
 SLACK_CONNECTION = 'slack_data_engineering'
 
-today_partition = date.today().strftime('%Y%m%d')
 
 default_args = {
     'owner': 'de-anyfin',
@@ -31,19 +28,19 @@ with DAG(
         default_args=default_args,
         catchup=False,
         description='This DAG is used to check freshness of sources in sources.yml',
-        schedule_interval='0 12 * * *',
+        schedule_interval='0 12 * * 1-6',
         max_active_runs=1
 ) as dag:
 
     dbt_source_freshness = BashOperator(
         task_id='source_freshness',
-        bash_command=f'cd {DBT_HOME_DIR} && dbt source freshness -o {DBT_HOME_DIR}target/sources.json',
+        bash_command=f'cd {DBT_HOME_DIR} && dbt source freshness -o {DATA_DIR}sources.json',
         retries=0,
     )
 
     parse_freshness = BashOperator(
         task_id='parse_freshness',
-        bash_command=f'python3 {UTILS_DIR}parse_freshness.py',
+        bash_command='python3 /home/airflow/gcs/dags/utils/parse_freshness.py {{ tomorrow_ds }}',
         trigger_rule='all_done',
     )
 
@@ -61,7 +58,7 @@ with DAG(
         allow_quoted_newlines=True,
         ignore_unknown_values=True,
         max_bad_records=10,
-        destination_project_dataset_table=f'{PROJECT_NAME}.{DBT_SOURCE_FRESHNESS_TABLE}${today_partition}',
+        destination_project_dataset_table='anyfin.metadata.source_freshness_metadata${{ tomorrow_ds_nodash }}',
         bigquery_conn_id='postgres-bq-etl-con',
         google_cloud_storage_conn_id='postgres-bq-etl-con',
     )
