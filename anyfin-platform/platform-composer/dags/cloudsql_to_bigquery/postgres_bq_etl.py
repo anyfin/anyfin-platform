@@ -147,6 +147,10 @@ with DAG(
                     # If ignore daily is true we dont want to deduplicate
                     if etl.get_tables().get(table).get('ignore_daily'):
                         continue
+                    
+                     # If the table is gdpr_sensitive we don't want to dedup
+                    if etl.get_tables().get(table).get('gdpr_sensitive'):
+                        continue
 
                     DEDUP_DESTINATION_DATASET = DESTINATION_DATASET.split('_')[0] # Removes _staging
                     destination_table = table if '.' not in table else table.split('.')[1]
@@ -237,7 +241,7 @@ with DAG(
                         )
                         dedup_tasks.append(dedup)
 
-                    else:   # If ignore daily is true we dont want to deduplicate
+                    else:
                         cluster_field = ['id'] if 'id' in etl.get_tables().get(table).get('schema').keys() else []
                         dedup = BigQueryExecuteQueryOperator(    
                         task_id=destination_table,
