@@ -612,7 +612,7 @@
       "code": "character varying",
       "amount": "numeric",
       "currency_code": "character varying",
-      "promo_code_ic": "uuid"
+      "promo_code_id": "uuid"
     }
   },
   "demo_accounts": {
