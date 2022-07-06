@@ -611,7 +611,8 @@
       "type": "text",
       "code": "character varying",
       "amount": "numeric",
-      "currency_code": "character varying"
+      "currency_code": "character varying",
+      "promo_code_ic": "uuid"
     }
   },
   "demo_accounts": {
