@@ -22,6 +22,8 @@ dag = DAG(
     dag_id="cltv_calculations",
     default_args=default_args,
     schedule_interval="0 3 1 * *",  # Run this DAG once per month after the first execution of run-thrice-daily
+    description="This DAG creates fitting and prediction datasets for CLTV prediction model, retrains it and updates "
+                "predictions",
     max_active_runs=1,
     catchup=False
 )
