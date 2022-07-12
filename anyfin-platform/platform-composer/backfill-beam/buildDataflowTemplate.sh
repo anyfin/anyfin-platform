@@ -27,7 +27,7 @@ START_DATE=$3
 echo "Fetching DB configuration."
 TABLES=()
 schemas_file="../dags/cloudsql_to_bigquery/pg_schemas/${DB}_schemas_state.json"
-while read table;
+for table in $(cat ${schemas_file} | jq 'keys[]')
 do
     backfill_method=$(cat ${schemas_file} | jq ".${table}.backfill_method")
     if [[ $backfill_method == "\"beam_export\"" ]]; then 
@@ -38,7 +38,7 @@ do
         table_entry_cleared=$(echo $table_entry | tr -d \")
         TABLES+=("$table_entry_cleared")
     fi
-done < <(cat ${schemas_file} | jq 'keys[]')
+done
 echo "DB configuration fetched. Building the templates."
 
 for ENTRY in "${TABLES[@]}"
