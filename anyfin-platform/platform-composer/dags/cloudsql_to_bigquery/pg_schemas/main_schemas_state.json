@@ -118,7 +118,9 @@
       "customer_provided":"jsonb",
       "creditor_id":"uuid",
       "rejected_by":"character varying",
-      "sub_product": "text"
+      "sub_product": "text",
+      "promo_code_id": "uuid",
+      "rejected_at": "timestamp with time zone"
     },
     "ts_column": "updated_at",
     "bq_partition_column": "created_at",
