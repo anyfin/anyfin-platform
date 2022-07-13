@@ -26,7 +26,7 @@ default_args = {
 def modify_xml(fetch_date):
     if fetch_date.month < 1 or fetch_date.month > 12:
         raise ValueError(f'Incorrect month number {fetch_date.month}')
-    tree = etree.parse('/home/airflow/gcs/dags/utils/message.xml')
+    tree = etree.parse('/home/airflow/gcs/dags/utils/currency_rates_message.xml')
 
     root = tree.getroot()
     year_tag = root.find('.//year')
@@ -35,7 +35,7 @@ def modify_xml(fetch_date):
     year_tag.text = str(fetch_date.year)
     month_tag.text = str(fetch_date.month)
 
-    tree.write('/home/airflow/gcs/dags/utils/message.xml')
+    tree.write('/home/airflow/gcs/dags/utils/currency_rates_message.xml')
 
 
 def get_insert_query(response, fetch_date):
@@ -79,7 +79,7 @@ def fetch_rates_and_prepare_query(ds):
     modify_xml(fetch_date)
     url = 'http://swea.riksbank.se/sweaWS/services/SweaWebServiceHttpSoap12Endpoint'
     headers = {'Content-Type': 'application/soap+xml;charset=utf-8;action=urn:getMonthlyAverageExchangeRates'}
-    with open('/home/airflow/gcs/dags/utils/message.xml', 'rb') as f:
+    with open('/home/airflow/gcs/dags/utils/currency_rates_message.xml', 'rb') as f:
         data = f.read()
 
     response = requests.post(url, headers=headers, data=data)
