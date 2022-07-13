@@ -1,0 +1,22 @@
+<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:xsd="http://swea.riksbank.se/xsd">
+	<soap:Header/>
+	<soap:Body>
+		<xsd:getInterestAndExchangeRates>
+			<searchRequestParameters>
+				<aggregateMethod>D</aggregateMethod>
+				<datefrom>2022-07-12</datefrom>
+				<dateto>2022-07-12</dateto>
+				<languageid>en</languageid>
+				<min>false</min>
+				<avg>true</avg>
+				<max>true</max>
+				<ultimo>false</ultimo>
+				<!--1 or more repetitions:-->
+				<searchGroupSeries>
+					<groupid>97</groupid>
+					<seriesid>EUDP3MEUR</seriesid>
+				</searchGroupSeries>
+			</searchRequestParameters>
+		</xsd:getInterestAndExchangeRates>
+	</soap:Body>
+</soap:Envelope>
