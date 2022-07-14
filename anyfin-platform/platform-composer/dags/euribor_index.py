@@ -132,7 +132,7 @@ do_nothing = DummyOperator(
 post_message_to_pubsub = PubSubPublishMessageOperator(
     task_id='publish_to_pubsub',
     project_id='anyfin',
-    topic='interest_indexes.created',
+    topic='floating_interest.created',
     gcp_conn_id='bigquery-composer-connection',
     messages=[
         {'data': "{{ message_data(task_instance.xcom_pull(task_ids='fetch_rates', key='return_value')) }}"}
