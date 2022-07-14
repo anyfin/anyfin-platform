@@ -1,10 +1,9 @@
-import holidays
 import json
 
 import holidays
 import requests
 from lxml import etree
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator, BranchPythonOperator
@@ -70,7 +69,7 @@ def choose_branch(result):
         return 'do_nothing'
 
 
-def fetch_eurobor3m_and_prepare_pubsub_msg(ds, task, ti):
+def fetch_eurobor3m_and_prepare_pubsub_msg(ds):
     fetch_date = datetime.strptime(ds, '%Y-%m-%d')
     # checking if date is not a holiday and not a weekend because these are not banking days
     # if fetch_date not in holidays.SE() and fetch_date.weekday() not in [5, 6]:
