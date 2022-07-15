@@ -3,6 +3,7 @@ SELECT
   l.customer_id,
   l.submission_id,
   schufa_features.error_message AS schufa_error_message,
+  crif.error_message AS crif_error_message,
   capacity.error_message AS capacity_error_message,
   -- features
   internal_lookup_features.* EXCEPT(timestamp,
@@ -12,6 +13,7 @@ SELECT
     timestamp,
     lookup_id,
     pit),
+  crif.score,
   capacity.* EXCEPT(lookup_id,
     timestamp,
     external_lookup_id,
@@ -40,5 +42,6 @@ ON
   l.submission_id = dfa.submission_id
   AND l.customer_id = dfa.customer_id
 WHERE
-  ARRAY_LENGTH(loan_ids) > 0
-  AND schufa_features.lookup_id IS NOT NULL
+  schufa_features.lookup_id IS NOT NULL
+  -- only submissions with applications that became loans are interesting for modelling
+  AND ARRAY_LENGTH(loan_ids) > 0
