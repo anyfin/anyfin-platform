@@ -15,19 +15,27 @@ PARAMS = {"maxWorkers": 8, "machineType": "n1-standard-2", "enableStreamingEngin
 
 default_args = {
     'owner': 'de-anyfin',
-    'depends_on_past': False, 
+    'depends_on_past': False,
     'retries': 0,
     'on_failure_callback': partial(slack_notification.task_fail_slack_alert, SLACK_CONNECTION),
     'start_date': datetime(2022, 3, 21),
 }
 
 dag = DAG(
-    dag_id="risk-variable-library", 
-    default_args=default_args, 
+    dag_id="risk-variable-library",
+    default_args=default_args,
     schedule_interval="0 5 * * *",  # Run this DAG once per day
     max_active_runs=1,
     catchup=False
 )
+
+COMMON_FLEX_KWARGS = {
+    "location": "europe-west1",
+    "project_id": "anyfin",
+    "gcp_conn_id": "postgres-bq-etl-con",
+    "wait_until_finished": True,
+    "dag": dag
+}
 
 schufa = DataflowStartFlexTemplateOperator(
     body={
@@ -38,11 +46,7 @@ schufa = DataflowStartFlexTemplateOperator(
         }
     },
     task_id="schufa",
-    location="europe-west1",
-    project_id="anyfin",
-    gcp_conn_id="postgres-bq-etl-con",
-    wait_until_finished=True,
-    dag=dag
+    **COMMON_FLEX_KWARGS
 )
 
 asiakastieto = DataflowStartFlexTemplateOperator(
@@ -54,29 +58,20 @@ asiakastieto = DataflowStartFlexTemplateOperator(
         }
     },
     task_id="asiakastieto",
-    location="europe-west1",
-    project_id="anyfin",
-    gcp_conn_id="postgres-bq-etl-con",
-    wait_until_finished=True,
-    dag=dag
+    **COMMON_FLEX_KWARGS
 )
 
-# # Temporarily commenting out until it's refactored
-# crif_buergel = DataflowStartFlexTemplateOperator(
-#     body={
-#         "launchParameter": {
-#             "containerSpecGcsPath": f"gs://{GCS_BUCKET}/{FLEX_TEMPLATES_DIR}/flex_template_crif_buergel",
-#             "jobName": "rvlcrifbuergel",
-#             "environment": PARAMS
-#         }
-#     },
-#     task_id="crif_buergel",
-#     location="europe-west1",
-#     project_id="anyfin",
-#     gcp_conn_id="postgres-bq-etl-con",
-#     wait_until_finished=True,
-#     dag=dag
-# )
+crif_buergel = DataflowStartFlexTemplateOperator(
+    body={
+        "launchParameter": {
+            "containerSpecGcsPath": f"gs://{GCS_BUCKET}/{FLEX_TEMPLATES_DIR}/flex_template_crif_buergel",
+            "jobName": "rvlcrifbuergel",
+            "environment": PARAMS
+        }
+    },
+    task_id="crif_buergel",
+    **COMMON_FLEX_KWARGS
+)
 
 uc = DataflowStartFlexTemplateOperator(
     body={
@@ -87,11 +82,7 @@ uc = DataflowStartFlexTemplateOperator(
         }
     },
     task_id="uc",
-    location="europe-west1",
-    project_id="anyfin",
-    gcp_conn_id="postgres-bq-etl-con",
-    wait_until_finished=True,
-    dag=dag
+    **COMMON_FLEX_KWARGS
 )
 
 internal_lookup = DataflowStartFlexTemplateOperator(
@@ -103,11 +94,7 @@ internal_lookup = DataflowStartFlexTemplateOperator(
         }
     },
     task_id="internal_lookup",
-    location="europe-west1",
-    project_id="anyfin",
-    gcp_conn_id="postgres-bq-etl-con",
-    wait_until_finished=True,
-    dag=dag
+    **COMMON_FLEX_KWARGS
 )
 
 de_capacity = DataflowStartFlexTemplateOperator(
@@ -119,11 +106,7 @@ de_capacity = DataflowStartFlexTemplateOperator(
         }
     },
     task_id="de_capacity",
-    location="europe-west1",
-    project_id="anyfin",
-    gcp_conn_id="postgres-bq-etl-con",
-    wait_until_finished=True,
-    dag=dag
+    **COMMON_FLEX_KWARGS
 )
 
 fi_capacity = DataflowStartFlexTemplateOperator(
@@ -135,11 +118,7 @@ fi_capacity = DataflowStartFlexTemplateOperator(
         }
     },
     task_id="fi_capacity",
-    location="europe-west1",
-    project_id="anyfin",
-    gcp_conn_id="postgres-bq-etl-con",
-    wait_until_finished=True,
-    dag=dag
+    **COMMON_FLEX_KWARGS
 )
 
 se_capacity = DataflowStartFlexTemplateOperator(
@@ -151,11 +130,7 @@ se_capacity = DataflowStartFlexTemplateOperator(
         }
     },
     task_id="se_capacity",
-    location="europe-west1",
-    project_id="anyfin",
-    gcp_conn_id="postgres-bq-etl-con",
-    wait_until_finished=True,
-    dag=dag
+    **COMMON_FLEX_KWARGS
 )
 
 with open(
@@ -163,15 +138,19 @@ with open(
 ) as _query:
     rdm_se_query = _query.read()
 
+COMMON_BQ_KWARGS = {
+    "use_legacy_sql": False,
+    "bigquery_conn_id": "postgres-bq-etl-con",
+    "write_disposition": "WRITE_TRUNCATE",
+    "create_disposition": "CREATE_IF_NEEDED",
+    "dag": dag
+}
+
 materialize_rdm_se = BigQueryOperator(
     task_id="materialize_rdm_se",
     sql=rdm_se_query,
     destination_dataset_table="anyfin.assess_staging.rdm_se",
-    use_legacy_sql=False,
-    bigquery_conn_id="postgres-bq-etl-con",
-    write_disposition="WRITE_TRUNCATE",
-    create_disposition="CREATE_IF_NEEDED",
-    dag=dag
+    **COMMON_BQ_KWARGS
 )
 
 with open(
@@ -183,11 +162,7 @@ materialize_rdm_de = BigQueryOperator(
     task_id="materialize_rdm_de",
     sql=rdm_de_query,
     destination_dataset_table="anyfin.assess_staging.rdm_de",
-    use_legacy_sql=False,
-    bigquery_conn_id="postgres-bq-etl-con",
-    write_disposition="WRITE_TRUNCATE",
-    create_disposition="CREATE_IF_NEEDED",
-    dag=dag
+    **COMMON_BQ_KWARGS
 )
 
 with open(
@@ -199,14 +174,11 @@ materialize_rdm_fi = BigQueryOperator(
     task_id="materialize_rdm_fi",
     sql=rdm_fi_query,
     destination_dataset_table="anyfin.assess_staging.rdm_fi",
-    use_legacy_sql=False,
-    bigquery_conn_id="postgres-bq-etl-con",
-    write_disposition="WRITE_TRUNCATE",
-    create_disposition="CREATE_IF_NEEDED",
-    dag=dag
+    **COMMON_BQ_KWARGS
 )
 
 internal_lookup >> [de_capacity, fi_capacity, se_capacity]
 schufa >> de_capacity >> materialize_rdm_de
+crif_buergel >> materialize_rdm_de
 asiakastieto >> fi_capacity >> materialize_rdm_fi
 uc >> se_capacity >> materialize_rdm_se
