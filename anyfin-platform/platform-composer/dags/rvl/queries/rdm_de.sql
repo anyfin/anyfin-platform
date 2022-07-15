@@ -3,7 +3,7 @@ SELECT
   l.customer_id,
   l.submission_id,
   schufa_features.error_message AS schufa_error_message,
-  crif.error_message AS crif_error_message,
+  crif_parser.error_message AS crif_error_message,
   capacity.error_message AS capacity_error_message,
   -- features
   internal_lookup_features.* EXCEPT(timestamp,
@@ -13,7 +13,7 @@ SELECT
     timestamp,
     lookup_id,
     pit),
-  crif.score,
+  crif_parser.score,
   capacity.* EXCEPT(lookup_id,
     timestamp,
     external_lookup_id,
