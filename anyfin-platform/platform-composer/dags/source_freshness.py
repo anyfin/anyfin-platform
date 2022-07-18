@@ -27,10 +27,16 @@ with DAG(
         dag_id='source_freshness',
         default_args=default_args,
         catchup=False,
-        description='This DAG is used to check freshness of sources in sources.yml',
+        description='This DAG is used to check freshness of sources in sources.yml and test dbt models in BigQuery',
         schedule_interval='0 12 * * 1-6',
         max_active_runs=1
 ) as dag:
+
+    dbt_test = BashOperator(
+        task_id='dbt_test',
+        bash_command=f'cd {DBT_HOME_DIR} && dbt test',
+        retries=0,
+    )
 
     dbt_source_freshness = BashOperator(
         task_id='source_freshness',
@@ -63,4 +69,5 @@ with DAG(
         google_cloud_storage_conn_id='postgres-bq-etl-con',
     )
 
+dbt_test
 dbt_source_freshness >> parse_freshness >> load_freshness_data

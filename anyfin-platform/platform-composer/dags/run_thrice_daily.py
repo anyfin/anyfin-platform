@@ -58,12 +58,6 @@ with DAG(
         allowed_states=[State.SUCCESS, State.FAILED],
     )
 
-    dbt_test = BashOperator(
-        task_id='dbt_test',
-        bash_command=f'cd {DBT_HOME_DIR} && dbt test',
-        retries=0,
-    )
-
     compute_coverage = BashOperator(
         task_id='compute_coverage',
         bash_command=f'cd {DBT_HOME_DIR} && dbt-coverage compute test --cov-report coverage-test.json && dbt-coverage '
@@ -89,5 +83,4 @@ with DAG(
         google_cloud_storage_conn_id='postgres-bq-etl-con',
     )
 
-compute_coverage >> load_coverage_data
-run_ETL >> run_dbt >> [dbt_test, compute_coverage]
+run_ETL >> run_dbt >> compute_coverage >> load_coverage_data
