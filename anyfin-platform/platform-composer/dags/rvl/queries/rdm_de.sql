@@ -13,7 +13,7 @@ SELECT
     timestamp,
     lookup_id,
     pit),
-  crif_parser.score,
+  crif_parser.score as num_crif_score,
   capacity.* EXCEPT(lookup_id,
     timestamp,
     external_lookup_id,
