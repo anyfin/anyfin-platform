@@ -1,4 +1,4 @@
-from AnyfinSPVModel import *
+from treasury_forecast.model.AnyfinSPVModel import *
 import pandas as pd
 import itertools
 import numpy as np
@@ -7,7 +7,6 @@ import warnings
 from scipy.optimize import curve_fit
 import os
 import holidays
-from google.cloud import storage
 
 warnings.filterwarnings('ignore')
 
@@ -36,7 +35,9 @@ class AnyfinPortfolioForecast:
 
         self.forecast_version_id = str(dt.datetime.now()) + ' ' + os.getlogin()
 
-        self.data_storage_path = os.getcwd() + os.sep + 'Data' + os.sep
+        # self.data_storage_path = os.getcwd() + os.sep + 'Data' + os.sep
+        # this folder in gcs will be used as temp storage for all csv files
+        self.data_storage_path = '/home/airflow/gcs/data/treasury_forecast/data'
         if os.path.exists(self.data_storage_path) == False:
             os.makedirs(self.data_storage_path)
 
