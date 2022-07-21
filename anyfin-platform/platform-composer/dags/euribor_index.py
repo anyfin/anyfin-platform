@@ -27,11 +27,8 @@ default_args = {
 def modify_xml(ds):
     tree = etree.parse('/home/airflow/gcs/dags/utils/euribor_message.xml')
     root = tree.getroot()
-    date_from = root.find('.//datefrom')
-    date_to = root.find('.//dateto')
-
-    date_from.text = ds
-    date_to.text = ds
+    root.find('.//datefrom').text = ds
+    root.find('.//dateto').text = ds
 
     tree.write('/home/airflow/gcs/dags/utils/euribor_message.xml')
 
@@ -103,13 +100,6 @@ dag = DAG('euribor_index',
           user_defined_macros={'message_data': str_to_bytes}
           )
 
-modify_xml = PythonOperator(
-    task_id='modify_xml_message',
-    python_callable=modify_xml,
-    provide_context=True,
-    dag=dag
-)
-
 fetch_rates = PythonOperator(
     task_id='fetch_rates',
     python_callable=fetch_eurobor3m_and_prepare_pubsub_msg,
@@ -147,4 +137,4 @@ post_message_to_pubsub = PubSubPublishMessageOperator(
     dag=dag,
 )
 
-modify_xml >> fetch_rates >> choose_branch >> [notify_fetch_nothing, post_message_to_pubsub, do_nothing]
+fetch_rates >> choose_branch >> [notify_fetch_nothing, post_message_to_pubsub, do_nothing]
