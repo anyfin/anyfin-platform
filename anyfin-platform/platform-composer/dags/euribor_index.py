@@ -1,6 +1,6 @@
 import json
 
-import holidays
+from bs4 import BeautifulSoup
 import requests
 from lxml import etree
 from datetime import datetime
@@ -18,7 +18,7 @@ SLACK_CONNECTION = 'slack_data_engineering'
 default_args = {
     'owner': 'de-anyfin',
     'depends_on_past': False,
-    'start_date': datetime(2022, 6, 30),
+    'start_date': datetime(2022, 7, 11),
     'retries': 0,
     'on_failure_callback': partial(slack_notification.task_fail_slack_alert, SLACK_CONNECTION),
 }
@@ -68,26 +68,29 @@ def choose_branch(result):
 
 def fetch_eurobor3m_and_prepare_pubsub_msg(ds):
     fetch_date = datetime.strptime(ds, '%Y-%m-%d')
-    # checking if date is not a holiday and not a weekend because these are not banking days
-    # if fetch_date not in holidays.SE() and fetch_date.weekday() not in [5, 6]:
-    if fetch_date.weekday() not in [5, 6] and fetch_date not in holidays.SE():
-        modify_xml(fetch_date.strftime('%Y-%m-%d'))
-        url = 'http://swea.riksbank.se/sweaWS/services/SweaWebServiceHttpSoap12Endpoint'
-        headers = {'Content-Type': 'application/soap+xml;charset=utf-8;action=urn:getInterestAndExchangeRates'}
-        with open('/home/airflow/gcs/dags/utils/euribor_message.xml', 'rb') as f:
-            data = f.read()
-        response = requests.post(url, headers=headers, data=data)
-        val = parse_values(response)
-        if val is None:
-            print('Fetched nothing!')
+    if fetch_date.weekday() not in [5, 6]:
+        page = requests.get('https://www.euribor-rates.eu/en/current-euribor-rates/').text
+        soup = BeautifulSoup(page, parser='html', features="lxml")
+        table = soup.find('table', {"class": 'table table-striped'})
+
+        data = []
+
+        rows = table.find_all('tr')
+        for row in rows:
+            cols = row.find_all('a')
+            cols.extend(row.find_all('td') or row.find_all('th'))
+            cols = [ele.text.strip() for ele in cols]
+            data.append([ele for ele in cols if ele])
+        if data[0][0] == fetch_date.strftime('%-m/%-d/%Y') and data[3][0] == 'Euribor 3 months':
+            print(data[0][0], data[3][1])
+            date = datetime.strptime(data[0][0], '%m/%d/%Y').strftime('%Y-%m-%d')
+            value = data[3][1].split(' ')[0]
+            return generate_pubsub_message(date, value, 'EURIBOR_3M')
+        else:
+            print('Fetched nothing! Either there is no value for required date or name "Euribor 3 months" is changed')
             return -1
-        date, value = val[0], val[1]
-        if date != ds:
-            print(f'Incorrect date. Expected {ds} parsed {date}')
-            return -1
-        return generate_pubsub_message(date, value, 'EURIBOR_3M')
     else:
-        print('Not a banking day. Skip fetching')
+        print('Not a banking day!')
         return 0
 
 
