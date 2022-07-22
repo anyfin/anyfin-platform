@@ -14,6 +14,9 @@ from utils import slack_notification
 from functools import partial
 
 SLACK_CONNECTION = 'slack_data_engineering'
+WEEKENDS_INDEXES = [5, 6]
+EURIBOR_RATES_URL = 'https://www.euribor-rates.eu/en/current-euribor-rates/'
+EXPECTED_ROW_TITLE = 'Euribor 3 months'
 
 default_args = {
     'owner': 'de-anyfin',
@@ -68,8 +71,8 @@ def choose_branch(result):
 
 def fetch_eurobor3m_and_prepare_pubsub_msg(ds):
     fetch_date = datetime.strptime(ds, '%Y-%m-%d')
-    if fetch_date.weekday() not in [5, 6]:
-        page = requests.get('https://www.euribor-rates.eu/en/current-euribor-rates/').text
+    if fetch_date.weekday() not in WEEKENDS_INDEXES:
+        page = requests.get(EURIBOR_RATES_URL).text
         soup = BeautifulSoup(page, parser='html', features="lxml")
         table = soup.find('table', {"class": 'table table-striped'})
 
@@ -81,13 +84,13 @@ def fetch_eurobor3m_and_prepare_pubsub_msg(ds):
             cols.extend(row.find_all('td') or row.find_all('th'))
             cols = [ele.text.strip() for ele in cols]
             data.append([ele for ele in cols if ele])
-        if data[0][0] == fetch_date.strftime('%-m/%-d/%Y') and data[3][0] == 'Euribor 3 months':
+        if data[0][0] == fetch_date.strftime('%-m/%-d/%Y') and data[3][0] == EXPECTED_ROW_TITLE:
             print(data[0][0], data[3][1])
             date = datetime.strptime(data[0][0], '%m/%d/%Y').strftime('%Y-%m-%d')
             value = data[3][1].split(' ')[0]
             return generate_pubsub_message(date, value, 'EURIBOR_3M')
         else:
-            print('Fetched nothing! Either there is no value for required date or name "Euribor 3 months" is changed')
+            print(f'Fetched nothing! Either there is no value for required date or name {EXPECTED_ROW_TITLE} is changed')
             return -1
     else:
         print('Not a banking day!')
