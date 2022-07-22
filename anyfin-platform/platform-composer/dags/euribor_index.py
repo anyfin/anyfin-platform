@@ -101,7 +101,7 @@ dag = DAG('euribor_index',
           default_args=default_args,
           catchup=False,
           max_active_runs=1,
-          schedule_interval='5 7 * * *',
+          schedule_interval='5 11 * * *',
           render_template_as_native_obj=True,
           user_defined_macros={'message_data': str_to_bytes}
           )
